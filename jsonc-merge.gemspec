@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.email = ["peter.boling@gmail.com"]
 
   spec.summary = "☯️ Intelligent JSONC file merging using tree-sitter AST analysis"
-  spec.description = "☯️ Jsonc::Merge provides smart JSONC (JSON with Comments) file merging that preserves comments, understands JSON structure, and supports freeze blocks for protecting destination content. Perfect for merging configuration files like tsconfig.json, package.json, and VS Code settings."
+  spec.description = "☯️ Jsonc::Merge provides smart JSONC (JSON with Comments) file merging that preserves comments, understands JSON structure, and supports freeze blocks for protecting destination content. Perfect for merging configuration files like devcontainer.json, tsconfig.json, package.json, and VS Code settings."
   spec.homepage = "https://github.com/kettle-rb/json-merge"
   spec.licenses = ["MIT"]
   spec.required_ruby_version = ">= 3.2.0"
