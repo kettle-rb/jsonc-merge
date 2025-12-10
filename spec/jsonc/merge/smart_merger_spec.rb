@@ -39,16 +39,16 @@ RSpec.describe Jsonc::Merge::SmartMerger do
       merger = described_class.new(
         template_json,
         dest_json,
-        signature_match_preference: :template,
+        preference: :template,
         add_template_only_nodes: true
       )
-      expect(merger.options[:signature_match_preference]).to eq(:template)
+      expect(merger.options[:preference]).to eq(:template)
       expect(merger.options[:add_template_only_nodes]).to be true
     end
 
     it "has default options" do
       merger = described_class.new(template_json, dest_json)
-      expect(merger.options[:signature_match_preference]).to eq(:destination)
+      expect(merger.options[:preference]).to eq(:destination)
       expect(merger.options[:add_template_only_nodes]).to be false
     end
   end
@@ -94,7 +94,7 @@ RSpec.describe Jsonc::Merge::SmartMerger do
           merger = described_class.new(
             template_json,
             dest_json,
-            signature_match_preference: :template
+            preference: :template
           )
           result = merger.merge_result
           expect(result).to be_a(Jsonc::Merge::MergeResult)

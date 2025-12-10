@@ -30,7 +30,7 @@ RSpec.describe "Jsonc::Merge::ConflictResolver Integration" do
       resolver = Jsonc::Merge::ConflictResolver.new(
         template_analysis,
         dest_analysis,
-        signature_match_preference: :template
+        preference: :template
       )
 
       resolver.resolve(result)
@@ -46,7 +46,7 @@ RSpec.describe "Jsonc::Merge::ConflictResolver Integration" do
       resolver = Jsonc::Merge::ConflictResolver.new(
         template_analysis,
         dest_analysis,
-        signature_match_preference: :destination
+        preference: :destination
       )
 
       resolver.resolve(result)

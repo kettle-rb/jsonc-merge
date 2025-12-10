@@ -69,7 +69,7 @@ For standard JSON (without comments) support, see the [json-merge](https://githu
 - **Standalone**: Minimal dependencies - just `ast-merge` and `ruby_tree_sitter`
 - **Customizable**:
   - `signature_generator` - callable custom signature generators
-  - `signature_match_preference` - setting of `:template`, `:destination`, or a Hash for per-node-type preferences
+  - `preference` - setting of `:template`, `:destination`, or a Hash for per-node-type preferences
   - `node_splitter` - Hash mapping node types to callables for per-node-type merge customization (see [ast-merge](https://github.com/kettle-rb/ast-merge) docs)
   - `add_template_only_nodes` - setting to retain nodes that do not exist in destination
   - `freeze_token` - customize freeze block markers (default: `"json-merge"`)
@@ -370,7 +370,7 @@ merger = Jsonc::Merge::SmartMerger.new(
   # Which version to prefer when nodes match
   # :destination (default) - keep destination values
   # :template - use template values
-  signature_match_preference: :destination,
+  preference: :destination,
 
   # Whether to add template-only nodes to the result
   # false (default) - only include properties that exist in destination

@@ -41,7 +41,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
       end
     end
 
-    it "accepts signature_match_preference option" do
+    it "accepts preference option" do
       begin
         template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
         dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
@@ -49,10 +49,10 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
         resolver = described_class.new(
           template_analysis,
           dest_analysis,
-          signature_match_preference: :template
+          preference: :template
         )
 
-        expect(resolver.signature_match_preference).to eq(:template)
+        expect(resolver.preference).to eq(:template)
       rescue Jsonc::Merge::ParseError => e
         skip "Tree-sitter parser not available: #{e.message}"
       end
@@ -108,7 +108,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
           resolver = described_class.new(
             template_analysis,
             dest_analysis,
-            signature_match_preference: :destination
+            preference: :destination
           )
           result = Jsonc::Merge::MergeResult.new
 
@@ -134,7 +134,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
           resolver = described_class.new(
             template_analysis,
             dest_analysis,
-            signature_match_preference: :template
+            preference: :template
           )
           result = Jsonc::Merge::MergeResult.new
 

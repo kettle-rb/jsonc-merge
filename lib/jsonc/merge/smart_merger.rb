@@ -18,7 +18,7 @@ module Jsonc
     #
     # @example With options
     #   merger = SmartMerger.new(template, dest,
-    #     signature_match_preference: :template,
+    #     preference: :template,
     #     add_template_only_nodes: true)
     #   merged_string = merger.merge
     class SmartMerger
@@ -36,7 +36,7 @@ module Jsonc
       # @param template_content [String] Template JSON content
       # @param dest_content [String] Destination JSON content
       # @param options [Hash] Merge options
-      # @option options [Symbol] :signature_match_preference (:destination)
+      # @option options [Symbol] :preference (:destination)
       #   Which version to prefer when nodes have matching signatures
       # @option options [Boolean] :add_template_only_nodes (false)
       #   Whether to add nodes only found in template
@@ -44,7 +44,7 @@ module Jsonc
         @template_content = template_content
         @dest_content = dest_content
         @options = {
-          signature_match_preference: :destination,
+          preference: :destination,
           add_template_only_nodes: false,
         }.merge(options)
       end
@@ -79,7 +79,7 @@ module Jsonc
         resolver = ConflictResolver.new(
           template_analysis,
           dest_analysis,
-          signature_match_preference: @options[:signature_match_preference],
+          preference: @options[:preference],
           add_template_only_nodes: @options[:add_template_only_nodes]
         )
 
