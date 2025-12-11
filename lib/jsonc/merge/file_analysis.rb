@@ -97,59 +97,41 @@ module Jsonc
       # Alias for convenience - json-merge prefers "nodes" terminology
       alias_method :nodes, :statements
 
-      # Check if a line is within a freeze block
+      # Check if a line is within a freeze block.
+      #
+      # NOTE: This method intentionally does NOT call `super` or use the base
+      # `freeze_blocks` method. The base implementation derives freeze blocks from
+      # `statements.select { |n| n.is_a?(Freezable) }`, but during initialization
+      # `@freeze_blocks` is extracted BEFORE `@nodes` is populated (see
+      # `integrate_nodes_and_freeze_blocks`). This method is called during that
+      # integration process, so we must use `@freeze_blocks` directly.
+      #
       # @param line_num [Integer] 1-based line number
       # @return [Boolean]
       def in_freeze_block?(line_num)
         @freeze_blocks.any? { |fb| fb.location.cover?(line_num) }
       end
 
-      # Get the freeze block containing the given line
+      # Get the freeze block containing the given line.
+      #
+      # NOTE: This method intentionally does NOT call `super` or use the base
+      # `freeze_blocks` method. The base implementation derives freeze blocks from
+      # `statements.select { |n| n.is_a?(Freezable) }`, but during initialization
+      # `@freeze_blocks` is extracted BEFORE `@nodes` is populated (see
+      # `integrate_nodes_and_freeze_blocks`). This method is called during that
+      # integration process, so we must use `@freeze_blocks` directly.
+      #
       # @param line_num [Integer] 1-based line number
       # @return [FreezeNode, nil]
       def freeze_block_at(line_num)
         @freeze_blocks.find { |fb| fb.location.cover?(line_num) }
       end
 
-      # Generate signature for a node
-      # @param node [NodeWrapper, FreezeNode] Node to generate signature for
-      # @return [Array, nil]
-      def generate_signature(node)
-        result = if @signature_generator
-          custom_result = @signature_generator.call(node)
-          if fallthrough_node?(custom_result)
-            # Fall through to default computation
-            compute_node_signature(custom_result)
-          else
-            custom_result
-          end
-        else
-          compute_node_signature(node)
-        end
-
-        DebugLogger.debug("Generated signature", {
-          node_type: node.class.name.split("::").last,
-          signature: result,
-          generator: @signature_generator ? "custom" : "default",
-        }) if result
-
-        result
-      end
-
       # Override to detect tree-sitter nodes for signature generator fallthrough
       # @param value [Object] The value to check
       # @return [Boolean] true if this is a fallthrough node
       def fallthrough_node?(value)
-        value.is_a?(NodeWrapper) || value.is_a?(FreezeNode)
-      end
-
-      # Get normalized line content (stripped)
-      # @param line_num [Integer] 1-based line number
-      # @return [String, nil]
-      def normalized_line(line_num)
-        return nil if line_num < 1 || line_num > @lines.length
-
-        @lines[line_num - 1].strip
+        value.is_a?(NodeWrapper) || value.is_a?(FreezeNode) || super
       end
 
       # Get the root node of the parse tree
