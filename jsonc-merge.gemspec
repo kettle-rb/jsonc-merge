@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   spec.name = "jsonc-merge"
   spec.version = gem_version
   spec.authors = ["Peter H. Boling"]
-  spec.email = ["peter.boling@gmail.com"]
+  spec.email = ["floss@galtzo.com"]
 
   spec.summary = "☯️ Intelligent JSONC file merging using tree-sitter AST analysis"
   spec.description = "☯️ Jsonc::Merge provides smart JSONC (JSON with Comments) file merging that preserves comments, understands JSON structure, and supports freeze blocks for protecting destination content. Perfect for merging configuration files like devcontainer.json, tsconfig.json, package.json, and VS Code settings."
