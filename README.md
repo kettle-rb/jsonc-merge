@@ -108,7 +108,7 @@ File.write("merged.json", result.to_jsonc)
   "api_key": "my-secret-key",
   "api_secret": "my-secret-value",
   // json-merge:unfreeze
-  
+
   "debug": false,
   "log_level": "info"
 }
@@ -402,7 +402,7 @@ template = <<~JSONC
     "name": "my-app",
     "version": "1.0.0",
     "debug": false,
-    
+
     /* Database configuration */
     "database": {
       "host": "localhost",
@@ -418,7 +418,7 @@ destination = <<~JSONC
     "name": "my-app",
     "version": "2.0.0",
     "custom_setting": true,
-    
+
     /* Database configuration */
     "database": {
       "host": "production.example.com",
@@ -440,12 +440,12 @@ Freeze blocks protect sections from being overwritten during merge:
 ```jsonc
 {
   "name": "my-app",
-  
+
   // json-merge:freeze Secret configuration
   "api_key": "my_production_api_key",
   "api_secret": "super_secret_value",
   // json-merge:unfreeze
-  
+
   "debug": false
 }
 ```

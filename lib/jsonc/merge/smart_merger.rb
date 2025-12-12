@@ -80,7 +80,7 @@ module Jsonc
           template_analysis,
           dest_analysis,
           preference: @options[:preference],
-          add_template_only_nodes: @options[:add_template_only_nodes]
+          add_template_only_nodes: @options[:add_template_only_nodes],
         )
 
         # Perform resolution

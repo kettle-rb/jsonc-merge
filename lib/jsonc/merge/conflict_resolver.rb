@@ -149,13 +149,11 @@ module Jsonc
         if dest_node.container? && template_node.container?
           # Both are containers - recursively merge their children
           merge_container_nodes(template_node, dest_node, template_analysis, dest_analysis, result)
-        else
+        elsif @preference == :destination
           # Leaf nodes or mismatched types - use preference
-          if @preference == :destination
-            add_node_to_result(dest_node, result, :destination, MergeResult::DECISION_KEPT_DEST, dest_analysis)
-          else
-            add_node_to_result(template_node, result, :template, MergeResult::DECISION_KEPT_TEMPLATE, template_analysis)
-          end
+          add_node_to_result(dest_node, result, :destination, MergeResult::DECISION_KEPT_DEST, dest_analysis)
+        else
+          add_node_to_result(template_node, result, :template, MergeResult::DECISION_KEPT_TEMPLATE, template_analysis)
         end
       end
 

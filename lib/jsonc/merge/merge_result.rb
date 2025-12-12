@@ -82,7 +82,7 @@ module Jsonc
             line.chomp,
             decision: DECISION_FREEZE_BLOCK,
             source: :destination,
-            original_line: freeze_node.start_line + idx
+            original_line: freeze_node.start_line + idx,
           )
         end
       end

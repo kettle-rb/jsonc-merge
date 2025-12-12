@@ -93,7 +93,7 @@ module Jsonc
           raise InvalidStructureError.new(
             "Freeze block is empty",
             start_line: @start_line,
-            end_line: @end_line
+            end_line: @end_line,
           )
         end
       end

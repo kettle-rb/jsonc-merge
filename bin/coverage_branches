@@ -51,8 +51,16 @@ files.each do |path, info|
           # Parse branch info: condition_key format is like "[:if, 0, 45, 8, 50, 11]"
           # branch_id format is like "[:then, 1, 46, 10, 46, 35]"
           begin
-            cond_info = eval(condition_key) rescue nil
-            branch_info = eval(branch_id) rescue nil
+            cond_info = begin
+              eval(condition_key)
+            rescue
+              nil
+            end
+            branch_info = begin
+              eval(branch_id)
+            rescue
+              nil
+            end
             if cond_info && branch_info
               cond_type = cond_info[0]
               cond_line = cond_info[2]
@@ -62,7 +70,7 @@ files.each do |path, info|
                 condition: cond_type,
                 cond_line: cond_line,
                 branch: branch_type,
-                branch_line: branch_line
+                branch_line: branch_line,
               }
             end
           rescue
@@ -84,7 +92,7 @@ files.each do |path, info|
           condition: branch["type"],
           cond_line: branch["start_line"],
           branch: branch["type"],
-          branch_line: branch["start_line"]
+          branch_line: branch["start_line"],
         }
       end
     end
@@ -93,7 +101,7 @@ files.each do |path, info|
   uncovered = total - covered
   next if uncovered == 0
 
-  pct = total > 0 ? (covered.to_f / total * 100).round(1) : 100.0
+  pct = (total > 0) ? (covered.to_f / total * 100).round(1) : 100.0
   short_path = path.split("/lib/").last || path.split("/").last(2).join("/")
 
   results << {
@@ -103,7 +111,7 @@ files.each do |path, info|
     pct: pct,
     path: short_path,
     full_path: path,
-    details: uncovered_details.sort_by { |d| d[:branch_line] || 0 }
+    details: uncovered_details.sort_by { |d| d[:branch_line] || 0 },
   }
 end
 
@@ -119,13 +127,15 @@ puts "Files with uncovered branches:"
 puts "-" * 70
 results.each do |r|
   puts format("%3d uncovered | %5.1f%% | %s", r[:uncovered], r[:pct], r[:path])
-  
+
   if show_detail && r[:details].any?
     r[:details].each do |d|
-      puts format("      Line %3d: %s -> %s branch not taken", 
-                  d[:branch_line] || d[:cond_line] || 0, 
-                  d[:condition], 
-                  d[:branch])
+      puts format(
+        "      Line %3d: %s -> %s branch not taken",
+        d[:branch_line] || d[:cond_line] || 0,
+        d[:condition],
+        d[:branch],
+      )
     end
   end
 end

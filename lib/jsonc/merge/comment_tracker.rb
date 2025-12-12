@@ -108,7 +108,6 @@ module Jsonc
       def extract_comments
         comments = []
         in_block_comment = false
-        block_comment_start = nil
         block_comment_indent = 0
 
         @lines.each_with_index do |line, idx|
@@ -126,7 +125,6 @@ module Jsonc
           # Check for block comment start
           if line.include?("/*") && !line.include?("*/")
             in_block_comment = true
-            block_comment_start = line_num
             match = line.match(/\A(\s*)/)
             block_comment_indent = match ? match[1].length : 0
             comments << {

@@ -2,6 +2,15 @@
 
 RSpec.describe Jsonc::Merge::FreezeNode do
   # Use shared examples to validate base FreezeNode integration
+  subject(:freeze_node) do
+    described_class.new(
+      start_line: start_line,
+      end_line: end_line,
+      lines: all_lines,
+      pattern_type: pattern_type,
+    )
+  end
+
   it_behaves_like "Ast::Merge::FreezeNodeBase" do
     let(:freeze_node_class) { described_class }
     let(:default_pattern_type) { :c_style_line }
@@ -12,12 +21,12 @@ RSpec.describe Jsonc::Merge::FreezeNode do
         lines = opts.delete(:lines) || begin
           result = []
           (1..end_line).each do |i|
-            if i == start_line
-              result << '// json-merge:freeze'
+            result << if i == start_line
+              "// json-merge:freeze"
             elsif i == end_line
-              result << '// json-merge:unfreeze'
+              "// json-merge:unfreeze"
             else
-              result << %("key_#{i}": "value_#{i}",)
+              %("key_#{i}": "value_#{i}",)
             end
           end
           result
@@ -27,7 +36,7 @@ RSpec.describe Jsonc::Merge::FreezeNode do
           end_line: end_line,
           lines: lines,
           pattern_type: opts[:pattern_type] || :c_style_line,
-          **opts.except(:pattern_type)
+          **opts.except(:pattern_type),
         )
       }
     end
@@ -38,25 +47,16 @@ RSpec.describe Jsonc::Merge::FreezeNode do
   let(:all_lines) do
     [
       "{",
-      '  // json-merge:freeze',
+      "  // json-merge:freeze",
       '  "frozen_key": "value",',
       '  "another": 123',
-      '  // json-merge:unfreeze',
+      "  // json-merge:unfreeze",
       "}",
     ]
   end
   let(:start_line) { 2 }
   let(:end_line) { 5 }
   let(:pattern_type) { :c_style_line }
-
-  subject(:freeze_node) do
-    described_class.new(
-      start_line: start_line,
-      end_line: end_line,
-      lines: all_lines,
-      pattern_type: pattern_type
-    )
-  end
 
   describe "#initialize" do
     it "creates a freeze node with line range" do
@@ -72,7 +72,7 @@ RSpec.describe Jsonc::Merge::FreezeNode do
 
   describe "#lines" do
     it "returns the extracted lines array" do
-      expect(freeze_node.lines).to include('  // json-merge:freeze')
+      expect(freeze_node.lines).to include("  // json-merge:freeze")
       expect(freeze_node.lines).to include('  "frozen_key": "value",')
     end
 
@@ -96,23 +96,23 @@ RSpec.describe Jsonc::Merge::FreezeNode do
   end
 
   describe "with block comments" do
-    let(:block_lines) do
-      [
-        "{",
-        '  /* json-merge:freeze */',
-        '  "frozen": true',
-        '  /* json-merge:unfreeze */',
-        "}",
-      ]
-    end
-
     subject(:block_freeze_node) do
       described_class.new(
         start_line: 2,
         end_line: 4,
         lines: block_lines,
-        pattern_type: :c_style_block
+        pattern_type: :c_style_block,
       )
+    end
+
+    let(:block_lines) do
+      [
+        "{",
+        "  /* json-merge:freeze */",
+        '  "frozen": true',
+        "  /* json-merge:unfreeze */",
+        "}",
+      ]
     end
 
     it "handles block comment markers" do
@@ -163,7 +163,7 @@ RSpec.describe Jsonc::Merge::FreezeNode do
         start_line: 1,
         end_line: 1,
         lines: lines,
-        pattern_type: :c_style_line
+        pattern_type: :c_style_line,
       )
       expect(node.lines.length).to eq(1)
     end
@@ -177,7 +177,7 @@ RSpec.describe Jsonc::Merge::FreezeNode do
         start_line: 1,
         end_line: 2,
         lines: lines,
-        pattern_type: :c_style_line
+        pattern_type: :c_style_line,
       )
       expect(node.lines.length).to eq(2)
     end
@@ -188,7 +188,7 @@ RSpec.describe Jsonc::Merge::FreezeNode do
           start_line: 1,
           end_line: 1,
           lines: [],
-          pattern_type: :c_style_line
+          pattern_type: :c_style_line,
         )
       }.to raise_error(Jsonc::Merge::FreezeNode::InvalidStructureError)
     end
@@ -199,7 +199,7 @@ RSpec.describe Jsonc::Merge::FreezeNode do
           start_line: 1,
           end_line: 2,
           lines: [nil, nil],
-          pattern_type: :c_style_line
+          pattern_type: :c_style_line,
         )
       }.to raise_error(Jsonc::Merge::FreezeNode::InvalidStructureError)
     end

@@ -28,64 +28,103 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
 
   describe "#initialize" do
     it "creates a resolver with analyses" do
-      begin
-        template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
-        dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
+      template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
+      dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
 
-        resolver = described_class.new(template_analysis, dest_analysis)
+      resolver = described_class.new(template_analysis, dest_analysis)
 
-        expect(resolver.template_analysis).to eq(template_analysis)
-        expect(resolver.dest_analysis).to eq(dest_analysis)
-      rescue Jsonc::Merge::ParseError => e
-        skip "Tree-sitter parser not available: #{e.message}"
-      end
+      expect(resolver.template_analysis).to eq(template_analysis)
+      expect(resolver.dest_analysis).to eq(dest_analysis)
+    rescue Jsonc::Merge::ParseError => e
+      skip "Tree-sitter parser not available: #{e.message}"
     end
 
     it "accepts preference option" do
-      begin
-        template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
-        dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
+      template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
+      dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
 
-        resolver = described_class.new(
-          template_analysis,
-          dest_analysis,
-          preference: :template
-        )
+      resolver = described_class.new(
+        template_analysis,
+        dest_analysis,
+        preference: :template,
+      )
 
-        expect(resolver.preference).to eq(:template)
-      rescue Jsonc::Merge::ParseError => e
-        skip "Tree-sitter parser not available: #{e.message}"
-      end
+      expect(resolver.preference).to eq(:template)
+    rescue Jsonc::Merge::ParseError => e
+      skip "Tree-sitter parser not available: #{e.message}"
     end
 
     it "accepts add_template_only_nodes option" do
-      begin
-        template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
-        dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
+      template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
+      dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
 
-        resolver = described_class.new(
-          template_analysis,
-          dest_analysis,
-          add_template_only_nodes: true
-        )
+      resolver = described_class.new(
+        template_analysis,
+        dest_analysis,
+        add_template_only_nodes: true,
+      )
 
-        expect(resolver.add_template_only_nodes).to be true
-      rescue Jsonc::Merge::ParseError => e
-        skip "Tree-sitter parser not available: #{e.message}"
-      end
+      expect(resolver.add_template_only_nodes).to be true
+    rescue Jsonc::Merge::ParseError => e
+      skip "Tree-sitter parser not available: #{e.message}"
     end
   end
 
   describe "#resolve" do
     it "populates the result" do
-      begin
+      template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
+      dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
+
+      # Skip if analysis failed (parser may not be working)
+      skip "FileAnalysis not valid - parser may not be available" unless template_analysis.valid? && dest_analysis.valid?
+
+      resolver = described_class.new(template_analysis, dest_analysis)
+      result = Jsonc::Merge::MergeResult.new
+
+      resolver.resolve(result)
+
+      expect(result.lines).not_to be_empty
+    rescue Jsonc::Merge::ParseError => e
+      skip "Tree-sitter parser not available: #{e.message}"
+    end
+
+    context "with destination preference" do
+      it "preserves destination values" do
         template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
         dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
 
         # Skip if analysis failed (parser may not be working)
         skip "FileAnalysis not valid - parser may not be available" unless template_analysis.valid? && dest_analysis.valid?
 
-        resolver = described_class.new(template_analysis, dest_analysis)
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          preference: :destination,
+        )
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        output = result.to_json
+        # Destination-only values should be preserved
+        expect(output).to include("custom")
+      rescue Jsonc::Merge::ParseError => e
+        skip "Tree-sitter parser not available: #{e.message}"
+      end
+    end
+
+    context "with template preference" do
+      it "uses template values for matching signatures" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          preference: :template,
+        )
         result = Jsonc::Merge::MergeResult.new
 
         resolver.resolve(result)
@@ -93,57 +132,6 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
         expect(result.lines).not_to be_empty
       rescue Jsonc::Merge::ParseError => e
         skip "Tree-sitter parser not available: #{e.message}"
-      end
-    end
-
-    context "with destination preference" do
-      it "preserves destination values" do
-        begin
-          template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
-          dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
-
-          # Skip if analysis failed (parser may not be working)
-          skip "FileAnalysis not valid - parser may not be available" unless template_analysis.valid? && dest_analysis.valid?
-
-          resolver = described_class.new(
-            template_analysis,
-            dest_analysis,
-            preference: :destination
-          )
-          result = Jsonc::Merge::MergeResult.new
-
-          resolver.resolve(result)
-
-          output = result.to_json
-          # Destination-only values should be preserved
-          expect(output).to include("custom")
-        rescue Jsonc::Merge::ParseError => e
-          skip "Tree-sitter parser not available: #{e.message}"
-        end
-      end
-    end
-
-    context "with template preference" do
-      it "uses template values for matching signatures" do
-        begin
-          template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
-          dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
-
-          skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
-
-          resolver = described_class.new(
-            template_analysis,
-            dest_analysis,
-            preference: :template
-          )
-          result = Jsonc::Merge::MergeResult.new
-
-          resolver.resolve(result)
-
-          expect(result.lines).not_to be_empty
-        rescue Jsonc::Merge::ParseError => e
-          skip "Tree-sitter parser not available: #{e.message}"
-        end
       end
     end
 
@@ -166,26 +154,24 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
       end
 
       it "adds template-only nodes to result" do
-        begin
-          template_analysis = Jsonc::Merge::FileAnalysis.new(template_with_extra)
-          dest_analysis = Jsonc::Merge::FileAnalysis.new(simple_dest)
+        template_analysis = Jsonc::Merge::FileAnalysis.new(template_with_extra)
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(simple_dest)
 
-          skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
 
-          resolver = described_class.new(
-            template_analysis,
-            dest_analysis,
-            add_template_only_nodes: true
-          )
-          result = Jsonc::Merge::MergeResult.new
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          add_template_only_nodes: true,
+        )
+        result = Jsonc::Merge::MergeResult.new
 
-          resolver.resolve(result)
+        resolver.resolve(result)
 
-          output = result.to_json
-          expect(output).to include("newField")
-        rescue Jsonc::Merge::ParseError => e
-          skip "Tree-sitter parser not available: #{e.message}"
-        end
+        output = result.to_json
+        expect(output).to include("newField")
+      rescue Jsonc::Merge::ParseError => e
+        skip "Tree-sitter parser not available: #{e.message}"
       end
     end
 
@@ -203,41 +189,37 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
       end
 
       it "preserves freeze blocks from destination" do
-        begin
-          template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
-          dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_with_freeze)
+        template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_with_freeze)
 
-          skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
 
-          resolver = described_class.new(template_analysis, dest_analysis)
-          result = Jsonc::Merge::MergeResult.new
+        resolver = described_class.new(template_analysis, dest_analysis)
+        result = Jsonc::Merge::MergeResult.new
 
-          resolver.resolve(result)
+        resolver.resolve(result)
 
-          # Freeze blocks should be preserved
-          expect(result.lines).not_to be_empty
-        rescue Jsonc::Merge::ParseError => e
-          skip "Tree-sitter parser not available: #{e.message}"
-        end
+        # Freeze blocks should be preserved
+        expect(result.lines).not_to be_empty
+      rescue Jsonc::Merge::ParseError => e
+        skip "Tree-sitter parser not available: #{e.message}"
       end
     end
 
     context "with nodes that have no signature" do
       it "handles nodes without signatures gracefully" do
-        begin
-          template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
-          dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
+        template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
 
-          skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
 
-          resolver = described_class.new(template_analysis, dest_analysis)
-          result = Jsonc::Merge::MergeResult.new
+        resolver = described_class.new(template_analysis, dest_analysis)
+        result = Jsonc::Merge::MergeResult.new
 
-          # Should not raise
-          expect { resolver.resolve(result) }.not_to raise_error
-        rescue Jsonc::Merge::ParseError => e
-          skip "Tree-sitter parser not available: #{e.message}"
-        end
+        # Should not raise
+        expect { resolver.resolve(result) }.not_to raise_error
+      rescue Jsonc::Merge::ParseError => e
+        skip "Tree-sitter parser not available: #{e.message}"
       end
     end
   end

@@ -14,9 +14,9 @@ module Jsonc
     module DebugLogger
       extend Ast::Merge::DebugLogger
 
-  # Jsonc-specific configuration
-  self.env_var_name = "JSONC_MERGE_DEBUG"
-  self.log_prefix = "[Jsonc::Merge]"
+      # Jsonc-specific configuration
+      self.env_var_name = "JSONC_MERGE_DEBUG"
+      self.log_prefix = "[Jsonc::Merge]"
 
       # Override log_node to handle Json-specific node types.
       #

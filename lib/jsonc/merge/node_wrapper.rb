@@ -131,11 +131,11 @@ module Jsonc
       # Get the key name if this is a pair node
       # @return [String, nil]
       def key_name
-        return nil unless pair?
+        return unless pair?
 
         # In JSON tree-sitter, pair has key and value children
         key_node = find_child_by_field("key")
-        return nil unless key_node
+        return unless key_node
 
         # Key is typically a string, extract its content without quotes using byte positions
         key_text = node_text(key_node)
@@ -146,10 +146,10 @@ module Jsonc
       # Get the value node if this is a pair
       # @return [NodeWrapper, nil]
       def value_node
-        return nil unless pair?
+        return unless pair?
 
         value = find_child_by_field("value")
-        return nil unless value
+        return unless value
 
         NodeWrapper.new(value, lines: @lines, source: @source)
       end
@@ -231,7 +231,7 @@ module Jsonc
       # Returns the full line content including any leading whitespace
       # @return [String, nil]
       def opening_line
-        return nil unless container? && @start_line
+        return unless container? && @start_line
 
         @lines[@start_line - 1]
       end
@@ -240,7 +240,7 @@ module Jsonc
       # Returns the full line content including any leading whitespace
       # @return [String, nil]
       def closing_line
-        return nil unless container? && @end_line
+        return unless container? && @end_line
 
         @lines[@end_line - 1]
       end
@@ -267,7 +267,7 @@ module Jsonc
       # @param field_name [String] Field name to look for
       # @return [TreeSitter::Node, nil]
       def find_child_by_field(field_name)
-        return nil unless @node.respond_to?(:child_by_field_name)
+        return unless @node.respond_to?(:child_by_field_name)
 
         @node.child_by_field_name(field_name)
       end
@@ -276,7 +276,7 @@ module Jsonc
       # @param type_name [String] Type name to look for
       # @return [TreeSitter::Node, nil]
       def find_child_by_type(type_name)
-        return nil unless @node.respond_to?(:each)
+        return unless @node.respond_to?(:each)
 
         @node.each do |child|
           return child if child.type.to_s == type_name
@@ -322,7 +322,10 @@ module Jsonc
         when "document"
           # Root document - signature based on root content type
           child = nil
-          node.each { |c| child = c unless c.type.to_s == "comment"; break if child }
+          node.each { |c|
+            child = c unless c.type.to_s == "comment"
+            break if child
+          }
           child_type = child&.type&.to_s
           [:document, child_type]
         when "object"

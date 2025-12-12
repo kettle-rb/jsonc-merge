@@ -59,7 +59,7 @@ RSpec.describe "Jsonc::Merge::SmartMerger Integration" do
       merger = Jsonc::Merge::SmartMerger.new(
         template_json,
         dest_json,
-        preference: :template
+        preference: :template,
       )
       result = merger.merge_result
 
@@ -89,7 +89,7 @@ RSpec.describe "Jsonc::Merge::SmartMerger Integration" do
       merger = Jsonc::Merge::SmartMerger.new(
         template_json,
         dest_json,
-        add_template_only_nodes: true
+        add_template_only_nodes: true,
       )
       result = merger.merge_result
 

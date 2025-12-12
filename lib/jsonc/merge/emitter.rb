@@ -59,10 +59,10 @@ module Jsonc
       def emit_leading_comments(comments)
         comments.each do |comment|
           indent = " " * (comment[:indent] || 0)
-          if comment[:block]
-            @lines << "#{indent}/* #{comment[:text]} */"
+          @lines << if comment[:block]
+            "#{indent}/* #{comment[:text]} */"
           else
-            @lines << "#{indent}// #{comment[:text]}"
+            "#{indent}// #{comment[:text]}"
           end
         end
       end
@@ -92,10 +92,10 @@ module Jsonc
       # @param key [String, nil] Key name if this array is a value in an object
       def emit_array_start(key = nil)
         add_comma_if_needed
-        if key
-          @lines << "#{current_indent}\"#{key}\": ["
+        @lines << if key
+          "#{current_indent}\"#{key}\": ["
         else
-          @lines << "#{current_indent}["
+          "#{current_indent}["
         end
         @indent_level += 1
         @needs_comma = false

@@ -10,4 +10,3 @@ module Jsonc
     VERSION = Version::VERSION # traditional location
   end
 end
-

@@ -37,7 +37,7 @@ RSpec.describe Jsonc::Merge::DebugLogger do
             end_line: 3,
             lines: lines,
             start_marker: "// json-merge:freeze",
-            end_marker: "// json-merge:unfreeze"
+            end_marker: "// json-merge:unfreeze",
           )
 
           expect {

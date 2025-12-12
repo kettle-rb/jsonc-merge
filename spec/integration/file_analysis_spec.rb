@@ -81,7 +81,7 @@ RSpec.describe "Jsonc::Merge::FileAnalysis Integration" do
     it "recognizes custom freeze token" do
       analysis = Jsonc::Merge::FileAnalysis.new(
         json_with_custom_token,
-        freeze_token: "my-token"
+        freeze_token: "my-token",
       )
       expect(analysis.freeze_blocks.size).to eq(1)
     end
@@ -99,7 +99,7 @@ RSpec.describe "Jsonc::Merge::FileAnalysis Integration" do
 
       analysis = Jsonc::Merge::FileAnalysis.new(
         json_content,
-        signature_generator: custom_generator
+        signature_generator: custom_generator,
       )
 
       expect(analysis.valid?).to be(true)
@@ -119,7 +119,7 @@ RSpec.describe "Jsonc::Merge::FileAnalysis Integration" do
 
       analysis = Jsonc::Merge::FileAnalysis.new(
         json_content,
-        signature_generator: fallthrough_generator
+        signature_generator: fallthrough_generator,
       )
 
       expect(analysis.valid?).to be(true)

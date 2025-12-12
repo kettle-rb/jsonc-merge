@@ -2,12 +2,12 @@
 
 RSpec.describe Jsonc::Merge::MergeResult do
   # Use the shared examples to validate MergeResultBase integration
+  subject(:result) { described_class.new }
+
   it_behaves_like "Ast::Merge::MergeResultBase" do
     let(:merge_result_class) { described_class }
     let(:build_merge_result) { -> { described_class.new } }
   end
-
-  subject(:result) { described_class.new }
 
   describe "#initialize" do
     it "creates an empty result" do
@@ -59,7 +59,7 @@ RSpec.describe Jsonc::Merge::MergeResult do
         start_line: 1,
         end_line: 3,
         lines: all_lines,
-        pattern_type: :c_style_line
+        pattern_type: :c_style_line,
       )
     end
 
@@ -205,20 +205,18 @@ RSpec.describe Jsonc::Merge::MergeResult do
 
   describe "#add_node edge cases" do
     it "returns early when node has nil start_line" do
-      begin
-        # Create a mock-like object that returns nil for start_line
-        json = '{"key": "value"}'
-        analysis = Jsonc::Merge::FileAnalysis.new(json)
-        node = analysis.root_object
-        skip "No root object" unless node
+      # Create a mock-like object that returns nil for start_line
+      json = '{"key": "value"}'
+      analysis = Jsonc::Merge::FileAnalysis.new(json)
+      node = analysis.root_object
+      skip "No root object" unless node
 
-        # Node should have valid lines, so this should work
-        initial_count = result.lines.size
-        result.add_node(node, decision: :kept_destination, source: :destination, analysis: analysis)
-        expect(result.lines.size).to be >= initial_count
-      rescue Jsonc::Merge::ParseError => e
-        skip "Parser not available: #{e.message}"
-      end
+      # Node should have valid lines, so this should work
+      initial_count = result.lines.size
+      result.add_node(node, decision: :kept_destination, source: :destination, analysis: analysis)
+      expect(result.lines.size).to be >= initial_count
+    rescue Jsonc::Merge::ParseError => e
+      skip "Parser not available: #{e.message}"
     end
   end
 

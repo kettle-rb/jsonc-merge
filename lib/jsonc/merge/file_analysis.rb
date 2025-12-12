@@ -137,7 +137,7 @@ module Jsonc
       # Get the root node of the parse tree
       # @return [NodeWrapper, nil]
       def root_node
-        return nil unless valid?
+        return unless valid?
 
         NodeWrapper.new(@ast.root_node, lines: @lines, source: @source)
       end
@@ -145,10 +145,10 @@ module Jsonc
       # Get the root object if the JSON document is an object
       # @return [NodeWrapper, nil]
       def root_object
-        return nil unless valid?
+        return unless valid?
 
         root = @ast.root_node
-        return nil unless root
+        return unless root
 
         # JSON root should be a document containing an object or array
         root.each do |child|
@@ -163,7 +163,7 @@ module Jsonc
       # @return [String, nil]
       def root_object_open_line
         obj = root_object
-        return nil unless obj&.start_line
+        return unless obj&.start_line
 
         line_at(obj.start_line)&.chomp
       end
@@ -172,7 +172,7 @@ module Jsonc
       # @return [String, nil]
       def root_object_close_line
         obj = root_object
-        return nil unless obj&.end_line
+        return unless obj&.end_line
 
         line_at(obj.end_line)&.chomp
       end
@@ -272,7 +272,7 @@ module Jsonc
             end_line: matching_end[:line],
             lines: @lines,
             start_marker: start_info[:marker],
-            end_marker: matching_end[:marker]
+            end_marker: matching_end[:marker],
           )
         end
 
@@ -312,8 +312,6 @@ module Jsonc
           node.signature
         when NodeWrapper
           node.signature
-        else
-          nil
         end
       end
     end
