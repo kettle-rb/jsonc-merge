@@ -42,7 +42,7 @@
 
 # ☯️ Jsonc::Merge
 
-[![Version][👽versioni]][👽version] [![GitHub tag (latest SemVer)][⛳️tag-img]][⛳️tag] [![License: MIT][📄license-img]][📄license-ref] [![Downloads Rank][👽dl-ranki]][👽dl-rank] [![Open Source Helpers][👽oss-helpi]][👽oss-help] [![CodeCov Test Coverage][🏀codecovi]][🏀codecov] [![Coveralls Test Coverage][🏀coveralls-img]][🏀coveralls] [![QLTY Test Coverage][🏀qlty-covi]][🏀qlty-cov] [![QLTY Maintainability][🏀qlty-mnti]][🏀qlty-mnt] [![CI Heads][🚎3-hd-wfi]][🚎3-hd-wf] [![CI Runtime Dependencies @ HEAD][🚎12-crh-wfi]][🚎12-crh-wf] [![CI Current][🚎11-c-wfi]][🚎11-c-wf] [![CI Truffle Ruby][🚎9-t-wfi]][🚎9-t-wf] [![CI JRuby][🚎10-j-wfi]][🚎10-j-wf] [![Deps Locked][🚎13-🔒️-wfi]][🚎13-🔒️-wf] [![Deps Unlocked][🚎14-🔓️-wfi]][🚎14-🔓️-wf] [![CI Supported][🚎6-s-wfi]][🚎6-s-wf] [![CI Legacy][🚎4-lg-wfi]][🚎4-lg-wf] [![CI Unsupported][🚎7-us-wfi]][🚎7-us-wf] [![CI Ancient][🚎1-an-wfi]][🚎1-an-wf] [![CI Test Coverage][🚎2-cov-wfi]][🚎2-cov-wf] [![CI Style][🚎5-st-wfi]][🚎5-st-wf] [![CodeQL][🖐codeQL-img]][🖐codeQL] [![Apache SkyWalking Eyes License Compatibility Check][🚎15-🪪-wfi]][🚎15-🪪-wf]
+[![Version][👽versioni]][👽version] [![GitHub tag (latest SemVer)][⛳️tag-img]][⛳️tag] [![License: MIT][📄license-img]][📄license-ref] [![Downloads Rank][👽dl-ranki]][👽dl-rank] [![Open Source Helpers][👽oss-helpi]][👽oss-help] [![CodeCov Test Coverage][🏀codecovi]][🏀codecov] [![Coveralls Test Coverage][🏀coveralls-img]][🏀coveralls] [![QLTY Test Coverage][🏀qlty-covi]][🏀qlty-cov] [![QLTY Maintainability][🏀qlty-mnti]][🏀qlty-mnt] [![CI Heads][🚎3-hd-wfi]][🚎3-hd-wf] [![CI Runtime Dependencies @ HEAD][🚎12-crh-wfi]][🚎12-crh-wf] [![CI Current][🚎11-c-wfi]][🚎11-c-wf] [![CI Truffle Ruby][🚎9-t-wfi]][🚎9-t-wf] [![Deps Locked][🚎13-🔒️-wfi]][🚎13-🔒️-wf] [![Deps Unlocked][🚎14-🔓️-wfi]][🚎14-🔓️-wf] [![CI Supported][🚎6-s-wfi]][🚎6-s-wf] [![CI Test Coverage][🚎2-cov-wfi]][🚎2-cov-wf] [![CI Style][🚎5-st-wfi]][🚎5-st-wf] [![CodeQL][🖐codeQL-img]][🖐codeQL] [![Apache SkyWalking Eyes License Compatibility Check][🚎15-🪪-wfi]][🚎15-🪪-wf]
 
 `if ci_badges.map(&:color).detect { it != "green"}` ☝️ [let me know][🖼️galtzo-discord], as I may have missed the [discord notification][🖼️galtzo-discord].
 
@@ -56,7 +56,7 @@
 
 Jsonc::Merge is a standalone Ruby module that intelligently merges two versions of a JSONC (JSON with Comments) file using tree-sitter AST analysis. It's like a smart "git merge" specifically designed for JSONC configuration files. Built on top of [ast-merge](https://github.com/kettle-rb/ast-merge), it shares the same architecture as [prism-merge](https://github.com/kettle-rb/prism-merge) for Ruby source files.
 
-For standard JSON (without comments) support, see the [json-merge](https://github.com/kettle-rb/json-merge) gem.
+For standard JSON (without comments) support, see the [jsonc-merge](https://github.com/kettle-rb/jsonc-merge) gem.
 
 ### Key Features
 
@@ -64,7 +64,7 @@ For standard JSON (without comments) support, see the [json-merge](https://githu
 - **JSONC Support**: Handles JSON with Comments (`//` and `/* */` style)
 - **Intelligent**: Matches objects and arrays by structural signatures
 - **Comment-Preserving**: Comments in JSONC files are preserved in context
-- **Freeze Block Support**: Respects freeze markers (default: `json-merge:freeze` / `json-merge:unfreeze`) for merge control - customizable to match your project's conventions
+- **Freeze Block Support**: Respects freeze markers (default: `jsonc-merge:freeze` / `jsonc-merge:unfreeze`) for merge control - customizable to match your project's conventions
 - **Full Provenance**: Tracks origin of every node
 - **Standalone**: Minimal dependencies - just `ast-merge` and `ruby_tree_sitter`
 - **Customizable**:
@@ -72,7 +72,7 @@ For standard JSON (without comments) support, see the [json-merge](https://githu
   - `preference` - setting of `:template`, `:destination`, or a Hash for per-node-type preferences
   - `node_splitter` - Hash mapping node types to callables for per-node-type merge customization (see [ast-merge](https://github.com/kettle-rb/ast-merge) docs)
   - `add_template_only_nodes` - setting to retain nodes that do not exist in destination
-  - `freeze_token` - customize freeze block markers (default: `"json-merge"`)
+  - `freeze_token` - customize freeze block markers (default: `"jsonc-merge"`)
 
 ### Supported Node Types
 
@@ -104,10 +104,10 @@ File.write("merged.json", result.to_jsonc)
 
 ```jsonc
 {
-  // json-merge:freeze Secret configuration
+  // jsonc-merge:freeze Secret configuration
   "api_key": "my-secret-key",
   "api_secret": "my-secret-value",
-  // json-merge:unfreeze
+  // jsonc-merge:unfreeze
 
   "debug": false,
   "log_level": "info"
@@ -129,8 +129,16 @@ This gem is part of a family of gems that provide intelligent merging for variou
 | [rbs-merge][rbs-merge] | RBS | [RBS][rbs] | Smart merge for Ruby type signatures |
 | [dotenv-merge][dotenv-merge] | Dotenv | internal ([dotenv][dotenv]) | Smart merge for `.env` files |
 | [toml-merge][toml-merge] | TOML | [tree-sitter-toml][ts-toml] | Smart merge for TOML files |
+| [markdown-merge][markdown-merge] | Markdown | _base classes_ | Shared foundation for Markdown mergers |
 | [markly-merge][markly-merge] | Markdown | [Markly][markly] | Smart merge for Markdown (CommonMark via libcmark-gfm) |
 | [commonmarker-merge][commonmarker-merge] | Markdown | [Commonmarker][commonmarker] | Smart merge for Markdown (CommonMark via comrak) |
+
+**Example implementations** for the gem templating use case:
+
+| Gem | Purpose | Description |
+|-----|---------|-------------|
+| [kettle-dev][kettle-dev] | Gem Development | Gem templating tool using `*-merge` gems |
+| [kettle-jem][kettle-jem] | Gem Templating | Gem template library with smart merge support |
 
 [ast-merge]: https://github.com/kettle-rb/ast-merge
 [prism-merge]: https://github.com/kettle-rb/prism-merge
@@ -141,8 +149,11 @@ This gem is part of a family of gems that provide intelligent merging for variou
 [rbs-merge]: https://github.com/kettle-rb/rbs-merge
 [dotenv-merge]: https://github.com/kettle-rb/dotenv-merge
 [toml-merge]: https://github.com/kettle-rb/toml-merge
+[markdown-merge]: https://github.com/kettle-rb/markdown-merge
 [markly-merge]: https://github.com/kettle-rb/markly-merge
 [commonmarker-merge]: https://github.com/kettle-rb/commonmarker-merge
+[kettle-dev]: https://github.com/kettle-rb/kettle-dev
+[kettle-jem]: https://github.com/kettle-rb/kettle-jem
 [prism]: https://github.com/ruby/prism
 [psych]: https://github.com/ruby/psych
 [ts-json]: https://github.com/tree-sitter/tree-sitter-json
@@ -158,8 +169,8 @@ This gem is part of a family of gems that provide intelligent merging for variou
 
 | Tokens to Remember      | [![Gem name][⛳️name-img]][⛳️gem-name] [![Gem namespace][⛳️namespace-img]][⛳️gem-namespace]                                                                                                                                                                                                                                                                          |
 |-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Works with JRuby        | ![JRuby 9.1 Compat][💎jruby-9.1i] ![JRuby 9.2 Compat][💎jruby-9.2i] ![JRuby 9.3 Compat][💎jruby-9.3i] <br/> [![JRuby 9.4 Compat][💎jruby-9.4i]][🚎10-j-wf] [![JRuby 10.0 Compat][💎jruby-c-i]][🚎11-c-wf] [![JRuby HEAD Compat][💎jruby-headi]][🚎3-hd-wf]                                                                                                          |
-| Works with Truffle Ruby | ![Truffle Ruby 22.3 Compat][💎truby-22.3i] ![Truffle Ruby 23.0 Compat][💎truby-23.0i] <br/> [![Truffle Ruby 23.1 Compat][💎truby-23.1i]][🚎9-t-wf] [![Truffle Ruby 24.1 Compat][💎truby-c-i]][🚎11-c-wf]                                                                                                                                                            |
+| Works with JRuby        | [![JRuby 10.0 Compat][💎jruby-c-i]][🚎11-c-wf] [![JRuby HEAD Compat][💎jruby-headi]][🚎3-hd-wf]                                                                                                          |
+| Works with Truffle Ruby | [![Truffle Ruby 23.1 Compat][💎truby-23.1i]][🚎9-t-wf] [![Truffle Ruby 24.1 Compat][💎truby-c-i]][🚎11-c-wf]                                                                                                                                                            |
 | Works with MRI Ruby 3   | [![Ruby 3.2 Compat][💎ruby-3.2i]][🚎6-s-wf] [![Ruby 3.3 Compat][💎ruby-3.3i]][🚎6-s-wf] [![Ruby 3.4 Compat][💎ruby-c-i]][🚎11-c-wf] [![Ruby HEAD Compat][💎ruby-headi]][🚎3-hd-wf]                                                                                         |
 | Support & Community     | [![Join Me on Daily.dev's RubyFriends][✉️ruby-friends-img]][✉️ruby-friends] [![Live Chat on Discord][✉️discord-invite-img-ftb]][✉️discord-invite] [![Get help from me on Upwork][👨🏼‍🏫expsup-upwork-img]][👨🏼‍🏫expsup-upwork] [![Get help from me on Codementor][👨🏼‍🏫expsup-codementor-img]][👨🏼‍🏫expsup-codementor]                                       |
 | Source                  | [![Source on GitLab.com][📜src-gl-img]][📜src-gl] [![Source on CodeBerg.org][📜src-cb-img]][📜src-cb] [![Source on Github.com][📜src-gh-img]][📜src-gh] [![The best SHA: dQw4w9WgXcQ!][🧮kloc-img]][🧮kloc]                                                                                                                                                         |
@@ -184,16 +195,16 @@ Compatible with MRI Ruby 3.2.0+, and concordant releases of JRuby, and TruffleRu
 
 | Federated [DVCS][💎d-in-dvcs] Repository        | Status                                                                | Issues                    | PRs                      | Wiki                      | CI                       | Discussions                  |
 |-------------------------------------------------|-----------------------------------------------------------------------|---------------------------|--------------------------|---------------------------|--------------------------|------------------------------|
-| 🧪 [kettle-rb/json-merge on GitLab][📜src-gl]   | The Truth                                                             | [💚][🤝gl-issues]         | [💚][🤝gl-pulls]         | [💚][📜gl-wiki]           | 🐭 Tiny Matrix           | ➖                            |
-| 🧊 [kettle-rb/json-merge on CodeBerg][📜src-cb] | An Ethical Mirror ([Donate][🤝cb-donate])                             | [💚][🤝cb-issues]         | [💚][🤝cb-pulls]         | ➖                         | ⭕️ No Matrix             | ➖                            |
-| 🐙 [kettle-rb/json-merge on GitHub][📜src-gh]   | Another Mirror                                                        | [💚][🤝gh-issues]         | [💚][🤝gh-pulls]         | [💚][📜gh-wiki]           | 💯 Full Matrix           | [💚][gh-discussions]         |
+| 🧪 [kettle-rb/jsonc-merge on GitLab][📜src-gl]   | The Truth                                                             | [💚][🤝gl-issues]         | [💚][🤝gl-pulls]         | [💚][📜gl-wiki]           | 🐭 Tiny Matrix           | ➖                            |
+| 🧊 [kettle-rb/jsonc-merge on CodeBerg][📜src-cb] | An Ethical Mirror ([Donate][🤝cb-donate])                             | [💚][🤝cb-issues]         | [💚][🤝cb-pulls]         | ➖                         | ⭕️ No Matrix             | ➖                            |
+| 🐙 [kettle-rb/jsonc-merge on GitHub][📜src-gh]   | Another Mirror                                                        | [💚][🤝gh-issues]         | [💚][🤝gh-pulls]         | [💚][📜gh-wiki]           | 💯 Full Matrix           | [💚][gh-discussions]         |
 | 🎮️ [Discord Server][✉️discord-invite]          | [![Live Chat on Discord][✉️discord-invite-img-ftb]][✉️discord-invite] | [Let's][✉️discord-invite] | [talk][✉️discord-invite] | [about][✉️discord-invite] | [this][✉️discord-invite] | [library!][✉️discord-invite] |
 
 </details>
 
-[gh-discussions]: https://github.com/kettle-rb/json-merge/discussions
+[gh-discussions]: https://github.com/kettle-rb/jsonc-merge/discussions
 
-### Enterprise Support [![Tidelift](https://tidelift.com/badges/package/rubygems/json-merge)](https://tidelift.com/subscription/pkg/rubygems-json-merge?utm_source=rubygems-json-merge&utm_medium=referral&utm_campaign=readme)
+### Enterprise Support [![Tidelift](https://tidelift.com/badges/package/rubygems/jsonc-merge)](https://tidelift.com/subscription/pkg/rubygems-jsonc-merge?utm_source=rubygems-jsonc-merge&utm_medium=referral&utm_campaign=readme)
 
 Available as part of the Tidelift Subscription.
 
@@ -221,13 +232,13 @@ Alternatively:
 Install the gem and add to the application's Gemfile by executing:
 
 ```console
-bundle add json-merge
+bundle add jsonc-merge
 ```
 
 If bundler is not being used to manage dependencies, install the gem by executing:
 
 ```console
-gem install json-merge
+gem install jsonc-merge
 ```
 
 ### 🔒 Secure Installation
@@ -248,7 +259,7 @@ gem cert --add <(curl -Ls https://raw.github.com/galtzo-floss/certs/main/pboling
 You only need to do that once.  Then proceed to install with:
 
 ```console
-gem install json-merge -P HighSecurity
+gem install jsonc-merge -P HighSecurity
 ```
 
 The `HighSecurity` trust profile will verify signed gems, and not allow the installation of unsigned dependencies.
@@ -378,9 +389,9 @@ merger = Jsonc::Merge::SmartMerger.new(
   add_template_only_nodes: false,
 
   # Token for freeze block markers
-  # Default: "json-merge"
-  # Looks for: // json-merge:freeze / // json-merge:unfreeze
-  freeze_token: "json-merge",
+  # Default: "jsonc-merge"
+  # Looks for: // jsonc-merge:freeze / // jsonc-merge:unfreeze
+  freeze_token: "jsonc-merge",
 
   # Custom signature generator (optional)
   # Receives a node, returns a signature array or nil
@@ -441,16 +452,16 @@ Freeze blocks protect sections from being overwritten during merge:
 {
   "name": "my-app",
 
-  // json-merge:freeze Secret configuration
+  // jsonc-merge:freeze Secret configuration
   "api_key": "my_production_api_key",
   "api_secret": "super_secret_value",
-  // json-merge:unfreeze
+  // jsonc-merge:unfreeze
 
   "debug": false
 }
 ```
 
-Content between `// json-merge:freeze` and `// json-merge:unfreeze` markers is preserved from the destination file, regardless of what the template contains.
+Content between `// jsonc-merge:freeze` and `// jsonc-merge:unfreeze` markers is preserved from the destination file, regardless of what the template contains.
 
 ### Adding Template-Only Properties
 
@@ -507,7 +518,7 @@ NOTE: [kettle-readme-backers][kettle-readme-backers] updates this list every day
 No sponsors yet. Be the first!
 <!-- OPENCOLLECTIVE-ORGANIZATIONS:END -->
 
-[kettle-readme-backers]: https://github.com/kettle-rb/json-merge/blob/main/exe/kettle-readme-backers
+[kettle-readme-backers]: https://github.com/kettle-rb/jsonc-merge/blob/main/exe/kettle-readme-backers
 
 ### Another way to support open-source
 
@@ -558,16 +569,16 @@ chat rooms and mailing lists agrees to follow the [![Contributor Covenant 2.1][�
 
 Made with [contributors-img][🖐contrib-rocks].
 
-Also see GitLab Contributors: [https://gitlab.com/kettle-rb/json-merge/-/graphs/main][🚎contributors-gl]
+Also see GitLab Contributors: [https://gitlab.com/kettle-rb/jsonc-merge/-/graphs/main][🚎contributors-gl]
 
 <details>
     <summary>⭐️ Star History</summary>
 
-<a href="https://star-history.com/#kettle-rb/json-merge&Date">
+<a href="https://star-history.com/#kettle-rb/jsonc-merge&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=kettle-rb/json-merge&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=kettle-rb/json-merge&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=kettle-rb/json-merge&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=kettle-rb/jsonc-merge&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=kettle-rb/jsonc-merge&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=kettle-rb/jsonc-merge&type=Date" />
  </picture>
 </a>
 
@@ -592,7 +603,7 @@ the [Pessimistic Version Constraint][📌pvc] with two digits of precision.
 For example:
 
 ```ruby
-spec.add_dependency("json-merge", "~> 1.0")
+spec.add_dependency("jsonc-merge", "~> 1.0")
 ```
 
 <details markdown="1">
@@ -626,7 +637,7 @@ See [LICENSE.txt][📄license] for the official [Copyright Notice][📄copyright
             <picture>
               <img src="https://logos.galtzo.com/assets/images/galtzo-floss/avatar-128px-blank.svg" alt="Galtzo.com Logo (Wordless) by Aboling0, CC BY-SA 4.0" width="24">
             </picture>
-        </a>, and json-merge contributors.
+        </a>, and jsonc-merge contributors.
     </li>
 </ul>
 
@@ -645,7 +656,7 @@ To join the community or get help 👇️ Join the Discord.
 
 To say "thanks!" ☝️ Join the Discord or 👇️ send money.
 
-[![Sponsor kettle-rb/json-merge on Open Source Collective][🖇osc-all-bottom-img]][🖇osc] 💌 [![Sponsor me on GitHub Sponsors][🖇sponsor-bottom-img]][🖇sponsor] 💌 [![Sponsor me on Liberapay][⛳liberapay-bottom-img]][⛳liberapay] 💌 [![Donate on PayPal][🖇paypal-bottom-img]][🖇paypal]
+[![Sponsor kettle-rb/jsonc-merge on Open Source Collective][🖇osc-all-bottom-img]][🖇osc] 💌 [![Sponsor me on GitHub Sponsors][🖇sponsor-bottom-img]][🖇sponsor] 💌 [![Sponsor me on Liberapay][⛳liberapay-bottom-img]][⛳liberapay] 💌 [![Donate on PayPal][🖇paypal-bottom-img]][🖇paypal]
 
 ### Please give the project a star ⭐ ♥.
 
@@ -688,13 +699,13 @@ Thanks for RTFM. ☺️
 [✉️ruby-friends]: https://app.daily.dev/squads/rubyfriends
 
 [✇bundle-group-pattern]: https://gist.github.com/pboling/4564780
-[⛳️gem-namespace]: https://github.com/kettle-rb/json-merge
+[⛳️gem-namespace]: https://github.com/kettle-rb/jsonc-merge
 [⛳️namespace-img]: https://img.shields.io/badge/namespace-Json::Merge-3C2D2D.svg?style=square&logo=ruby&logoColor=white
-[⛳️gem-name]: https://bestgems.org/gems/json-merge
+[⛳️gem-name]: https://bestgems.org/gems/jsonc-merge
 [⛳️name-img]: https://img.shields.io/badge/name-json--merge-3C2D2D.svg?style=square&logo=rubygems&logoColor=red
-[⛳️tag-img]: https://img.shields.io/github/tag/kettle-rb/json-merge.svg
-[⛳️tag]: http://github.com/kettle-rb/json-merge/releases
-[🚂maint-blog]: http://www.railsbling.com/tags/json-merge
+[⛳️tag-img]: https://img.shields.io/github/tag/kettle-rb/jsonc-merge.svg
+[⛳️tag]: http://github.com/kettle-rb/jsonc-merge/releases
+[🚂maint-blog]: http://www.railsbling.com/tags/jsonc-merge
 [🚂maint-blog-img]: https://img.shields.io/badge/blog-railsbling-0093D0.svg?style=for-the-badge&logo=rubyonrails&logoColor=orange
 [🚂maint-contact]: http://www.railsbling.com/contact
 [🚂maint-contact-img]: https://img.shields.io/badge/Contact-Maintainer-0093D0.svg?style=flat&logo=rubyonrails&logoColor=red
@@ -722,97 +733,81 @@ Thanks for RTFM. ☺️
 [👨🏼‍🏫expsup-upwork-img]: https://img.shields.io/badge/UpWork-13544E?style=for-the-badge&logo=Upwork&logoColor=white
 [👨🏼‍🏫expsup-codementor]: https://www.codementor.io/peterboling?utm_source=github&utm_medium=button&utm_term=peterboling&utm_campaign=github
 [👨🏼‍🏫expsup-codementor-img]: https://img.shields.io/badge/CodeMentor-Get_Help-1abc9c?style=for-the-badge&logo=CodeMentor&logoColor=white
-[🏙️entsup-tidelift]: https://tidelift.com/subscription/pkg/rubygems-json-merge?utm_source=rubygems-json-merge&utm_medium=referral&utm_campaign=readme
+[🏙️entsup-tidelift]: https://tidelift.com/subscription/pkg/rubygems-jsonc-merge?utm_source=rubygems-jsonc-merge&utm_medium=referral&utm_campaign=readme
 [🏙️entsup-tidelift-img]: https://img.shields.io/badge/Tidelift_and_Sonar-Enterprise_Support-FD3456?style=for-the-badge&logo=sonar&logoColor=white
 [🏙️entsup-tidelift-sonar]: https://blog.tidelift.com/tidelift-joins-sonar
 [💁🏼‍♂️peterboling]: http://www.peterboling.com
 [🚂railsbling]: http://www.railsbling.com
 [📜src-gl-img]: https://img.shields.io/badge/GitLab-FBA326?style=for-the-badge&logo=Gitlab&logoColor=orange
-[📜src-gl]: https://gitlab.com/kettle-rb/json-merge/
+[📜src-gl]: https://gitlab.com/kettle-rb/jsonc-merge/
 [📜src-cb-img]: https://img.shields.io/badge/CodeBerg-4893CC?style=for-the-badge&logo=CodeBerg&logoColor=blue
-[📜src-cb]: https://codeberg.org/kettle-rb/json-merge
+[📜src-cb]: https://codeberg.org/kettle-rb/jsonc-merge
 [📜src-gh-img]: https://img.shields.io/badge/GitHub-238636?style=for-the-badge&logo=Github&logoColor=green
-[📜src-gh]: https://github.com/kettle-rb/json-merge
+[📜src-gh]: https://github.com/kettle-rb/jsonc-merge
 [📜docs-cr-rd-img]: https://img.shields.io/badge/RubyDoc-Current_Release-943CD2?style=for-the-badge&logo=readthedocs&logoColor=white
 [📜docs-head-rd-img]: https://img.shields.io/badge/YARD_on_Galtzo.com-HEAD-943CD2?style=for-the-badge&logo=readthedocs&logoColor=white
-[📜gl-wiki]: https://gitlab.com/kettle-rb/json-merge/-/wikis/home
-[📜gh-wiki]: https://github.com/kettle-rb/json-merge/wiki
+[📜gl-wiki]: https://gitlab.com/kettle-rb/jsonc-merge/-/wikis/home
+[📜gh-wiki]: https://github.com/kettle-rb/jsonc-merge/wiki
 [📜gl-wiki-img]: https://img.shields.io/badge/wiki-examples-943CD2.svg?style=for-the-badge&logo=gitlab&logoColor=white
 [📜gh-wiki-img]: https://img.shields.io/badge/wiki-examples-943CD2.svg?style=for-the-badge&logo=github&logoColor=white
-[👽dl-rank]: https://bestgems.org/gems/json-merge
-[👽dl-ranki]: https://img.shields.io/gem/rd/json-merge.svg
-[👽oss-help]: https://www.codetriage.com/kettle-rb/json-merge
-[👽oss-helpi]: https://www.codetriage.com/kettle-rb/json-merge/badges/users.svg
-[👽version]: https://bestgems.org/gems/json-merge
-[👽versioni]: https://img.shields.io/gem/v/json-merge.svg
-[🏀qlty-mnt]: https://qlty.sh/gh/kettle-rb/projects/json-merge
-[🏀qlty-mnti]: https://qlty.sh/gh/kettle-rb/projects/json-merge/maintainability.svg
-[🏀qlty-cov]: https://qlty.sh/gh/kettle-rb/projects/json-merge/metrics/code?sort=coverageRating
-[🏀qlty-covi]: https://qlty.sh/gh/kettle-rb/projects/json-merge/coverage.svg
-[🏀codecov]: https://codecov.io/gh/kettle-rb/json-merge
-[🏀codecovi]: https://codecov.io/gh/kettle-rb/json-merge/graph/badge.svg
-[🏀coveralls]: https://coveralls.io/github/kettle-rb/json-merge?branch=main
-[🏀coveralls-img]: https://coveralls.io/repos/github/kettle-rb/json-merge/badge.svg?branch=main
-[🖐codeQL]: https://github.com/kettle-rb/json-merge/security/code-scanning
-[🖐codeQL-img]: https://github.com/kettle-rb/json-merge/actions/workflows/codeql-analysis.yml/badge.svg
-[🚎1-an-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/ancient.yml
-[🚎1-an-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/ancient.yml/badge.svg
-[🚎2-cov-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/coverage.yml
-[🚎2-cov-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/coverage.yml/badge.svg
-[🚎3-hd-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/heads.yml
-[🚎3-hd-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/heads.yml/badge.svg
-[🚎4-lg-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/legacy.yml
-[🚎4-lg-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/legacy.yml/badge.svg
-[🚎5-st-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/style.yml
-[🚎5-st-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/style.yml/badge.svg
-[🚎6-s-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/supported.yml
-[🚎6-s-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/supported.yml/badge.svg
-[🚎7-us-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/unsupported.yml
-[🚎7-us-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/unsupported.yml/badge.svg
-[🚎8-ho-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/hoary.yml
-[🚎8-ho-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/hoary.yml/badge.svg
-[🚎9-t-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/truffle.yml
-[🚎9-t-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/truffle.yml/badge.svg
-[🚎10-j-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/jruby.yml
-[🚎10-j-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/jruby.yml/badge.svg
-[🚎11-c-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/current.yml
-[🚎11-c-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/current.yml/badge.svg
-[🚎12-crh-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/dep-heads.yml
-[🚎12-crh-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/dep-heads.yml/badge.svg
-[🚎13-🔒️-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/locked_deps.yml
-[🚎13-🔒️-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/locked_deps.yml/badge.svg
-[🚎14-🔓️-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/unlocked_deps.yml
-[🚎14-🔓️-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/unlocked_deps.yml/badge.svg
-[🚎15-🪪-wf]: https://github.com/kettle-rb/json-merge/actions/workflows/license-eye.yml
-[🚎15-🪪-wfi]: https://github.com/kettle-rb/json-merge/actions/workflows/license-eye.yml/badge.svg
+[👽dl-rank]: https://bestgems.org/gems/jsonc-merge
+[👽dl-ranki]: https://img.shields.io/gem/rd/jsonc-merge.svg
+[👽oss-help]: https://www.codetriage.com/kettle-rb/jsonc-merge
+[👽oss-helpi]: https://www.codetriage.com/kettle-rb/jsonc-merge/badges/users.svg
+[👽version]: https://bestgems.org/gems/jsonc-merge
+[👽versioni]: https://img.shields.io/gem/v/jsonc-merge.svg
+[🏀qlty-mnt]: https://qlty.sh/gh/kettle-rb/projects/jsonc-merge
+[🏀qlty-mnti]: https://qlty.sh/gh/kettle-rb/projects/jsonc-merge/maintainability.svg
+[🏀qlty-cov]: https://qlty.sh/gh/kettle-rb/projects/jsonc-merge/metrics/code?sort=coverageRating
+[🏀qlty-covi]: https://qlty.sh/gh/kettle-rb/projects/jsonc-merge/coverage.svg
+[🏀codecov]: https://codecov.io/gh/kettle-rb/jsonc-merge
+[🏀codecovi]: https://codecov.io/gh/kettle-rb/jsonc-merge/graph/badge.svg
+[🏀coveralls]: https://coveralls.io/github/kettle-rb/jsonc-merge?branch=main
+[🏀coveralls-img]: https://coveralls.io/repos/github/kettle-rb/jsonc-merge/badge.svg?branch=main
+[🖐codeQL]: https://github.com/kettle-rb/jsonc-merge/security/code-scanning
+[🖐codeQL-img]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/codeql-analysis.yml/badge.svg
+[🚎2-cov-wf]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/coverage.yml
+[🚎2-cov-wfi]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/coverage.yml/badge.svg
+[🚎3-hd-wf]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/heads.yml
+[🚎3-hd-wfi]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/heads.yml/badge.svg
+[🚎5-st-wf]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/style.yml
+[🚎5-st-wfi]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/style.yml/badge.svg
+[🚎6-s-wf]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/supported.yml
+[🚎6-s-wfi]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/supported.yml/badge.svg
+[🚎9-t-wf]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/truffle.yml
+[🚎9-t-wfi]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/truffle.yml/badge.svg
+[🚎11-c-wf]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/current.yml
+[🚎11-c-wfi]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/current.yml/badge.svg
+[🚎12-crh-wf]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/dep-heads.yml
+[🚎12-crh-wfi]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/dep-heads.yml/badge.svg
+[🚎13-🔒️-wf]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/locked_deps.yml
+[🚎13-🔒️-wfi]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/locked_deps.yml/badge.svg
+[🚎14-🔓️-wf]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/unlocked_deps.yml
+[🚎14-🔓️-wfi]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/unlocked_deps.yml/badge.svg
+[🚎15-🪪-wf]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/license-eye.yml
+[🚎15-🪪-wfi]: https://github.com/kettle-rb/jsonc-merge/actions/workflows/license-eye.yml/badge.svg
 [💎ruby-3.2i]: https://img.shields.io/badge/Ruby-3.2-CC342D?style=for-the-badge&logo=ruby&logoColor=white
 [💎ruby-3.3i]: https://img.shields.io/badge/Ruby-3.3-CC342D?style=for-the-badge&logo=ruby&logoColor=white
 [💎ruby-c-i]: https://img.shields.io/badge/Ruby-current-CC342D?style=for-the-badge&logo=ruby&logoColor=green
 [💎ruby-headi]: https://img.shields.io/badge/Ruby-HEAD-CC342D?style=for-the-badge&logo=ruby&logoColor=blue
-[💎truby-22.3i]: https://img.shields.io/badge/Truffle_Ruby-22.3_(%F0%9F%9A%ABCI)-AABBCC?style=for-the-badge&logo=ruby&logoColor=pink
-[💎truby-23.0i]: https://img.shields.io/badge/Truffle_Ruby-23.0_(%F0%9F%9A%ABCI)-AABBCC?style=for-the-badge&logo=ruby&logoColor=pink
 [💎truby-23.1i]: https://img.shields.io/badge/Truffle_Ruby-23.1-34BCB1?style=for-the-badge&logo=ruby&logoColor=pink
 [💎truby-c-i]: https://img.shields.io/badge/Truffle_Ruby-current-34BCB1?style=for-the-badge&logo=ruby&logoColor=green
 [💎truby-headi]: https://img.shields.io/badge/Truffle_Ruby-HEAD-34BCB1?style=for-the-badge&logo=ruby&logoColor=blue
-[💎jruby-9.1i]: https://img.shields.io/badge/JRuby-9.1_(%F0%9F%9A%ABCI)-AABBCC?style=for-the-badge&logo=ruby&logoColor=red
-[💎jruby-9.2i]: https://img.shields.io/badge/JRuby-9.2_(%F0%9F%9A%ABCI)-AABBCC?style=for-the-badge&logo=ruby&logoColor=red
-[💎jruby-9.3i]: https://img.shields.io/badge/JRuby-9.3_(%F0%9F%9A%ABCI)-AABBCC?style=for-the-badge&logo=ruby&logoColor=red
-[💎jruby-9.4i]: https://img.shields.io/badge/JRuby-9.4-FBE742?style=for-the-badge&logo=ruby&logoColor=red
 [💎jruby-c-i]: https://img.shields.io/badge/JRuby-current-FBE742?style=for-the-badge&logo=ruby&logoColor=green
 [💎jruby-headi]: https://img.shields.io/badge/JRuby-HEAD-FBE742?style=for-the-badge&logo=ruby&logoColor=blue
-[🤝gh-issues]: https://github.com/kettle-rb/json-merge/issues
-[🤝gh-pulls]: https://github.com/kettle-rb/json-merge/pulls
-[🤝gl-issues]: https://gitlab.com/kettle-rb/json-merge/-/issues
-[🤝gl-pulls]: https://gitlab.com/kettle-rb/json-merge/-/merge_requests
-[🤝cb-issues]: https://codeberg.org/kettle-rb/json-merge/issues
-[🤝cb-pulls]: https://codeberg.org/kettle-rb/json-merge/pulls
+[🤝gh-issues]: https://github.com/kettle-rb/jsonc-merge/issues
+[🤝gh-pulls]: https://github.com/kettle-rb/jsonc-merge/pulls
+[🤝gl-issues]: https://gitlab.com/kettle-rb/jsonc-merge/-/issues
+[🤝gl-pulls]: https://gitlab.com/kettle-rb/jsonc-merge/-/merge_requests
+[🤝cb-issues]: https://codeberg.org/kettle-rb/jsonc-merge/issues
+[🤝cb-pulls]: https://codeberg.org/kettle-rb/jsonc-merge/pulls
 [🤝cb-donate]: https://donate.codeberg.org/
 [🤝contributing]: CONTRIBUTING.md
-[🏀codecov-g]: https://codecov.io/gh/kettle-rb/json-merge/graphs/tree.svg
+[🏀codecov-g]: https://codecov.io/gh/kettle-rb/jsonc-merge/graphs/tree.svg
 [🖐contrib-rocks]: https://contrib.rocks
-[🖐contributors]: https://github.com/kettle-rb/json-merge/graphs/contributors
-[🖐contributors-img]: https://contrib.rocks/image?repo=kettle-rb/json-merge
-[🚎contributors-gl]: https://gitlab.com/kettle-rb/json-merge/-/graphs/main
+[🖐contributors]: https://github.com/kettle-rb/jsonc-merge/graphs/contributors
+[🖐contributors-img]: https://contrib.rocks/image?repo=kettle-rb/jsonc-merge
+[🚎contributors-gl]: https://gitlab.com/kettle-rb/jsonc-merge/-/graphs/main
 [🪇conduct]: CODE_OF_CONDUCT.md
 [🪇conduct-img]: https://img.shields.io/badge/Contributor_Covenant-2.1-259D6C.svg
 [📌pvc]: http://guides.rubygems.org/patterns/#pessimistic-version-constraint
@@ -837,10 +832,10 @@ Thanks for RTFM. ☺️
 [📄license-compat-img]: https://img.shields.io/badge/Apache_Compatible:_Category_A-%E2%9C%93-259D6C.svg?style=flat&logo=Apache
 [📄ilo-declaration]: https://www.ilo.org/declaration/lang--en/index.htm
 [📄ilo-declaration-img]: https://img.shields.io/badge/ILO_Fundamental_Principles-✓-259D6C.svg?style=flat
-[🚎yard-current]: http://rubydoc.info/gems/json-merge
-[🚎yard-head]: https://json-merge.galtzo.com
+[🚎yard-current]: http://rubydoc.info/gems/jsonc-merge
+[🚎yard-head]: https://jsonc-merge.galtzo.com
 [💎stone_checksums]: https://github.com/galtzo-floss/stone_checksums
-[💎SHA_checksums]: https://gitlab.com/kettle-rb/json-merge/-/tree/main/checksums
+[💎SHA_checksums]: https://gitlab.com/kettle-rb/jsonc-merge/-/tree/main/checksums
 [💎rlts]: https://github.com/rubocop-lts/rubocop-lts
 [💎rlts-img]: https://img.shields.io/badge/code_style_&_linting-rubocop--lts-34495e.svg?plastic&logo=ruby&logoColor=white
 [💎appraisal2]: https://github.com/appraisal-rb/appraisal2

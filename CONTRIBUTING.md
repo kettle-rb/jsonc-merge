@@ -155,7 +155,7 @@ Your picture could be here!
 
 Made with [contributors-img][🖐contrib-rocks].
 
-Also see GitLab Contributors: [https://gitlab.com/kettle-rb/json-merge/-/graphs/main][🚎contributors-gl]
+Also see GitLab Contributors: [https://gitlab.com/kettle-rb/jsonc-merge/-/graphs/main][🚎contributors-gl]
 
 ## For Maintainers
 
@@ -205,15 +205,15 @@ NOTE: To build without signing the gem set `SKIP_GEM_SIGNING` to any value in th
 13. Run `bundle exec rake release` which will create a git tag for the version,
     push git commits and tags, and push the `.gem` file to the gem host configured in the gemspec.
 
-[📜src-gl]: https://gitlab.com/kettle-rb/json-merge/
-[📜src-cb]: https://codeberg.org/kettle-rb/json-merge
-[📜src-gh]: https://github.com/kettle-rb/json-merge
-[🧪build]: https://github.com/kettle-rb/json-merge/actions
-[🤝conduct]: https://gitlab.com/kettle-rb/json-merge/-/blob/main/CODE_OF_CONDUCT.md
+[📜src-gl]: https://gitlab.com/kettle-rb/jsonc-merge/
+[📜src-cb]: https://codeberg.org/kettle-rb/jsonc-merge
+[📜src-gh]: https://github.com/kettle-rb/jsonc-merge
+[🧪build]: https://github.com/kettle-rb/jsonc-merge/actions
+[🤝conduct]: https://gitlab.com/kettle-rb/jsonc-merge/-/blob/main/CODE_OF_CONDUCT.md
 [🖐contrib-rocks]: https://contrib.rocks
-[🖐contributors]: https://github.com/kettle-rb/json-merge/graphs/contributors
-[🚎contributors-gl]: https://gitlab.com/kettle-rb/json-merge/-/graphs/main
-[🖐contributors-img]: https://contrib.rocks/image?repo=kettle-rb/json-merge
+[🖐contributors]: https://github.com/kettle-rb/jsonc-merge/graphs/contributors
+[🚎contributors-gl]: https://gitlab.com/kettle-rb/jsonc-merge/-/graphs/main
+[🖐contributors-img]: https://contrib.rocks/image?repo=kettle-rb/jsonc-merge
 [💎gem-coop]: https://gem.coop
 [🔒️rubygems-security-guide]: https://guides.rubygems.org/security/#building-gems
 [🔒️rubygems-checksums-pr]: https://github.com/rubygems/rubygems/pull/6022

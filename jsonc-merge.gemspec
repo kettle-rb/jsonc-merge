@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
 
   spec.summary = "☯️ Intelligent JSONC file merging using tree-sitter AST analysis"
   spec.description = "☯️ Jsonc::Merge provides smart JSONC (JSON with Comments) file merging that preserves comments, understands JSON structure, and supports freeze blocks for protecting destination content. Perfect for merging configuration files like devcontainer.json, tsconfig.json, package.json, and VS Code settings."
-  spec.homepage = "https://github.com/kettle-rb/json-merge"
+  spec.homepage = "https://github.com/kettle-rb/jsonc-merge"
   spec.licenses = ["MIT"]
   spec.required_ruby_version = ">= 3.2.0"
 
@@ -142,7 +142,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency("stone_checksums", "~> 1.0", ">= 1.0.2")          # ruby >= 2.2.0
 
   # Git integration (optional)
-  # The 'git' gem is optional; json-merge falls back to shelling out to `git` if it is not present.
+  # The 'git' gem is optional; jsonc-merge falls back to shelling out to `git` if it is not present.
   # The current release of the git gem depends on activesupport, which makes it too heavy to depend on directly
   # spec.add_dependency("git", ">= 1.19.1")                               # ruby >= 2.3
 

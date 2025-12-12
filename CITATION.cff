@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: json-merge
+title: jsonc-merge
 message: >-
   If you use this work and you want to cite it,
   then you can use the metadata from this file.
@@ -12,9 +12,9 @@ authors:
     orcid: 'https://orcid.org/0009-0008-8519-441X'
 identifiers:
   - type: url
-    value: 'https://github.com/kettle-rb/json-merge'
-    description: json-merge
-repository-code: 'https://github.com/kettle-rb/json-merge'
+    value: 'https://github.com/kettle-rb/jsonc-merge'
+    description: jsonc-merge
+repository-code: 'https://github.com/kettle-rb/jsonc-merge'
 abstract: >-
-  json-merge
+  jsonc-merge
 license: See license file
