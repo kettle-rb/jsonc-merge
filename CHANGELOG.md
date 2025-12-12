@@ -20,6 +20,8 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Added
 
+- Initial release
+
 ### Changed
 
 ### Deprecated
@@ -30,6 +32,6 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Security
 
-## [0.1.0] - 2025-12-05
-
-- Initial release
+[Unreleased]: https://github.com/kettle-rb/jsonc-merge/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/kettle-rb/jsonc-merge/compare/f1cc25b1d9b79c598270e3aa203fa56787e6c6fc...v1.0.0
+[1.0.0t]: https://github.com/kettle-rb/jsonc-merge/tags/v1.0.0
