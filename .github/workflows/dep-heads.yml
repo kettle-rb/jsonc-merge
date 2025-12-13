@@ -33,8 +33,11 @@ jobs:
     name: Specs ${{ matrix.ruby }}@${{ matrix.appraisal }}${{ matrix.name_extra || '' }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental || endsWith(matrix.ruby, 'head') }}
-    env: # $BUNDLE_GEMFILE must be set at job level, so it is set for all steps
+    env:
+      # $BUNDLE_GEMFILE must be set at job level, so it is set for all steps
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}.gemfile
+      # Set LD_LIBRARY_PATH globally for the job to ensure the dynamic linker finds the library
+      LD_LIBRARY_PATH: "/usr/lib/x86_64-linux-gnu:/usr/lib"
     strategy:
       fail-fast: true
       matrix:
@@ -68,6 +71,9 @@ jobs:
         if: ${{ (env.ACT && !(startsWith(matrix.ruby, 'jruby')) || startsWith(matrix.ruby, 'truffleruby')) || (!env.ACT && (startsWith(matrix.ruby, 'jruby')) || startsWith(matrix.ruby, 'truffleruby')) }}
         uses: actions/checkout@v6
 
+      - name: Install tree-sitter system library
+        run: sudo apt-get update && sudo apt-get install -y libtree-sitter-dev
+
       - name: Setup Ruby & RubyGems
         if: ${{ (env.ACT && !(startsWith(matrix.ruby, 'jruby')) || startsWith(matrix.ruby, 'truffleruby')) || (!env.ACT && (startsWith(matrix.ruby, 'jruby')) || startsWith(matrix.ruby, 'truffleruby')) }}
         uses: ruby/setup-ruby@v1
@@ -75,7 +81,7 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
           rubygems: ${{ matrix.rubygems }}
           bundler: ${{ matrix.bundler }}
-          bundler-cache: false
+          bundler-cache: true
 
       # Raw `bundle` will use the BUNDLE_GEMFILE set to matrix.gemfile (i.e. Appraisal.root)
       # We need to do this first to get appraisal installed.
