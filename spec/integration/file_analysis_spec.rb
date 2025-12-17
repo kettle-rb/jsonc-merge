@@ -17,7 +17,7 @@ RSpec.describe "Jsonc::Merge::FileAnalysis Integration" do
 
     it "parses JSONC content (may have errors due to comments)" do
       analysis = Jsonc::Merge::FileAnalysis.new(jsonc_content)
-      # Tree-sitter JSON parser may report errors for comments
+      # tree-sitter JSON parser may report errors for comments
       # but the content is still processed for freeze blocks
       expect(analysis).to be_a(Jsonc::Merge::FileAnalysis)
       expect(analysis.comment_tracker).to be_a(Jsonc::Merge::CommentTracker)

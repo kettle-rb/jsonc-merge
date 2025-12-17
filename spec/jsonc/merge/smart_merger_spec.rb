@@ -59,7 +59,7 @@ RSpec.describe Jsonc::Merge::SmartMerger do
       result = merger.merge_result
       expect(result).to be_a(Jsonc::Merge::MergeResult)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "produces a result with lines" do
@@ -68,7 +68,7 @@ RSpec.describe Jsonc::Merge::SmartMerger do
       # Result should have content (may be empty if parser didn't work)
       expect(result).to respond_to(:lines)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "preserves destination customizations by default" do
@@ -79,7 +79,7 @@ RSpec.describe Jsonc::Merge::SmartMerger do
       skip "Merge produced no output - parser may not be fully functional" if result.to_json.empty?
       expect(result.to_json).to include("custom")
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     context "with template preference" do
@@ -92,7 +92,7 @@ RSpec.describe Jsonc::Merge::SmartMerger do
         result = merger.merge_result
         expect(result).to be_a(Jsonc::Merge::MergeResult)
       rescue Jsonc::Merge::ParseError => e
-        skip "Tree-sitter parser not available: #{e.message}"
+        skip "tree-sitter parser not available: #{e.message}"
       end
     end
 
@@ -108,7 +108,7 @@ RSpec.describe Jsonc::Merge::SmartMerger do
         skip "Merge produced no output - parser may not be fully functional" if result.to_json.empty?
         expect(result.to_json).to include("description")
       rescue Jsonc::Merge::ParseError => e
-        skip "Tree-sitter parser not available: #{e.message}"
+        skip "tree-sitter parser not available: #{e.message}"
       end
     end
   end
@@ -123,7 +123,7 @@ RSpec.describe Jsonc::Merge::SmartMerger do
       invalid_merger = described_class.new("{ invalid", dest_json)
       expect { invalid_merger.merge }.to raise_error(Jsonc::Merge::ParseError)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     rescue RSpec::Expectations::ExpectationNotMetError
       # Parser didn't raise - that's also acceptable behavior
     end
@@ -156,7 +156,7 @@ RSpec.describe Jsonc::Merge::SmartMerger do
       result = merger.merge_result
       expect(result).to be_a(Jsonc::Merge::MergeResult)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 end

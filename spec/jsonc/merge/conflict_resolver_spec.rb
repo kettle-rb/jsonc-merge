@@ -36,7 +36,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
       expect(resolver.template_analysis).to eq(template_analysis)
       expect(resolver.dest_analysis).to eq(dest_analysis)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "accepts preference option" do
@@ -51,7 +51,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
 
       expect(resolver.preference).to eq(:template)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "accepts add_template_only_nodes option" do
@@ -66,7 +66,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
 
       expect(resolver.add_template_only_nodes).to be true
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -85,7 +85,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
 
       expect(result.lines).not_to be_empty
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     context "with destination preference" do
@@ -109,7 +109,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
         # Destination-only values should be preserved
         expect(output).to include("custom")
       rescue Jsonc::Merge::ParseError => e
-        skip "Tree-sitter parser not available: #{e.message}"
+        skip "tree-sitter parser not available: #{e.message}"
       end
     end
 
@@ -131,7 +131,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
 
         expect(result.lines).not_to be_empty
       rescue Jsonc::Merge::ParseError => e
-        skip "Tree-sitter parser not available: #{e.message}"
+        skip "tree-sitter parser not available: #{e.message}"
       end
     end
 
@@ -171,7 +171,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
         output = result.to_json
         expect(output).to include("newField")
       rescue Jsonc::Merge::ParseError => e
-        skip "Tree-sitter parser not available: #{e.message}"
+        skip "tree-sitter parser not available: #{e.message}"
       end
     end
 
@@ -202,7 +202,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
         # Freeze blocks should be preserved
         expect(result.lines).not_to be_empty
       rescue Jsonc::Merge::ParseError => e
-        skip "Tree-sitter parser not available: #{e.message}"
+        skip "tree-sitter parser not available: #{e.message}"
       end
     end
 
@@ -219,7 +219,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
         # Should not raise
         expect { resolver.resolve(result) }.not_to raise_error
       rescue Jsonc::Merge::ParseError => e
-        skip "Tree-sitter parser not available: #{e.message}"
+        skip "tree-sitter parser not available: #{e.message}"
       end
     end
   end

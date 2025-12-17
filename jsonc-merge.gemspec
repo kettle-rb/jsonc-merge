@@ -81,8 +81,8 @@ Gem::Specification.new do |spec|
   # Listed files are the relative paths from bindir above.
   spec.executables = []
 
-  # Parser - Tree-sitter for JSON (supports JSONC with comments)
-  spec.add_dependency("ruby_tree_sitter", "~> 2.0")                     # ruby >= 3.2.0
+  # Parser - tree_haver provides unified tree-sitter interface (supports JSONC with comments)
+  spec.add_dependency("tree_haver", "~> 3.0")                           # ruby >= 3.2.0
   # NOTE: tree-sitter-json parser must be installed separately via your package manager
   #       e.g., `apt install libtree-sitter-json-dev` or built from source
 

@@ -31,7 +31,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       result = described_class.new(simple_json)
       expect(result).to be_a(described_class)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "handles invalid JSON gracefully" do
@@ -41,7 +41,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       analysis = described_class.new("{ invalid json }")
       expect(analysis.valid?).to be(false).or be(true) # depends on parser behavior
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -50,7 +50,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       analysis = described_class.new(simple_json)
       expect(analysis.nodes).to be_an(Array)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -60,7 +60,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       expect(analysis.lines).to be_an(Array)
       expect(analysis.lines).to include("{")
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -69,14 +69,14 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       analysis = described_class.new(simple_json)
       expect(analysis.line_at(1)).to eq("{")
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "returns nil for out of bounds" do
       analysis = described_class.new(simple_json)
       expect(analysis.line_at(1000)).to be_nil
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -85,7 +85,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       analysis = described_class.new(simple_json)
       expect(analysis.comment_tracker).to be_a(Jsonc::Merge::CommentTracker)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -99,7 +99,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
         expect(sig).to be_an(Array).or be_nil
       end
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -122,7 +122,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       # May or may not detect depending on parser support for JSONC
       expect(freeze_nodes).to be_an(Array)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -131,7 +131,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       analysis = described_class.new(simple_json)
       expect(analysis.valid?).to be true
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -141,7 +141,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       root = analysis.root_node
       expect(root).to be_a(Jsonc::Merge::NodeWrapper)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -152,7 +152,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       expect(obj).to be_a(Jsonc::Merge::NodeWrapper)
       expect(obj.object?).to be true
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "returns nil for array root" do
@@ -160,7 +160,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       obj = analysis.root_object
       expect(obj).to be_nil
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -171,7 +171,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       expect(pairs).to be_an(Array)
       expect(pairs.size).to eq(2)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "returns empty array for array root" do
@@ -179,7 +179,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       pairs = analysis.root_pairs
       expect(pairs).to eq([])
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -190,7 +190,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       expect(line).to be_a(String)
       expect(line).not_to start_with(" ")
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "returns nil for out of bounds" do
@@ -198,7 +198,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       expect(analysis.normalized_line(0)).to be_nil
       expect(analysis.normalized_line(1000)).to be_nil
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -207,7 +207,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       analysis = described_class.new(simple_json)
       expect(analysis.in_freeze_block?(1)).to be false
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -216,7 +216,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       analysis = described_class.new(simple_json)
       expect(analysis.freeze_block_at(1)).to be_nil
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -227,7 +227,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       skip "No root object" unless node
       expect(analysis.fallthrough_node?(node)).to be true
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "returns false for other types" do
@@ -236,7 +236,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       expect(analysis.fallthrough_node?(123)).to be false
       expect(analysis.fallthrough_node?(nil)).to be false
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -250,7 +250,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
         expect(sig.first).to eq(:custom)
       end
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "falls through to default when custom returns a node" do
@@ -262,7 +262,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
         expect(sig).to be_an(Array)
       end
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -297,7 +297,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       analysis = described_class.new(json_with_block_freeze)
       expect(analysis.nodes).to be_an(Array)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -320,7 +320,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       freeze_blocks = analysis.nodes.select { |n| n.is_a?(Jsonc::Merge::FreezeNode) }
       expect(freeze_blocks).to be_an(Array)
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "marks lines as in freeze block" do
@@ -332,7 +332,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
         expect(analysis.in_freeze_block?(fb.start_line)).to be true
       end
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "returns freeze block at line" do
@@ -344,7 +344,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
         expect(found).to eq(fb)
       end
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -363,7 +363,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
         expect(analysis.fallthrough_node?(freeze_nodes.first)).to be true
       end
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -373,7 +373,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       expect(analysis.valid?).to be true
       expect(analysis.root_object).not_to be_nil
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "handles empty JSON array" do
@@ -381,7 +381,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       expect(analysis.valid?).to be true
       expect(analysis.root_object).to be_nil
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "handles deeply nested JSON" do
@@ -389,7 +389,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       analysis = described_class.new(deep_json)
       expect(analysis.valid?).to be true
     rescue Jsonc::Merge::ParseError => e
-      skip "Tree-sitter parser not available: #{e.message}"
+      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 end

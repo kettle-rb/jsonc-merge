@@ -2,17 +2,17 @@
 
 module Jsonc
   module Merge
-    # Wraps tree-sitter nodes with comment associations, line information, and signatures.
+    # Wraps TreeHaver nodes with comment associations, line information, and signatures.
     # This provides a unified interface for working with JSON AST nodes during merging.
     #
     # @example Basic usage
-    #   parser = TreeSitter::Parser.new
-    #   parser.language = TreeSitter::Language.load("json", path)
-    #   tree = parser.parse_string(nil, source)
+    #   parser = TreeHaver::Parser.new
+    #   parser.language = TreeHaver::Language.json
+    #   tree = parser.parse(source)
     #   wrapper = NodeWrapper.new(tree.root_node, lines: source.lines, source: source)
     #   wrapper.signature # => [:object, ...]
     class NodeWrapper
-      # @return [TreeSitter::Node] The wrapped tree-sitter node
+      # @return [TreeHaver::Node] The wrapped tree-haver node
       attr_reader :node
 
       # @return [Array<Hash>] Leading comments associated with this node
@@ -33,7 +33,7 @@ module Jsonc
       # @return [Array<String>] Source lines
       attr_reader :lines
 
-      # @param node [TreeSitter::Node] Tree-sitter node to wrap
+      # @param node [TreeHaver::Node] tree-haver node to wrap
       # @param lines [Array<String>] Source lines for content extraction
       # @param source [String] Original source string for byte-based text extraction
       # @param leading_comments [Array<Hash>] Comments before this node
@@ -45,9 +45,15 @@ module Jsonc
         @leading_comments = leading_comments
         @inline_comment = inline_comment
 
-        # Extract line information from the tree-sitter node (0-indexed to 1-indexed)
-        @start_line = node.start_point.row + 1 if node.respond_to?(:start_point)
-        @end_line = node.end_point.row + 1 if node.respond_to?(:end_point)
+        # Extract line information from the tree-haver node (0-indexed to 1-indexed)
+        if node.respond_to?(:start_point)
+          point = node.start_point
+          @start_line = (point.respond_to?(:row) ? point.row : point[:row]) + 1
+        end
+        if node.respond_to?(:end_point)
+          point = node.end_point
+          @end_line = (point.respond_to?(:row) ? point.row : point[:row]) + 1
+        end
 
         # Handle edge case where end_line might be before start_line
         @end_line = @start_line if @start_line && @end_line && @end_line < @start_line
