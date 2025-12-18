@@ -27,19 +27,6 @@ GIT
       yard
 
 PATH
-  remote: ../..
-  specs:
-    ast-merge (1.0.0)
-      tree_haver (~> 3.0, >= 3.0.0)
-      version_gem (~> 1.1, >= 1.1.9)
-
-PATH
-  remote: ../tree_haver
-  specs:
-    tree_haver (3.0.0)
-      version_gem (~> 1.1, >= 1.1.9)
-
-PATH
   remote: .
   specs:
     jsonc-merge (1.0.0)
@@ -58,6 +45,8 @@ GEM
       rake (>= 10)
       thor (>= 0.14)
     ast (2.4.3)
+    ast-merge (1.0.0)
+      version_gem (~> 1.1, >= 1.1.9)
     backports (3.25.3)
     benchmark (0.5.0)
     bigdecimal (3.3.1)
@@ -321,6 +310,8 @@ GEM
       delegate (~> 0.1)
       rspec (~> 3.0)
       timecop (>= 0.7, < 1)
+    tree_haver (3.0.0)
+      version_gem (~> 1.1, >= 1.1.9)
     tsort (0.2.0)
     ttfunk (1.8.0)
       bigdecimal (~> 3.1)
@@ -352,7 +343,6 @@ PLATFORMS
 DEPENDENCIES
   addressable (>= 2.8, < 3)
   appraisal2 (~> 3.0)
-  ast-merge!
   benchmark (~> 0.4, >= 0.4.1)
   bundler-audit (~> 0.9.2)
   debug (>= 1.1)
@@ -383,7 +373,6 @@ DEPENDENCIES
   standard (>= 1.50)
   stone_checksums (~> 1.0, >= 1.0.2)
   stringio (>= 3.0)
-  tree_haver!
   tree_stump!
   yaml-converter (~> 0.1)
   yard (~> 0.9, >= 0.9.37)
