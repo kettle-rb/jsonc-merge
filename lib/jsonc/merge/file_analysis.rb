@@ -191,19 +191,20 @@ module Jsonc
         end
 
         begin
-          # Use TreeHaver's unified interface
-          parser = TreeHaver::Parser.new
-
-          # Determine which language to use
-          language = if @parser_path && File.exist?(@parser_path)
-            # Custom parser path provided - use it
-            # JSONC uses json grammar with comments support
-            TreeHaver::Language.from_library(@parser_path, symbol: "tree_sitter_json", name: "json")
-          elsif TreeHaver::Language.respond_to?(:jsonc)
-            # Use registered jsonc language (from GrammarFinder)
-            TreeHaver::Language.jsonc
+          # Determine which language to use (do this BEFORE creating parser)
+          language = if @parser_path
+            # Custom parser path was explicitly provided
+            if File.exist?(@parser_path)
+              # Use the provided path
+              TreeHaver::Language.from_library(@parser_path, symbol: "tree_sitter_jsonc", name: "jsonc")
+            else
+              # Explicit path doesn't exist - this is an error
+              @errors << "Provided parser path does not exist: #{@parser_path}"
+              @ast = nil
+              return
+            end
           elsif TreeHaver::Language.respond_to?(:json)
-            # Fall back to json language
+            # Use registered json language (from GrammarFinder)
             TreeHaver::Language.json
           else
             # No language available
@@ -217,6 +218,8 @@ module Jsonc
             return
           end
 
+          # Use TreeHaver's unified interface
+          parser = TreeHaver::Parser.new
           parser.language = language
           @ast = parser.parse(@source)
 
