@@ -17,4 +17,8 @@ eval_gemfile "gemfiles/modular/x_std_libs.gemfile"
 
 if ENV.fetch("KETTLE_RB_DEV", "false").casecmp?("true")
   gem "ast-merge", path: "../../"
+  gem "tree_haver", path: "../tree_haver"
+else
+  # Handled naturally in gemspec
 end
+
