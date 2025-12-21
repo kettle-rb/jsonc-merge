@@ -30,30 +30,15 @@ module Jsonc
       attr_reader :errors
 
       class << self
-        # Find the parser library path
+        # Find the parser library path using TreeHaver::GrammarFinder
         #
-        # Uses TreeHaver::GrammarFinder if available, otherwise
-        # searches common paths directly.
+        # Note: JSONC uses the tree-sitter-json library (not tree-sitter-jsonc)
         #
         # @return [String, nil] Path to the parser library or nil if not found
         def find_parser_path
-          # Use TreeHaver's GrammarFinder if available
-          if defined?(TreeHaver::GrammarFinder)
-            TreeHaver::GrammarFinder.new(:jsonc).find_library_path
-          else
-            # Fallback: check environment variable first
-            env_path = ENV["TREE_SITTER_JSONC_PATH"]
-            return env_path if env_path && File.exist?(env_path)
+          return unless defined?(TreeHaver::GrammarFinder)
 
-            # Search common paths
-            [
-              "/usr/lib/libtree-sitter-json.so",
-              "/usr/lib64/libtree-sitter-json.so",
-              "/usr/local/lib/libtree-sitter-json.so",
-              "/opt/homebrew/lib/libtree-sitter-json.dylib",
-              "/usr/local/lib/libtree-sitter-json.dylib",
-            ].find { |path| File.exist?(path) }
-          end
+          TreeHaver::GrammarFinder.new(:jsonc).find_library_path
         end
       end
 
@@ -63,13 +48,15 @@ module Jsonc
       # @param freeze_token [String] Token for freeze block markers
       # @param signature_generator [Proc, nil] Custom signature generator
       # @param parser_path [String, nil] Path to tree-sitter-json parser library
-      def initialize(source, freeze_token: DEFAULT_FREEZE_TOKEN, signature_generator: nil, parser_path: nil)
+      # @param options [Hash] Additional options (forward compatibility - ignored by FileAnalysis)
+      def initialize(source, freeze_token: DEFAULT_FREEZE_TOKEN, signature_generator: nil, parser_path: nil, **options)
         @source = source
         @lines = source.lines.map(&:chomp)
         @freeze_token = freeze_token
         @signature_generator = signature_generator
         @parser_path = parser_path || self.class.find_parser_path
         @errors = []
+        # **options captures any additional parameters (e.g., node_typing) for forward compatibility
 
         # Initialize comment tracking
         @comment_tracker = CommentTracker.new(source)

@@ -2,20 +2,27 @@
 set -e
 
 # Setup script for tree-sitter dependencies (Ubuntu/Debian)
-# Works for both GitHub Actions (with --sudo flag) and devcontainer (without --sudo flag)
+# Works for both GitHub Actions and devcontainer environments
+#
+# Dual-Environment Design:
+# - GitHub Actions: Runs as non-root user, auto-detects need for sudo
+# - Devcontainer: Can run as root (apt-install feature) or non-root (postCreateCommand)
+# - Auto-detection: Checks if running as root (id -u = 0), uses sudo if non-root
+#
 # Options:
-#   --sudo: Use sudo for package installation commands
+#   --sudo: Force use of sudo (optional, auto-detected by default)
 #   --cli:  Install tree-sitter-cli via npm (optional)
 #   --build: Build and install the tree-sitter C runtime from source when distro packages are missing (optional)
-#   --workspace PATH: Workspace root path (defaults to /workspaces/jsonc-merge for GHA compatibility)
+#   --workspace PATH: Workspace root path for informational/debugging purposes only (defaults to /workspaces/jsonc-merge)
 
 SUDO=""
 INSTALL_CLI=false
 BUILD_FROM_SOURCE=false
 WORKSPACE_ROOT="/workspaces/jsonc-merge"
 
-for arg in "$@"; do
-  case $arg in
+# Parse arguments properly using while loop
+while [[ $# -gt 0 ]]; do
+  case $1 in
     --sudo)
       SUDO="sudo"
       shift
@@ -33,14 +40,23 @@ for arg in "$@"; do
       shift 2
       ;;
     --workspace=*)
-      WORKSPACE_ROOT="${arg#*=}"
+      WORKSPACE_ROOT="${1#*=}"
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
       shift
       ;;
   esac
 done
 
+# Auto-detect if we need sudo (running as non-root)
+if [ -z "$SUDO" ] && [ "$(id -u)" -ne 0 ]; then
+  SUDO="sudo"
+fi
+
 echo "Configuration:"
-echo "  Workspace root: $WORKSPACE_ROOT"
+echo "  Workspace root: $WORKSPACE_ROOT (informational only)"
 echo "  Using sudo: $([ -n "$SUDO" ] && echo "yes" || echo "no")"
 echo "  Install CLI: $INSTALL_CLI"
 echo "  Build from source: $BUILD_FROM_SOURCE"

@@ -24,8 +24,6 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Changed
 
-- Migrated from `ruby_tree_sitter` to `tree_haver` for unified cross-platform tree-sitter support
-
 ### Deprecated
 
 ### Removed
