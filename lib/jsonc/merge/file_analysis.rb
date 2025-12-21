@@ -32,7 +32,7 @@ module Jsonc
       class << self
         # Find the parser library path using TreeHaver::GrammarFinder
         #
-        # Note: JSONC uses the tree-sitter-json library (not tree-sitter-jsonc)
+        # Note: JSONC uses the tree-sitter-jsonc grammar (supports JSON with Comments)
         #
         # @return [String, nil] Path to the parser library or nil if not found
         def find_parser_path
@@ -178,35 +178,34 @@ module Jsonc
         end
 
         begin
-          # Determine which language to use (do this BEFORE creating parser)
-          language = if @parser_path
-            # Custom parser path was explicitly provided
-            if File.exist?(@parser_path)
-              # Use the provided path
-              TreeHaver::Language.from_library(@parser_path, symbol: "tree_sitter_jsonc", name: "jsonc")
-            else
-              # Explicit path doesn't exist - this is an error
-              @errors << "Provided parser path does not exist: #{@parser_path}"
-              @ast = nil
-              return
-            end
-          elsif TreeHaver::Language.respond_to?(:json)
-            # Use registered json language (from GrammarFinder)
-            TreeHaver::Language.json
+          # Let TreeHaver handle all backend selection and language loading
+          parser = TreeHaver::Parser.new
+
+          # Get the language - tree_haver handles automatic discovery and backend selection
+          # Note: JSONC uses the tree-sitter-jsonc grammar (which supports JSON with Comments)
+          language = if @parser_path && !@parser_path.empty? && File.exist?(@parser_path)
+            # Explicit parser path provided - use it (for tree-sitter-jsonc)
+            TreeHaver::Language.from_library(@parser_path, symbol: "tree_sitter_jsonc", name: "jsonc")
+          elsif TreeHaver::Language.respond_to?(:jsonc)
+            # Use registered jsonc language (auto-discovered by GrammarFinder)
+            TreeHaver::Language.jsonc
           else
-            # No language available
-            error_msg = if defined?(TreeHaver::GrammarFinder)
-              TreeHaver::GrammarFinder.new(:jsonc).not_found_message
-            else
-              "tree-sitter json/jsonc parser not found. Install tree-sitter-json or set TREE_SITTER_JSONC_PATH."
+            # Try to auto-register via GrammarFinder (looks for tree-sitter-jsonc)
+            if defined?(TreeHaver::GrammarFinder)
+              finder = TreeHaver::GrammarFinder.new(:jsonc)
+              finder.register! if finder.available?
+              TreeHaver::Language.jsonc if TreeHaver::Language.respond_to?(:jsonc)
             end
+          end
+
+          unless language
+            error_msg = "No JSONC parser available. Install tree-sitter-jsonc (via tree_haver) or set TREE_SITTER_JSONC_PATH."
             @errors << error_msg
             @ast = nil
             return
           end
 
-          # Use TreeHaver's unified interface
-          parser = TreeHaver::Parser.new
+          # Parse with tree_haver's unified interface
           parser.language = language
           @ast = parser.parse(@source)
 
