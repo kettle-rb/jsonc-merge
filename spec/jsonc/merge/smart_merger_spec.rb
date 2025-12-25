@@ -53,33 +53,23 @@ RSpec.describe Jsonc::Merge::SmartMerger do
     end
   end
 
-  describe "#merge" do
+  describe "#merge", :tree_sitter_jsonc do
     it "returns a MergeResult" do
       merger = described_class.new(template_json, dest_json)
       result = merger.merge_result
       expect(result).to be_a(Jsonc::Merge::MergeResult)
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "produces a result with lines" do
       merger = described_class.new(template_json, dest_json)
       result = merger.merge_result
-      # Result should have content (may be empty if parser didn't work)
       expect(result).to respond_to(:lines)
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "preserves destination customizations by default" do
       merger = described_class.new(template_json, dest_json)
       result = merger.merge_result
-      # If the merge produced content, check for custom destination values
-      # Otherwise skip (parser may have silently failed)
-      skip "Merge produced no output - parser may not be fully functional" if result.to_json.empty?
       expect(result.to_json).to include("custom")
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     context "with template preference" do
@@ -91,8 +81,6 @@ RSpec.describe Jsonc::Merge::SmartMerger do
         )
         result = merger.merge_result
         expect(result).to be_a(Jsonc::Merge::MergeResult)
-      rescue Jsonc::Merge::ParseError => e
-        skip "tree-sitter parser not available: #{e.message}"
       end
     end
 
@@ -104,32 +92,44 @@ RSpec.describe Jsonc::Merge::SmartMerger do
           add_template_only_nodes: true,
         )
         result = merger.merge_result
-        # If the merge produced content, check for description (template-only)
-        skip "Merge produced no output - parser may not be fully functional" if result.to_json.empty?
         expect(result.to_json).to include("description")
-      rescue Jsonc::Merge::ParseError => e
-        skip "tree-sitter parser not available: #{e.message}"
       end
     end
   end
 
-  describe "error handling" do
-    it "raises ParseError for invalid template" do
-      # First check if parser is available
-      merger = described_class.new(template_json, dest_json)
-      merger.merge
+  describe "error handling", :tree_sitter_jsonc do
+    it "raises TemplateParseError for invalid template" do
+      expect {
+        described_class.new("{ invalid", dest_json)
+      }.to raise_error(Jsonc::Merge::TemplateParseError)
+    end
 
-      # Now test invalid input - it may raise ParseError or silently fail depending on parser
-      invalid_merger = described_class.new("{ invalid", dest_json)
-      expect { invalid_merger.merge }.to raise_error(Jsonc::Merge::ParseError)
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
-    rescue RSpec::Expectations::ExpectationNotMetError
-      # Parser didn't raise - that's also acceptable behavior
+    it "raises DestinationParseError for invalid destination" do
+      expect {
+        described_class.new(template_json, "{ also invalid")
+      }.to raise_error(Jsonc::Merge::DestinationParseError)
+    end
+
+    it "includes error details in TemplateParseError" do
+      expect {
+        described_class.new("{ invalid json }", dest_json)
+      }.to raise_error(Jsonc::Merge::TemplateParseError) do |error|
+        expect(error.message).to include("ERROR")
+        expect(error.content).to eq("{ invalid json }")
+      end
+    end
+
+    it "includes error details in DestinationParseError" do
+      expect {
+        described_class.new(template_json, "not json at all")
+      }.to raise_error(Jsonc::Merge::DestinationParseError) do |error|
+        expect(error.message).to include("ERROR")
+        expect(error.content).to eq("not json at all")
+      end
     end
   end
 
-  describe "JSONC support" do
+  describe "JSONC support", :tree_sitter_jsonc do
     let(:jsonc_template) do
       <<~JSON
         {
@@ -155,8 +155,37 @@ RSpec.describe Jsonc::Merge::SmartMerger do
       merger = described_class.new(jsonc_template, jsonc_dest)
       result = merger.merge_result
       expect(result).to be_a(Jsonc::Merge::MergeResult)
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
+    end
+
+    it "preserves destination values" do
+      merger = described_class.new(jsonc_template, jsonc_dest)
+      result = merger.merge_result
+      json_output = result.to_json
+      expect(json_output).to include("destination")
+      expect(json_output).to include("custom")
+    end
+
+    it "handles single-line comments" do
+      merger = described_class.new(jsonc_template, jsonc_dest)
+      result = merger.merge_result
+      # Comments should be preserved or handled gracefully
+      expect(result.to_json).to be_a(String)
+    end
+
+    it "handles block comments" do
+      merger = described_class.new(jsonc_template, jsonc_dest)
+      result = merger.merge_result
+      expect(result.to_json).to be_a(String)
+    end
+  end
+
+  # Tests that run when tree-sitter-jsonc is NOT available
+  describe "without parser", :not_tree_sitter_jsonc do
+    it "handles missing parser gracefully" do
+      # When parser is not available, FileAnalysis should capture errors
+      merger = described_class.new(template_json, dest_json)
+      # Either raises ParseError or has invalid analysis
+      expect(merger.template_analysis.valid?).to be false
     end
   end
 end

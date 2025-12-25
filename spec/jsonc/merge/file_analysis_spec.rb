@@ -27,69 +27,53 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
   end
 
   describe "#initialize" do
-    it "returns a FileAnalysis instance" do
+    it "returns a FileAnalysis instance", :tree_sitter_jsonc do
       result = described_class.new(simple_json)
       expect(result).to be_a(described_class)
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
-    it "handles invalid JSON gracefully" do
-      # First ensure parser is available
-      described_class.new(simple_json)
-      # Then test invalid JSON - tree-sitter may still parse with errors
+    it "handles invalid JSON gracefully", :tree_sitter_jsonc do
+      # tree-sitter may still parse with errors (error recovery)
       analysis = described_class.new("{ invalid json }")
       expect(analysis.valid?).to be(false).or be(true) # depends on parser behavior
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#nodes" do
+  describe "#nodes", :tree_sitter_jsonc do
     it "returns an array of nodes" do
       analysis = described_class.new(simple_json)
       expect(analysis.nodes).to be_an(Array)
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#lines" do
+  describe "#lines", :tree_sitter_jsonc do
     it "returns the content split into lines" do
       analysis = described_class.new(simple_json)
       expect(analysis.lines).to be_an(Array)
       expect(analysis.lines).to include("{")
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#line_at" do
+  describe "#line_at", :tree_sitter_jsonc do
     it "returns the line at the given 1-based index" do
       analysis = described_class.new(simple_json)
       expect(analysis.line_at(1)).to eq("{")
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "returns nil for out of bounds" do
       analysis = described_class.new(simple_json)
       expect(analysis.line_at(1000)).to be_nil
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#comment_tracker" do
+  describe "#comment_tracker", :tree_sitter_jsonc do
     it "returns a CommentTracker instance" do
       analysis = described_class.new(simple_json)
       expect(analysis.comment_tracker).to be_a(Jsonc::Merge::CommentTracker)
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#generate_signature" do
+  describe "#generate_signature", :tree_sitter_jsonc do
     it "generates a signature for nodes" do
       analysis = described_class.new(complex_json)
       node = analysis.nodes.first
@@ -98,12 +82,10 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
         # Signatures are Arrays like [:pair, "key_name"] or nil
         expect(sig).to be_an(Array).or be_nil
       end
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "freeze block detection" do
+  describe "freeze block detection", :tree_sitter_jsonc do
     let(:json_with_freeze) do
       <<~JSON
         {
@@ -121,113 +103,89 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       freeze_nodes = analysis.nodes.select { |n| n.is_a?(Jsonc::Merge::FreezeNode) }
       # May or may not detect depending on parser support for JSONC
       expect(freeze_nodes).to be_an(Array)
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#valid?" do
+  describe "#valid?", :tree_sitter_jsonc do
     it "returns true for valid JSON" do
       analysis = described_class.new(simple_json)
       expect(analysis.valid?).to be true
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#root_node" do
+  describe "#root_node", :tree_sitter_jsonc do
     it "returns the root node" do
       analysis = described_class.new(simple_json)
       root = analysis.root_node
       expect(root).to be_a(Jsonc::Merge::NodeWrapper)
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#root_object" do
+  describe "#root_object", :tree_sitter_jsonc do
     it "returns the root object" do
       analysis = described_class.new(simple_json)
       obj = analysis.root_object
       expect(obj).to be_a(Jsonc::Merge::NodeWrapper)
       expect(obj.object?).to be true
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "returns nil for array root" do
       analysis = described_class.new('["item1", "item2"]')
       obj = analysis.root_object
       expect(obj).to be_nil
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#root_pairs" do
+  describe "#root_pairs", :tree_sitter_jsonc do
     it "returns pairs from root object" do
       analysis = described_class.new(simple_json)
       pairs = analysis.root_pairs
       expect(pairs).to be_an(Array)
       expect(pairs.size).to eq(2)
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "returns empty array for array root" do
       analysis = described_class.new('["item1"]')
       pairs = analysis.root_pairs
       expect(pairs).to eq([])
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#normalized_line" do
+  describe "#normalized_line", :tree_sitter_jsonc do
     it "returns stripped line content" do
       analysis = described_class.new(simple_json)
       line = analysis.normalized_line(2)
       expect(line).to be_a(String)
       expect(line).not_to start_with(" ")
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "returns nil for out of bounds" do
       analysis = described_class.new(simple_json)
       expect(analysis.normalized_line(0)).to be_nil
       expect(analysis.normalized_line(1000)).to be_nil
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#in_freeze_block?" do
+  describe "#in_freeze_block?", :tree_sitter_jsonc do
     it "returns false when no freeze blocks" do
       analysis = described_class.new(simple_json)
       expect(analysis.in_freeze_block?(1)).to be false
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#freeze_block_at" do
+  describe "#freeze_block_at", :tree_sitter_jsonc do
     it "returns nil when no freeze block at line" do
       analysis = described_class.new(simple_json)
       expect(analysis.freeze_block_at(1)).to be_nil
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#fallthrough_node?" do
+  describe "#fallthrough_node?", :tree_sitter_jsonc do
     it "returns true for NodeWrapper instances" do
       analysis = described_class.new(simple_json)
       node = analysis.root_object
       skip "No root object" unless node
       expect(analysis.fallthrough_node?(node)).to be true
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "returns false for other types" do
@@ -235,12 +193,10 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       expect(analysis.fallthrough_node?("string")).to be false
       expect(analysis.fallthrough_node?(123)).to be false
       expect(analysis.fallthrough_node?(nil)).to be false
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "custom signature generator" do
+  describe "custom signature generator", :tree_sitter_jsonc do
     it "uses custom signature generator when provided" do
       custom_gen = ->(node) { [:custom, node.class.name] }
       analysis = described_class.new(simple_json, signature_generator: custom_gen)
@@ -249,8 +205,6 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
         sig = analysis.generate_signature(node)
         expect(sig.first).to eq(:custom)
       end
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "falls through to default when custom returns a node" do
@@ -261,8 +215,6 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
         sig = analysis.generate_signature(node)
         expect(sig).to be_an(Array)
       end
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
@@ -272,15 +224,36 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       expect(described_class).to respond_to(:find_parser_path)
     end
 
-    it "handles missing parser gracefully" do
-      # When parser is not found, it should set errors
-      analysis = described_class.new(simple_json, parser_path: "/nonexistent/path")
+    it "handles nonexistent parser path gracefully" do
+      # When an explicit parser_path is provided that doesn't exist,
+      # TreeHaver should raise NotAvailable (Principle of Least Surprise)
+      analysis = described_class.new(simple_json, parser_path: "/nonexistent/path/to/parser.so")
+      expect(analysis.valid?).to be false
+      expect(analysis.errors).not_to be_empty
+      expect(analysis.errors.first).to include("nonexistent")
+    end
+
+    it "handles TreeHaver::NotAvailable gracefully" do
+      # When TreeHaver raises NotAvailable, errors should be populated
+      allow(TreeHaver).to receive(:parser_for).and_raise(TreeHaver::NotAvailable.new("No parser available"))
+
+      analysis = described_class.new(simple_json)
+      expect(analysis.valid?).to be false
+      expect(analysis.errors).not_to be_empty
+      expect(analysis.errors.first).to include("No parser available")
+    end
+
+    it "handles other parse errors gracefully" do
+      # When TreeHaver raises a StandardError, errors should be populated
+      allow(TreeHaver).to receive(:parser_for).and_raise(StandardError.new("Unexpected error"))
+
+      analysis = described_class.new(simple_json)
       expect(analysis.valid?).to be false
       expect(analysis.errors).not_to be_empty
     end
   end
 
-  describe "freeze blocks with block comments" do
+  describe "freeze blocks with block comments", :tree_sitter_jsonc do
     let(:json_with_block_freeze) do
       <<~JSON
         {
@@ -296,12 +269,10 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     it "detects block comment freeze markers" do
       analysis = described_class.new(json_with_block_freeze)
       expect(analysis.nodes).to be_an(Array)
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "with freeze blocks" do
+  describe "with freeze blocks", :tree_sitter_jsonc do
     let(:json_with_complete_freeze) do
       <<~JSONC
         {
@@ -319,8 +290,6 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       # Check for freeze blocks
       freeze_blocks = analysis.nodes.select { |n| n.is_a?(Jsonc::Merge::FreezeNode) }
       expect(freeze_blocks).to be_an(Array)
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "marks lines as in freeze block" do
@@ -331,8 +300,6 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
         fb = freeze_blocks.first
         expect(analysis.in_freeze_block?(fb.start_line)).to be true
       end
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "returns freeze block at line" do
@@ -343,12 +310,10 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
         found = analysis.freeze_block_at(fb.start_line)
         expect(found).to eq(fb)
       end
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "#fallthrough_node? with FreezeNode" do
+  describe "#fallthrough_node? with FreezeNode", :tree_sitter_jsonc do
     it "returns true for FreezeNode instances" do
       json_with_freeze = <<~JSONC
         {
@@ -362,34 +327,98 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       if freeze_nodes.any?
         expect(analysis.fallthrough_node?(freeze_nodes.first)).to be true
       end
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "edge cases" do
+  describe "edge cases", :tree_sitter_jsonc do
     it "handles empty JSON object" do
       analysis = described_class.new("{}")
       expect(analysis.valid?).to be true
       expect(analysis.root_object).not_to be_nil
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "handles empty JSON array" do
       analysis = described_class.new("[]")
       expect(analysis.valid?).to be true
       expect(analysis.root_object).to be_nil
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     it "handles deeply nested JSON" do
       deep_json = '{"a": {"b": {"c": {"d": "value"}}}}'
       analysis = described_class.new(deep_json)
       expect(analysis.valid?).to be true
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
+    end
+  end
+
+  describe "#root_object_open_line", :tree_sitter_jsonc do
+    it "returns the opening brace line for objects" do
+      json = "{\n  \"key\": \"value\"\n}"
+      analysis = described_class.new(json)
+      expect(analysis.root_object_open_line).to eq("{")
+    end
+
+    it "returns nil for array root" do
+      json = '["item"]'
+      analysis = described_class.new(json)
+      expect(analysis.root_object_open_line).to be_nil
+    end
+
+    it "returns nil when root_object has no start_line" do
+      json = "{}"
+      analysis = described_class.new(json)
+      obj = analysis.root_object
+      if obj && obj.start_line
+        expect(analysis.root_object_open_line).not_to be_nil
+      end
+    end
+  end
+
+  describe "#root_object_close_line", :tree_sitter_jsonc do
+    it "returns the closing brace line for objects" do
+      json = "{\n  \"key\": \"value\"\n}"
+      analysis = described_class.new(json)
+      expect(analysis.root_object_close_line).to eq("}")
+    end
+
+    it "returns nil for array root" do
+      json = '["item"]'
+      analysis = described_class.new(json)
+      expect(analysis.root_object_close_line).to be_nil
+    end
+  end
+
+  describe "compute_node_signature", :tree_sitter_jsonc do
+    it "returns signature for NodeWrapper" do
+      json = '{"key": "value"}'
+      analysis = described_class.new(json)
+      node = analysis.nodes.find { |n| n.is_a?(Jsonc::Merge::NodeWrapper) }
+      skip "No NodeWrapper found" unless node
+      sig = analysis.send(:compute_node_signature, node)
+      expect(sig).to be_an(Array).or be_nil
+    end
+
+    it "returns signature for FreezeNode" do
+      json = <<~JSONC
+        {
+          // json-merge:freeze
+          "frozen": true
+          // json-merge:unfreeze
+        }
+      JSONC
+      analysis = described_class.new(json)
+      freeze_node = analysis.nodes.find { |n| n.is_a?(Jsonc::Merge::FreezeNode) }
+      if freeze_node
+        sig = analysis.send(:compute_node_signature, freeze_node)
+        expect(sig).to be_an(Array)
+      end
+    end
+
+    it "returns nil for unknown node types" do
+      json = '{"key": "value"}'
+      analysis = described_class.new(json)
+      sig = analysis.send(:compute_node_signature, "not a node")
+      expect(sig).to be_nil
     end
   end
 end
+

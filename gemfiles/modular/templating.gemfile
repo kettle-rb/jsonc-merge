@@ -13,7 +13,7 @@ if ENV.fetch("KETTLE_RB_DEV", "false").casecmp?("true")
   gem "bash-merge", path: "../../../bash-merge"         # dotenv code blocks
   gem "dotenv-merge", path: "../../../dotenv-merge"     # dotenv code blocks
   gem "json-merge", path: "../../../json-merge"         # JSON code blocks
-  gem "jsonc-merge", path: "../../../jsonc-merge"       # JSONC code blocks
+  # gem "jsonc-merge", path: "../../../jsonc-merge"       # JSONC code blocks
   gem "markdown-merge", path: "../../../markdown-merge" # generic markdown tools
   gem "markly-merge", path: "../../../markly-merge"     # markly markdown merging
   gem "prism-merge", path: "../../../prism-merge"       # Ruby code blocks
@@ -24,7 +24,7 @@ else
   gem "bash-merge"      # dotenv code blocks
   gem "dotenv-merge"    # dotenv code blocks
   gem "json-merge"      # JSON code blocks
-  gem "jsonc-merge"     # JSONC code blocks
+  # gem "jsonc-merge"     # JSONC code blocks
   gem "markdown-merge"  # generic markdown tools
   gem "markly-merge"    # markly markdown merging
   gem "prism-merge"     # Ruby code blocks

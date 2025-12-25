@@ -9,13 +9,13 @@
 
 # FFI Backend - works on MRI, JRuby, and TruffleRuby
 gem "ffi", require: false # DO NOT LOAD, because conflicts with MRI
-gem "toml-rb"
-gem "citrus"
+# gem "toml-rb"
+# gem "citrus"
 
 # Set KETTLE_RB_DEV=true for local development
 if ENV.fetch("KETTLE_RB_DEV", "false").casecmp?("true")
-  gem "tree_haver",
-    path: "../../../tree_haver"
+  gem "tree_haver", path: "../../../tree_haver"
+  gem "ast-merge", path: "../../../../"
 end
 
 platform :mri do
