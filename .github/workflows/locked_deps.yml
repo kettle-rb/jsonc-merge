@@ -32,6 +32,8 @@ env:
   K_SOUP_COV_DO: true
   K_SOUP_COV_MULTI_FORMATTERS: true
   K_SOUP_COV_COMMAND_NAME: "Test Coverage"
+  # Point to the installed jsonc grammar (setup script installs to /usr/local/lib)
+  TREE_SITTER_JSONC_PATH: /usr/local/lib/libtree-sitter-jsonc.so
 
 on:
   push:
@@ -72,6 +74,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Install tree-sitter dependencies (Ubuntu)
+        run: .github/scripts/ubuntu/setup-tree-sitter.sh --sudo --grammars=jsonc
 
       - name: Setup Ruby & RubyGems
         uses: ruby/setup-ruby@v1
