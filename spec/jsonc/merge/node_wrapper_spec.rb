@@ -68,7 +68,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "type predicate methods" do
+  describe "type predicate methods", :jsonc_grammar do
     describe "#object?" do
       it "returns true for object nodes" do
         json = '{"key": "value"}'
@@ -181,7 +181,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#key_name" do
+  describe "#key_name", :jsonc_grammar do
     it "returns key name for pair nodes" do
       json = '{"myKey": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -201,7 +201,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#value_node" do
+  describe "#value_node", :jsonc_grammar do
     it "returns value wrapper for pair nodes" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -222,7 +222,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#pairs" do
+  describe "#pairs", :jsonc_grammar do
     it "returns pairs for object nodes" do
       json = '{"a": 1, "b": 2}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -244,7 +244,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#elements" do
+  describe "#elements", :jsonc_grammar do
     it "returns elements for array nodes" do
       json = '["a", "b", "c"]'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -265,7 +265,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#signature" do
+  describe "#signature", :jsonc_grammar do
     it "generates signature for pair nodes" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -278,7 +278,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#freeze_node?" do
+  describe "#freeze_node?", :jsonc_grammar do
     it "returns false for NodeWrapper" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -288,7 +288,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#type?" do
+  describe "#type?", :jsonc_grammar do
     it "returns true when type matches" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -307,7 +307,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#comment?" do
+  describe "#comment?", :jsonc_grammar do
     it "returns false for non-comment nodes" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -317,7 +317,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#content" do
+  describe "#content", :jsonc_grammar do
     it "returns node content from source lines" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -337,7 +337,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#node_text" do
+  describe "#node_text", :jsonc_grammar do
     it "extracts text from tree-sitter node" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -347,7 +347,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#find_child_by_type" do
+  describe "#find_child_by_type", :jsonc_grammar do
     it "finds child node by type" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -367,7 +367,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#inspect" do
+  describe "#inspect", :jsonc_grammar do
     it "returns a debug string" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -378,7 +378,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "signature generation" do
+  describe "signature generation", :jsonc_grammar do
     describe "for document type" do
       it "generates signature for document root" do
         json = '{"key": "value"}'
@@ -541,7 +541,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "nested structures" do
+  describe "nested structures", :jsonc_grammar do
     it "handles nested objects" do
       json = '{"outer": {"inner": "value"}}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -580,7 +580,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "edge cases" do
+  describe "edge cases", :jsonc_grammar do
     it "handles empty object" do
       json = "{}"
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -632,7 +632,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "method edge cases" do
+  describe "method edge cases", :jsonc_grammar do
     describe "#find_child_by_field" do
       it "returns nil when node does not respond to child_by_field_name" do
         json = '{"key": "value"}'
@@ -703,7 +703,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "array element edge cases" do
+  describe "array element edge cases", :jsonc_grammar do
     it "skips punctuation in elements" do
       json = '["a", "b"]'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -729,7 +729,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "object pairs edge cases" do
+  describe "object pairs edge cases", :jsonc_grammar do
     it "skips non-pair children" do
       json = '{"a": 1, "b": 2}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -741,7 +741,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "signature extraction" do
+  describe "signature extraction", :jsonc_grammar do
     describe "#extract_object_keys" do
       it "extracts keys from object" do
         json = '{"z": 1, "a": 2, "m": 3}'
