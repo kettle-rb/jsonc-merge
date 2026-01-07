@@ -28,7 +28,7 @@ RSpec.describe Jsonc::Merge::SmartMerger do
     JSON
   end
 
-  describe "#initialize" do
+  describe "#initialize", :jsonc_grammar do
     it "creates a merger with content" do
       merger = described_class.new(template_json, dest_json)
       expect(merger.template_content).to eq(template_json)

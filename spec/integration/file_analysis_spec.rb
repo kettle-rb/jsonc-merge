@@ -2,7 +2,7 @@
 
 # Integration tests for FileAnalysis with real JSON parsing scenarios
 
-RSpec.describe "Jsonc::Merge::FileAnalysis Integration" do
+RSpec.describe "Jsonc::Merge::FileAnalysis Integration", :jsonc_grammar do
   describe "with JSONC comments" do
     let(:jsonc_content) do
       <<~JSON

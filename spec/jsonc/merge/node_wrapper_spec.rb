@@ -4,7 +4,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
   # NodeWrapper requires a tree-sitter node, which requires parser availability
   # These tests use the actual parser when available
 
-  describe "when tree-sitter parser is available" do
+  describe "when tree-sitter parser is available", :jsonc_grammar do
     let(:json_content) { '{"key": "value"}' }
 
     it "creates wrapper instances from FileAnalysis" do
@@ -12,19 +12,15 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
       nodes = analysis.nodes
       expect(nodes).to be_an(Array)
       expect(nodes).to all(be_a(described_class).or(be_a(Jsonc::Merge::FreezeNode)))
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
   end
 
-  describe "instance methods" do
+  describe "instance methods", :jsonc_grammar do
     let(:json_content) { '{"name": "test", "version": "1.0.0"}' }
 
     before do
       @analysis = Jsonc::Merge::FileAnalysis.new(json_content)
       @wrapper = @analysis.nodes.find { |n| n.is_a?(described_class) }
-    rescue Jsonc::Merge::ParseError => e
-      skip "tree-sitter parser not available: #{e.message}"
     end
 
     describe "#type" do

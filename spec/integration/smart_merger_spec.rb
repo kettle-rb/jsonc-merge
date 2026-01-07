@@ -4,7 +4,7 @@
 # Note: tree-sitter JSON parser does not support JSONC comments, so tests
 # that need valid parsing use strict JSON.
 
-RSpec.describe "Jsonc::Merge::SmartMerger Integration" do
+RSpec.describe "Jsonc::Merge::SmartMerger Integration", :jsonc_grammar do
   describe "basic merge" do
     let(:template_json) do
       <<~JSON
