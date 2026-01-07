@@ -21,21 +21,8 @@ Please file a bug if you notice a violation of semantic versioning.
 ### Added
 
 - Initial release
-- `spec/support/dependency_tags.rb` for conditional test execution based on backend availability
-  - `:tree_sitter_jsonc` RSpec tag for tests requiring tree-sitter JSONC grammar
-  - `:jruby` and `:not_jruby` tags for Ruby engine-specific tests
 
 ### Changed
-
-- **SmartMerger**: Added `**options` for forward compatibility
-  - Accepts additional options that may be added to base class in future
-  - Passes all options through to `SmartMergerBase`
-- **ConflictResolver**: Added `**options` for forward compatibility
-  - Now passes `match_refiner` to base class instead of storing locally
-- **MergeResult**: Added `**options` for forward compatibility
-- **FileAnalysis**: Simplified to use `TreeHaver.parser_for` API
-  - Removed 30+ lines of grammar loading boilerplate
-  - Now relies on tree_haver for auto-discovery and fallback
 
 ### Deprecated
 

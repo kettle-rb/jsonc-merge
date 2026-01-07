@@ -18,23 +18,25 @@ module Jsonc
       self.env_var_name = "JSONC_MERGE_DEBUG"
       self.log_prefix = "[Jsonc::Merge]"
 
-      # Override log_node to handle Json-specific node types.
-      #
-      # @param node [Object] Node to log information about
-      # @param label [String] Label for the node
-      def self.log_node(node, label: "Node")
-        return unless enabled?
+      class << self
+        # Override log_node to handle Json-specific node types.
+        #
+        # @param node [Object] Node to log information about
+        # @param label [String] Label for the node
+        def log_node(node, label: "Node")
+          return unless enabled?
 
-        info = case node
-        when Jsonc::Merge::FreezeNode
-          {type: "FreezeNode", lines: "#{node.start_line}..#{node.end_line}"}
-        when Jsonc::Merge::NodeWrapper
-          {type: node.type.to_s, lines: "#{node.start_line}..#{node.end_line}"}
-        else
-          extract_node_info(node)
+          info = case node
+          when Jsonc::Merge::FreezeNode
+            {type: "FreezeNode", lines: "#{node.start_line}..#{node.end_line}"}
+          when Jsonc::Merge::NodeWrapper
+            {type: node.type.to_s, lines: "#{node.start_line}..#{node.end_line}"}
+          else
+            extract_node_info(node)
+          end
+
+          debug(label, info)
         end
-
-        debug(label, info)
       end
     end
   end

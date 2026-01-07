@@ -691,7 +691,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
         pair = root.pairs.first
         skip "No pair" unless pair
         # Value should be present
-        expect(pair.value_node).to be_a(Jsonc::Merge::NodeWrapper)
+        expect(pair.value_node).to be_a(described_class)
       end
     end
 
@@ -761,7 +761,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
   end
 
   describe "#mergeable_children", :tree_sitter_jsonc do
-    context "for object nodes" do
+    context "with object nodes" do
       it "returns pairs" do
         json = '{"a": 1, "b": 2}'
         analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -774,7 +774,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
       end
     end
 
-    context "for array nodes" do
+    context "with array nodes" do
       it "returns elements" do
         json = '["a", "b"]'
         analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -789,7 +789,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
       end
     end
 
-    context "for leaf nodes (string, number, etc.)" do
+    context "with leaf nodes (string, number, etc.)" do
       it "returns empty array for string values" do
         json = '{"key": "value"}'
         analysis = Jsonc::Merge::FileAnalysis.new(json)

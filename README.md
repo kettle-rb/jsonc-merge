@@ -46,7 +46,7 @@
 
 `if ci_badges.map(&:color).detect { it != "green"}` ☝️ [let me know][🖼️galtzo-discord], as I may have missed the [discord notification][🖼️galtzo-discord].
 
----
+-----
 
 `if ci_badges.map(&:color).all? { it == "green"}` 👇️ send money so I can do more of this. FLOSS maintenance is now my full-time job.
 
@@ -373,6 +373,53 @@ If the gem can't find the parser, check for versioned files and either:
 - Create a symlink: `sudo ln -s /usr/lib64/libtree-sitter-json.so.14 /usr/lib64/libtree-sitter-json.so`
 
 Add this to your shell profile (`.bashrc`, `.zshrc`, etc.) for persistence.
+
+### 💎 Ruby Interface Gems
+
+In addition to the tree-sitter parser library, you need a Ruby gem that provides
+bindings to tree-sitter. Alternatively, on JRuby the jtreesitter maven package is sufficient. Choose **one** of the following based on your Ruby implementation:
+
+| package                                                                                | Ruby Support            | Description                                              |
+|----------------------------------------------------------------------------------------|-------------------------|----------------------------------------------------------|
+| [ruby\_tree\_sitter](https://github.com/Faveod/ruby_tree_sitter)                       | MRI only                | C extension bindings (recommended for MRI)               |
+| [tree\_stump](https://github.com/nickstenning/tree_stump)                              | MRI only                | Rust-based bindings via rbs_sys and magnus               |
+| [ffi](https://github.com/ffi/ffi)                                                      | MRI, JRuby, TruffleRuby | Generic FFI bindings (used by tree\_haver's FFI backend) |
+| [jtreesitter](https://central.sonatype.com/artifact/io.github.tree-sitter/jtreesitter) | JRuby                   | used by tree\_haver's Java backend)                      |
+
+[ruby_tree_sitter]: https://github.com/Faveod/ruby_tree_sitter
+[tree_stump]: https://github.com/nickstenning/tree_stump
+[ffi]: https://github.com/ffi/ffi
+[jtreesitter]: https://central.sonatype.com/artifact/io.github.tree-sitter/jtreesitter
+
+#### For MRI Ruby (Recommended)
+
+``` console
+gem install ruby_tree_sitter
+```
+
+Or add to your Gemfile:
+
+``` ruby
+gem "ruby_tree_sitter", "~> 2.0", require: "tree_sitter"
+```
+
+#### For JRuby or TruffleRuby
+
+``` console
+gem install ffi
+```
+
+Or add to your Gemfile:
+
+``` ruby
+gem "ffi"
+```
+
+The `tree_haver` gem (a dependency of jsonc-merge) will automatically detect and use
+the appropriate backend based on which gems are available.
+
+**Note:** The `ruby_tree_sitter` gem only compiles on MRI Ruby. For JRuby or TruffleRuby,
+you must use the FFI backend.
 
 ## ⚙️ Configuration
 

@@ -1,21 +1,14 @@
 # frozen_string_literal: true
 
-# External gems
-# TreeHaver provides a unified cross-Ruby interface to tree-sitter
-require "tree_haver"
-
-# Register tree-sitter jsonc grammar
-jsonc_finder = TreeHaver::GrammarFinder.new(:jsonc)
-jsonc_available = jsonc_finder.available?
-jsonc_finder.register! if jsonc_available
-
-# Ensure grammar is available
-unless jsonc_available
-  warn "WARNING: JSONC grammar not available. #{jsonc_finder.not_found_message}"
-end
-
-require "version_gem"
+# std libs
 require "set"
+
+# External gems
+# TreeHaver provides a unified cross-Ruby interface to tree-sitter.
+# It handles grammar discovery and backend selection automatically
+# via parser_for(:jsonc). No manual registration needed.
+require "tree_haver"
+require "version_gem"
 
 # Shared merge infrastructure
 require "ast/merge"

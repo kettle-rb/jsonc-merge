@@ -367,7 +367,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
       json = "{}"
       analysis = described_class.new(json)
       obj = analysis.root_object
-      if obj && obj.start_line
+      if obj&.start_line
         expect(analysis.root_object_open_line).not_to be_nil
       end
     end
@@ -421,4 +421,3 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 end
-

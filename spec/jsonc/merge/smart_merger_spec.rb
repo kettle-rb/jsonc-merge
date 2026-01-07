@@ -169,18 +169,23 @@ RSpec.describe Jsonc::Merge::SmartMerger do
       merger = described_class.new(jsonc_template, jsonc_dest)
       result = merger.merge_result
       # Comments should be preserved or handled gracefully
-      expect(result.to_json).to be_a(String)
+      json_output = result.to_json
+      expect(json_output).to be_a(String)
+      expect(json_output.length).to be > 0
     end
 
     it "handles block comments" do
       merger = described_class.new(jsonc_template, jsonc_dest)
       result = merger.merge_result
-      expect(result.to_json).to be_a(String)
+      json_output = result.to_json
+      expect(json_output).to be_a(String)
+      # Block comments in JSONC should not break parsing
+      expect(json_output).to include("name")
     end
   end
 
   # Tests that run when tree-sitter-jsonc is NOT available
-  describe "without parser", :not_tree_sitter_jsonc do
+  describe "without parser", :not_jsonc_grammar do
     it "handles missing parser gracefully" do
       # When parser is not available, FileAnalysis should capture errors
       merger = described_class.new(template_json, dest_json)
