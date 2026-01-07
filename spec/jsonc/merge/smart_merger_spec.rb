@@ -186,11 +186,11 @@ RSpec.describe Jsonc::Merge::SmartMerger do
 
   # Tests that run when tree-sitter-jsonc is NOT available
   describe "without parser", :not_jsonc_grammar do
-    it "handles missing parser gracefully" do
-      # When parser is not available, FileAnalysis should capture errors
-      merger = described_class.new(template_json, dest_json)
-      # Either raises ParseError or has invalid analysis
-      expect(merger.template_analysis.valid?).to be false
+    it "raises TemplateParseError when parser is not available" do
+      # When parser is not available, SmartMerger raises TemplateParseError during initialization
+      expect {
+        described_class.new(template_json, dest_json)
+      }.to raise_error(Jsonc::Merge::TemplateParseError, /No native tree-sitter backend is available/)
     end
   end
 end
