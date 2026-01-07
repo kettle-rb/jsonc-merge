@@ -223,7 +223,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
       end
     end
 
-    context "with template preference merging leaf nodes", :tree_sitter_jsonc do
+    context "with template preference merging leaf nodes", :jsonc_grammar do
       let(:template_with_different_values) do
         <<~JSON
           {
@@ -263,7 +263,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
       end
     end
 
-    context "with container nodes (nested objects)", :tree_sitter_jsonc do
+    context "with container nodes (nested objects)", :jsonc_grammar do
       let(:template_with_nested) do
         <<~JSON
           {
@@ -328,7 +328,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
       end
     end
 
-    context "with mismatched container types", :tree_sitter_jsonc do
+    context "with mismatched container types", :jsonc_grammar do
       let(:template_with_array) do
         <<~JSON
           {
@@ -362,7 +362,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
       end
     end
 
-    context "with match_refiner", :tree_sitter_jsonc do
+    context "with match_refiner", :jsonc_grammar do
       let(:template_with_key) do
         <<~JSON
           {
@@ -419,7 +419,7 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
       end
     end
 
-    context "with empty match_refiner result", :tree_sitter_jsonc do
+    context "with empty match_refiner result", :jsonc_grammar do
       it "handles empty refined matches" do
         template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
         dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)

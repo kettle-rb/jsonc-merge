@@ -760,7 +760,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#mergeable_children", :tree_sitter_jsonc do
+  describe "#mergeable_children", :jsonc_grammar do
     context "with object nodes" do
       it "returns pairs" do
         json = '{"a": 1, "b": 2}'
@@ -816,7 +816,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#container?", :tree_sitter_jsonc do
+  describe "#container?", :jsonc_grammar do
     it "returns true for objects" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -848,7 +848,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#leaf?", :tree_sitter_jsonc do
+  describe "#leaf?", :jsonc_grammar do
     it "returns false for objects" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -870,7 +870,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#opening_line", :tree_sitter_jsonc do
+  describe "#opening_line", :jsonc_grammar do
     it "returns the opening line for objects" do
       json = "{\n  \"key\": \"value\"\n}"
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -902,7 +902,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#closing_line", :tree_sitter_jsonc do
+  describe "#closing_line", :jsonc_grammar do
     it "returns the closing line for objects" do
       json = "{\n  \"key\": \"value\"\n}"
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -934,7 +934,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#opening_bracket", :tree_sitter_jsonc do
+  describe "#opening_bracket", :jsonc_grammar do
     it "returns { for objects" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -966,7 +966,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "#closing_bracket", :tree_sitter_jsonc do
+  describe "#closing_bracket", :jsonc_grammar do
     it "returns } for objects" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
@@ -998,7 +998,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     end
   end
 
-  describe "signature generation for various types", :tree_sitter_jsonc do
+  describe "signature generation for various types", :jsonc_grammar do
     it "generates signature for boolean true" do
       json = '{"enabled": true}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)

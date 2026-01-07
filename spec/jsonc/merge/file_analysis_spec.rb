@@ -27,26 +27,26 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
   end
 
   describe "#initialize" do
-    it "returns a FileAnalysis instance", :tree_sitter_jsonc do
+    it "returns a FileAnalysis instance", :jsonc_grammar do
       result = described_class.new(simple_json)
       expect(result).to be_a(described_class)
     end
 
-    it "handles invalid JSON gracefully", :tree_sitter_jsonc do
+    it "handles invalid JSON gracefully", :jsonc_grammar do
       # tree-sitter may still parse with errors (error recovery)
       analysis = described_class.new("{ invalid json }")
       expect(analysis.valid?).to be(false).or be(true) # depends on parser behavior
     end
   end
 
-  describe "#nodes", :tree_sitter_jsonc do
+  describe "#nodes", :jsonc_grammar do
     it "returns an array of nodes" do
       analysis = described_class.new(simple_json)
       expect(analysis.nodes).to be_an(Array)
     end
   end
 
-  describe "#lines", :tree_sitter_jsonc do
+  describe "#lines", :jsonc_grammar do
     it "returns the content split into lines" do
       analysis = described_class.new(simple_json)
       expect(analysis.lines).to be_an(Array)
@@ -54,7 +54,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "#line_at", :tree_sitter_jsonc do
+  describe "#line_at", :jsonc_grammar do
     it "returns the line at the given 1-based index" do
       analysis = described_class.new(simple_json)
       expect(analysis.line_at(1)).to eq("{")
@@ -66,14 +66,14 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "#comment_tracker", :tree_sitter_jsonc do
+  describe "#comment_tracker", :jsonc_grammar do
     it "returns a CommentTracker instance" do
       analysis = described_class.new(simple_json)
       expect(analysis.comment_tracker).to be_a(Jsonc::Merge::CommentTracker)
     end
   end
 
-  describe "#generate_signature", :tree_sitter_jsonc do
+  describe "#generate_signature", :jsonc_grammar do
     it "generates a signature for nodes" do
       analysis = described_class.new(complex_json)
       node = analysis.nodes.first
@@ -85,7 +85,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "freeze block detection", :tree_sitter_jsonc do
+  describe "freeze block detection", :jsonc_grammar do
     let(:json_with_freeze) do
       <<~JSON
         {
@@ -106,14 +106,14 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "#valid?", :tree_sitter_jsonc do
+  describe "#valid?", :jsonc_grammar do
     it "returns true for valid JSON" do
       analysis = described_class.new(simple_json)
       expect(analysis.valid?).to be true
     end
   end
 
-  describe "#root_node", :tree_sitter_jsonc do
+  describe "#root_node", :jsonc_grammar do
     it "returns the root node" do
       analysis = described_class.new(simple_json)
       root = analysis.root_node
@@ -121,7 +121,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "#root_object", :tree_sitter_jsonc do
+  describe "#root_object", :jsonc_grammar do
     it "returns the root object" do
       analysis = described_class.new(simple_json)
       obj = analysis.root_object
@@ -136,7 +136,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "#root_pairs", :tree_sitter_jsonc do
+  describe "#root_pairs", :jsonc_grammar do
     it "returns pairs from root object" do
       analysis = described_class.new(simple_json)
       pairs = analysis.root_pairs
@@ -151,7 +151,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "#normalized_line", :tree_sitter_jsonc do
+  describe "#normalized_line", :jsonc_grammar do
     it "returns stripped line content" do
       analysis = described_class.new(simple_json)
       line = analysis.normalized_line(2)
@@ -166,21 +166,21 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "#in_freeze_block?", :tree_sitter_jsonc do
+  describe "#in_freeze_block?", :jsonc_grammar do
     it "returns false when no freeze blocks" do
       analysis = described_class.new(simple_json)
       expect(analysis.in_freeze_block?(1)).to be false
     end
   end
 
-  describe "#freeze_block_at", :tree_sitter_jsonc do
+  describe "#freeze_block_at", :jsonc_grammar do
     it "returns nil when no freeze block at line" do
       analysis = described_class.new(simple_json)
       expect(analysis.freeze_block_at(1)).to be_nil
     end
   end
 
-  describe "#fallthrough_node?", :tree_sitter_jsonc do
+  describe "#fallthrough_node?", :jsonc_grammar do
     it "returns true for NodeWrapper instances" do
       analysis = described_class.new(simple_json)
       node = analysis.root_object
@@ -196,7 +196,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "custom signature generator", :tree_sitter_jsonc do
+  describe "custom signature generator", :jsonc_grammar do
     it "uses custom signature generator when provided" do
       custom_gen = ->(node) { [:custom, node.class.name] }
       analysis = described_class.new(simple_json, signature_generator: custom_gen)
@@ -253,7 +253,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "freeze blocks with block comments", :tree_sitter_jsonc do
+  describe "freeze blocks with block comments", :jsonc_grammar do
     let(:json_with_block_freeze) do
       <<~JSON
         {
@@ -272,7 +272,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "with freeze blocks", :tree_sitter_jsonc do
+  describe "with freeze blocks", :jsonc_grammar do
     let(:json_with_complete_freeze) do
       <<~JSONC
         {
@@ -313,7 +313,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "#fallthrough_node? with FreezeNode", :tree_sitter_jsonc do
+  describe "#fallthrough_node? with FreezeNode", :jsonc_grammar do
     it "returns true for FreezeNode instances" do
       json_with_freeze = <<~JSONC
         {
@@ -330,7 +330,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "edge cases", :tree_sitter_jsonc do
+  describe "edge cases", :jsonc_grammar do
     it "handles empty JSON object" do
       analysis = described_class.new("{}")
       expect(analysis.valid?).to be true
@@ -350,7 +350,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "#root_object_open_line", :tree_sitter_jsonc do
+  describe "#root_object_open_line", :jsonc_grammar do
     it "returns the opening brace line for objects" do
       json = "{\n  \"key\": \"value\"\n}"
       analysis = described_class.new(json)
@@ -373,7 +373,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "#root_object_close_line", :tree_sitter_jsonc do
+  describe "#root_object_close_line", :jsonc_grammar do
     it "returns the closing brace line for objects" do
       json = "{\n  \"key\": \"value\"\n}"
       analysis = described_class.new(json)
@@ -387,7 +387,7 @@ RSpec.describe Jsonc::Merge::FileAnalysis do
     end
   end
 
-  describe "compute_node_signature", :tree_sitter_jsonc do
+  describe "compute_node_signature", :jsonc_grammar do
     it "returns signature for NodeWrapper" do
       json = '{"key": "value"}'
       analysis = described_class.new(json)

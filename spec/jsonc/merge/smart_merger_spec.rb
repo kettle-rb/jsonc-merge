@@ -53,7 +53,7 @@ RSpec.describe Jsonc::Merge::SmartMerger do
     end
   end
 
-  describe "#merge", :tree_sitter_jsonc do
+  describe "#merge", :jsonc_grammar do
     it "returns a MergeResult" do
       merger = described_class.new(template_json, dest_json)
       result = merger.merge_result
@@ -97,7 +97,7 @@ RSpec.describe Jsonc::Merge::SmartMerger do
     end
   end
 
-  describe "error handling", :tree_sitter_jsonc do
+  describe "error handling", :jsonc_grammar do
     it "raises TemplateParseError for invalid template" do
       expect {
         described_class.new("{ invalid", dest_json)
@@ -129,7 +129,7 @@ RSpec.describe Jsonc::Merge::SmartMerger do
     end
   end
 
-  describe "JSONC support", :tree_sitter_jsonc do
+  describe "JSONC support", :jsonc_grammar do
     let(:jsonc_template) do
       <<~JSON
         {
