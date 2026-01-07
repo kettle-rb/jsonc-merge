@@ -29,6 +29,9 @@ require "jsonc/merge"
 # NOTE: Loaded after jsonc/merge so TreeHaver is available for dependency checks
 Dir[File.join(__dir__, "support", "**", "*.rb")].each { |f| require f }
 
+# Load shared examples
+Dir[File.join(__dir__, "support", "shared_examples", "**", "*.rb")].sort.each { |f| require f }
+
 RSpec.configure do |config|
   config.before do
     # Speed up polling loops

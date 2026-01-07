@@ -31,3 +31,19 @@ RSpec/DescribeClass:
 
 RSpec/MultipleMemoizedHelpers:
   Enabled: false
+
+RSpec/SpecFilePathSuffix:
+  Exclude:
+    - 'spec/README.md'
+
+RSpec/NoExpectationExample:
+  Exclude:
+    - 'spec/README.md'
+
+RSpec/MultipleDescribes:
+  Exclude:
+    - 'spec/README.md'
+
+RSpec/RepeatedExampleGroupDescription:
+  Exclude:
+    - 'spec/README.md'

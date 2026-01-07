@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-# Integration tests for SmartMerger with real JSON parsing and merging scenarios
-# Note: tree-sitter JSON parser does not support JSONC comments, so tests
-# that need valid parsing use strict JSON.
+# Integration tests for SmartMerger with real JSONC parsing and merging scenarios
 
 RSpec.describe "Jsonc::Merge::SmartMerger Integration", :jsonc_grammar do
   describe "basic merge" do

@@ -56,11 +56,11 @@
 
 Jsonc::Merge is a standalone Ruby module that intelligently merges two versions of a JSONC (JSON with Comments) file using tree-sitter AST analysis. It's like a smart "git merge" specifically designed for JSONC configuration files. Built on top of [ast-merge](https://github.com/kettle-rb/ast-merge), it shares the same architecture as [prism-merge](https://github.com/kettle-rb/prism-merge) for Ruby source files.
 
-For standard JSON (without comments) support, see the [jsonc-merge](https://github.com/kettle-rb/jsonc-merge) gem.
+For standard JSON (without comments) support, see the [json-merge](https://github.com/kettle-rb/json-merge) gem.
 
 ### Key Features
 
-- **Tree-Sitter Powered**: Uses tree-sitter-json for accurate AST parsing
+- **Tree-Sitter Powered**: Uses tree-sitter-jsonc for accurate AST parsing
 - **JSONC Support**: Handles JSON with Comments (`//` and `/* */` style)
 - **Intelligent**: Matches objects and arrays by structural signatures
 - **Comment-Preserving**: Comments in JSONC files are preserved in context
@@ -89,15 +89,15 @@ For standard JSON (without comments) support, see the [jsonc-merge](https://gith
 ### Example
 
 ```ruby
-require "json/merge"
+require "jsonc/merge"
 
-template = File.read("template.json")
-destination = File.read("destination.json")
+template = File.read("template.jsonc")
+destination = File.read("destination.jsonc")
 
 merger = Jsonc::Merge::SmartMerger.new(template, destination)
 result = merger.merge
 
-File.write("merged.json", result.to_jsonc)
+File.write("merged.jsonc", result.to_jsonc)
 ```
 
 ### JSONC Example with Freeze Blocks
