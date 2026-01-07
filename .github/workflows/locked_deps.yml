@@ -26,12 +26,14 @@ env:
   # Also we can validate all output formats without breaking CodeCov,
   #   since we aren't submitting these reports anywhere.
   K_SOUP_COV_MIN_BRANCH: 71
-  K_SOUP_COV_MIN_LINE: 86
+  K_SOUP_COV_MIN_LINE: 92
   K_SOUP_COV_MIN_HARD: false
   K_SOUP_COV_FORMATTERS: "html,xml,rcov,lcov,json,tty"
   K_SOUP_COV_DO: true
   K_SOUP_COV_MULTI_FORMATTERS: true
   K_SOUP_COV_COMMAND_NAME: "Test Coverage"
+  # Point to the installed jsonc grammar (setup script installs to /usr/local/lib)
+  TREE_SITTER_JSONC_PATH: /usr/local/lib/libtree-sitter-jsonc.so
 
 on:
   push:
@@ -72,6 +74,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Install tree-sitter and jsonc grammar
+        uses: kettle-rb/ts-grammar-action@main
+        with:
+          grammar-jsonc: true
 
       - name: Setup Ruby & RubyGems
         uses: ruby/setup-ruby@v1

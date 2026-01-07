@@ -2,7 +2,7 @@
 
 # Integration tests for FileAnalysis with real JSON parsing scenarios
 
-RSpec.describe "Jsonc::Merge::FileAnalysis Integration" do
+RSpec.describe "Jsonc::Merge::FileAnalysis Integration", :jsonc_grammar do
   describe "with JSONC comments" do
     let(:jsonc_content) do
       <<~JSON
@@ -15,10 +15,10 @@ RSpec.describe "Jsonc::Merge::FileAnalysis Integration" do
       JSON
     end
 
-    it "parses JSONC content (may have errors due to comments)" do
+    it "parses JSONC content with comments" do
       analysis = Jsonc::Merge::FileAnalysis.new(jsonc_content)
-      # Tree-sitter JSON parser may report errors for comments
-      # but the content is still processed for freeze blocks
+      # tree-sitter-jsonc grammar supports comments natively
+      expect(analysis).to be_a(Jsonc::Merge::FileAnalysis)
       expect(analysis).to be_a(Jsonc::Merge::FileAnalysis)
       expect(analysis.comment_tracker).to be_a(Jsonc::Merge::CommentTracker)
     end

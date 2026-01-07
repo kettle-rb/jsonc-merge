@@ -155,6 +155,17 @@ RSpec.describe Jsonc::Merge::Emitter do
       emitter.clear
       expect(emitter.indent_level).to eq(0)
     end
+
+    it "resets needs_comma flag" do
+      emitter = described_class.new
+      emitter.emit_pair("key", '"value"')
+      emitter.clear
+      # After clear, needs_comma should be false
+      emitter.emit_object_start
+      emitter.emit_pair("new", '"value"')
+      # First pair should not have comma before it
+      expect(emitter.lines[1]).not_to start_with(",")
+    end
   end
 
   describe "#emit_comment with inline option" do
@@ -409,19 +420,6 @@ RSpec.describe Jsonc::Merge::Emitter do
       emitter.emit_object_end
       # No comma should be added within the object
       expect(emitter.lines[0]).to eq("{")
-    end
-  end
-
-  describe "#clear" do
-    it "resets needs_comma flag" do
-      emitter = described_class.new
-      emitter.emit_pair("key", '"value"')
-      emitter.clear
-      # After clear, needs_comma should be false
-      emitter.emit_object_start
-      emitter.emit_pair("new", '"value"')
-      # First pair should not have comma before it
-      expect(emitter.lines[1]).not_to start_with(",")
     end
   end
 

@@ -203,7 +203,7 @@ RSpec.describe Jsonc::Merge::MergeResult do
     end
   end
 
-  describe "#add_node edge cases" do
+  describe "#add_node edge cases", :jsonc_grammar do
     it "returns early when node has nil start_line" do
       # Create a mock-like object that returns nil for start_line
       json = '{"key": "value"}'
@@ -215,8 +215,6 @@ RSpec.describe Jsonc::Merge::MergeResult do
       initial_count = result.lines.size
       result.add_node(node, decision: :kept_destination, source: :destination, analysis: analysis)
       expect(result.lines.size).to be >= initial_count
-    rescue Jsonc::Merge::ParseError => e
-      skip "Parser not available: #{e.message}"
     end
   end
 

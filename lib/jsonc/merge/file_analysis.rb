@@ -20,34 +20,24 @@ module Jsonc
       # Default freeze token for identifying freeze blocks
       DEFAULT_FREEZE_TOKEN = "json-merge"
 
-      # Common paths where tree-sitter-json library might be installed
-      # Searched in order until one is found
-      PARSER_SEARCH_PATHS = [
-        "/usr/lib/libtree-sitter-json.so",
-        "/usr/lib64/libtree-sitter-json.so",
-        "/usr/local/lib/libtree-sitter-json.so",
-        "/opt/homebrew/lib/libtree-sitter-json.dylib",
-        "/usr/local/lib/libtree-sitter-json.dylib",
-      ].freeze
-
       # @return [CommentTracker] Comment tracker for this file
       attr_reader :comment_tracker
 
-      # @return [TreeSitter::Tree, nil] Parsed AST
+      # @return [TreeHaver::Tree, nil] Parsed AST
       attr_reader :ast
 
       # @return [Array] Parse errors if any
       attr_reader :errors
 
-      # Find the parser library path
-      # @return [String, nil] Path to the parser library or nil if not found
-      def self.find_parser_path
-        # Check environment variable first
-        env_path = ENV["TREE_SITTER_JSON_PATH"]
-        return env_path if env_path && File.exist?(env_path)
-
-        # Search common paths
-        PARSER_SEARCH_PATHS.find { |path| File.exist?(path) }
+      class << self
+        # Find the parser library path using TreeHaver::GrammarFinder
+        #
+        # Note: JSONC uses the tree-sitter-jsonc grammar (supports JSON with Comments)
+        #
+        # @return [String, nil] Path to the parser library or nil if not found
+        def find_parser_path
+          TreeHaver::GrammarFinder.new(:jsonc).find_library_path
+        end
       end
 
       # Initialize file analysis
@@ -56,13 +46,15 @@ module Jsonc
       # @param freeze_token [String] Token for freeze block markers
       # @param signature_generator [Proc, nil] Custom signature generator
       # @param parser_path [String, nil] Path to tree-sitter-json parser library
-      def initialize(source, freeze_token: DEFAULT_FREEZE_TOKEN, signature_generator: nil, parser_path: nil)
+      # @param options [Hash] Additional options (forward compatibility - ignored by FileAnalysis)
+      def initialize(source, freeze_token: DEFAULT_FREEZE_TOKEN, signature_generator: nil, parser_path: nil, **options)
         @source = source
         @lines = source.lines.map(&:chomp)
         @freeze_token = freeze_token
         @signature_generator = signature_generator
         @parser_path = parser_path || self.class.find_parser_path
         @errors = []
+        # **options captures any additional parameters (e.g., node_typing) for forward compatibility
 
         # Initialize comment tracking
         @comment_tracker = CommentTracker.new(source)
@@ -99,13 +91,6 @@ module Jsonc
 
       # Check if a line is within a freeze block.
       #
-      # NOTE: This method intentionally does NOT call `super` or use the base
-      # `freeze_blocks` method. The base implementation derives freeze blocks from
-      # `statements.select { |n| n.is_a?(Freezable) }`, but during initialization
-      # `@freeze_blocks` is extracted BEFORE `@nodes` is populated (see
-      # `integrate_nodes_and_freeze_blocks`). This method is called during that
-      # integration process, so we must use `@freeze_blocks` directly.
-      #
       # @param line_num [Integer] 1-based line number
       # @return [Boolean]
       def in_freeze_block?(line_num)
@@ -113,13 +98,6 @@ module Jsonc
       end
 
       # Get the freeze block containing the given line.
-      #
-      # NOTE: This method intentionally does NOT call `super` or use the base
-      # `freeze_blocks` method. The base implementation derives freeze blocks from
-      # `statements.select { |n| n.is_a?(Freezable) }`, but during initialization
-      # `@freeze_blocks` is extracted BEFORE `@nodes` is populated (see
-      # `integrate_nodes_and_freeze_blocks`). This method is called during that
-      # integration process, so we must use `@freeze_blocks` directly.
       #
       # @param line_num [Integer] 1-based line number
       # @return [FreezeNode, nil]
@@ -189,27 +167,27 @@ module Jsonc
       private
 
       def parse_json
-        unless @parser_path && File.exist?(@parser_path)
-          searched = @parser_path || PARSER_SEARCH_PATHS.join(", ")
-          @errors << "Tree-sitter json parser not found. Searched: #{searched}. Install tree-sitter-json or set TREE_SITTER_JSON_PATH."
-          @ast = nil
-          return
-        end
+        # Use TreeHaver's high-level API - it handles:
+        # - Grammar auto-discovery
+        # - Backend selection
+        # - Explicit path validation (raises NotAvailable if path doesn't exist)
+        # Note: JSONC uses the tree-sitter-jsonc grammar (supports JSON with Comments)
+        parser = TreeHaver.parser_for(:jsonc, library_path: @parser_path)
 
-        begin
-          language = TreeSitter::Language.load("json", @parser_path)
-          parser = TreeSitter::Parser.new
-          parser.language = language
-          @ast = parser.parse_string(nil, @source)
+        @ast = parser.parse(@source)
 
-          # Check for parse errors in the tree
-          if @ast&.root_node&.has_error?
-            collect_parse_errors(@ast.root_node)
-          end
-        rescue StandardError => e
-          @errors << e
-          @ast = nil
+        # Check for parse errors in the tree
+        if @ast&.root_node&.has_error?
+          collect_parse_errors(@ast.root_node)
         end
+      rescue TreeHaver::Error => e
+        # TreeHaver::Error inherits from Exception, not StandardError.
+        # This also catches TreeHaver::NotAvailable (subclass of Error).
+        @errors << e.message
+        @ast = nil
+      rescue StandardError => e
+        @errors << e
+        @ast = nil
       end
 
       def collect_parse_errors(node)

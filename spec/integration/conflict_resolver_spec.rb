@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 # Integration tests for ConflictResolver with real merge scenarios
-# Note: tree-sitter JSON parser does not support JSONC comments, so tests
-# that need valid parsing use strict JSON.
 
-RSpec.describe "Jsonc::Merge::ConflictResolver Integration" do
+RSpec.describe "Jsonc::Merge::ConflictResolver Integration", :jsonc_grammar do
   describe "with template preference for matching signatures" do
     let(:template_json) do
       <<~JSON

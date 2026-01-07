@@ -21,8 +21,16 @@ rescue LoadError => error
   raise error unless error.message.include?("kettle")
 end
 
-# this library
+# this library - must be loaded BEFORE support files so TreeHaver is available
+# for dependency detection in support/dependency_tags.rb
 require "jsonc/merge"
+
+# Support files (dependency tags, helpers)
+# NOTE: Loaded after jsonc/merge so TreeHaver is available for dependency checks
+Dir[File.join(__dir__, "support", "**", "*.rb")].each { |f| require f }
+
+# Load shared examples
+Dir[File.join(__dir__, "support", "shared_examples", "**", "*.rb")].sort.each { |f| require f }
 
 RSpec.configure do |config|
   config.before do

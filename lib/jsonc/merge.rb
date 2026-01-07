@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
-# External gems
-require "tree_sitter"
-require "version_gem"
+# std libs
 require "set"
+
+# External gems
+# TreeHaver provides a unified cross-Ruby interface to tree-sitter.
+# It handles grammar discovery and backend selection automatically
+# via parser_for(:jsonc). No manual registration needed.
+require "tree_haver"
+require "version_gem"
 
 # Shared merge infrastructure
 require "ast/merge"
