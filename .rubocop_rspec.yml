@@ -47,3 +47,9 @@ RSpec/MultipleDescribes:
 RSpec/RepeatedExampleGroupDescription:
   Exclude:
     - 'spec/README.md'
+
+RSpec/Output:
+  Exclude:
+    - 'spec/support/**/*'
+    - 'spec/config/**/*'
+    - 'spec/fixtures/**/*'
