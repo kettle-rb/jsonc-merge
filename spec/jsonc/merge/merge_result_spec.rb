@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "spec_helper"
+
 RSpec.describe Jsonc::Merge::MergeResult do
   # Use the shared examples to validate MergeResultBase integration
   subject(:result) { described_class.new }

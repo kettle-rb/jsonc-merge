@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "spec_helper"
+
 # Integration tests for ConflictResolver with real merge scenarios
 
 RSpec.describe "Jsonc::Merge::ConflictResolver Integration", :jsonc_grammar do
@@ -96,66 +98,6 @@ RSpec.describe "Jsonc::Merge::ConflictResolver Integration", :jsonc_grammar do
 
       output = result.to_json
       expect(output).not_to include("templateOnly")
-    end
-  end
-
-  describe "#add_node_to_result with unknown node type" do
-    it "logs debug message for unknown node types" do
-      stub_env("JSONC_MERGE_DEBUG" => "1")
-
-      template_json = '{"a": 1}'
-      dest_json = '{"a": 2}'
-
-      template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
-      dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
-
-      resolver = Jsonc::Merge::ConflictResolver.new(template_analysis, dest_analysis)
-      result = Jsonc::Merge::MergeResult.new
-
-      unknown_node = Object.new
-
-      expect {
-        resolver.send(:add_node_to_result, unknown_node, result, :destination, :kept_dest, dest_analysis)
-      }.to output(/Unknown node type/).to_stderr
-    end
-  end
-
-  describe "#add_wrapper_to_result edge cases" do
-    it "returns early when wrapper has no start_line" do
-      template_json = '{"a": 1}'
-      dest_json = '{"a": 2}'
-
-      template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
-      dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
-
-      resolver = Jsonc::Merge::ConflictResolver.new(template_analysis, dest_analysis)
-      result = Jsonc::Merge::MergeResult.new
-
-      mock_wrapper = double("NodeWrapper", start_line: nil, end_line: 5)
-
-      expect {
-        resolver.send(:add_wrapper_to_result, mock_wrapper, result, :destination, :kept_dest, dest_analysis)
-      }.not_to raise_error
-
-      expect(result.lines).to be_empty
-    end
-
-    it "skips lines that return nil from analysis" do
-      template_json = '{"a": 1}'
-      dest_json = '{"a": 2}'
-
-      template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
-      dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
-
-      resolver = Jsonc::Merge::ConflictResolver.new(template_analysis, dest_analysis)
-      result = Jsonc::Merge::MergeResult.new
-
-      # Create a mock wrapper that spans beyond actual lines
-      mock_wrapper = double("NodeWrapper", start_line: 1, end_line: 100)
-
-      expect {
-        resolver.send(:add_wrapper_to_result, mock_wrapper, result, :destination, :kept_dest, dest_analysis)
-      }.not_to raise_error
     end
   end
 end

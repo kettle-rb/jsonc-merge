@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "spec_helper"
+
 RSpec.describe Jsonc::Merge::Emitter do
   describe "#initialize" do
     it "creates an emitter with default indent size" do

@@ -24,11 +24,11 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Changed
 
+### Fixed
+
 ### Deprecated
 
 ### Removed
-
-### Fixed
 
 ### Security
 

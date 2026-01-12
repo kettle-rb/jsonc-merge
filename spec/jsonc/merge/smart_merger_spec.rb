@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "spec_helper"
+
 # SmartMerger specs with explicit backend testing
 #
 # This spec file tests SmartMerger behavior across all available tree-sitter backends:

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "spec_helper"
+
 RSpec.describe Jsonc::Merge::FreezeNode do
   # Use shared examples to validate base FreezeNode integration
   subject(:freeze_node) do

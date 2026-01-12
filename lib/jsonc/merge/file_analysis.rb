@@ -105,6 +105,25 @@ module Jsonc
         @freeze_blocks.find { |fb| fb.location.cover?(line_num) }
       end
 
+      # Override to handle special signature generation for root-level objects
+      # When there's only one root object, we want it to match regardless of keys
+      # so that add_template_only_nodes can work properly
+      def generate_signature(node)
+        # If custom signature generator provided, let it handle everything
+        return super if @signature_generator
+
+        return super unless node.is_a?(NodeWrapper)
+        return super unless node.object?
+
+        # Check if this is the sole root object
+        if statements.size == 1 && statements.first == node
+          # Root object gets a consistent signature so they always match
+          return [:root_object]
+        end
+
+        super
+      end
+
       # Override to detect tree-sitter nodes for signature generator fallthrough
       # @param value [Object] The value to check
       # @return [Boolean] true if this is a fallthrough node
@@ -177,7 +196,11 @@ module Jsonc
         @ast = parser.parse(@source)
 
         # Check for parse errors in the tree
-        if @ast&.root_node&.has_error?
+        # Note: Some backends (Java/jtreesitter) may not set has_error? correctly,
+        # so we always collect errors if present, regardless of has_error? return value
+        if @ast&.root_node
+          # Collect parse errors from the AST
+          # This works whether has_error? is supported or not
           collect_parse_errors(@ast.root_node)
         end
       rescue TreeHaver::Error => e
@@ -190,18 +213,23 @@ module Jsonc
         @ast = nil
       end
 
-      def collect_parse_errors(node)
+      def collect_parse_errors(node, found_errors = [])
         # Collect ERROR and MISSING nodes from the tree
-        if node.type.to_s == "ERROR" || node.missing?
-          @errors << {
+        if node.type.to_s == "ERROR" || (node.respond_to?(:missing?) && node.missing?)
+          found_errors << {
             type: node.type.to_s,
-            start_point: node.start_point,
-            end_point: node.end_point,
+            start_point: node.respond_to?(:start_point) ? node.start_point : nil,
+            end_point: node.respond_to?(:end_point) ? node.end_point : nil,
             text: node.to_s,
           }
         end
 
-        node.each { |child| collect_parse_errors(child) }
+        node.each { |child| collect_parse_errors(child, found_errors) } if node.respond_to?(:each)
+
+        # Add found errors to @errors
+        @errors.concat(found_errors) unless found_errors.empty?
+
+        found_errors
       end
 
       def extract_freeze_blocks
@@ -269,19 +297,19 @@ module Jsonc
           result << fb
         end
 
-        # Add root-level key-value pairs that aren't in freeze blocks
-        root_pairs.each do |pair|
-          next unless pair.start_line && pair.end_line
-
-          # Skip if any part of this pair is in a freeze block
-          pair_lines = (pair.start_line..pair.end_line).to_a
-          next if pair_lines.any? { |ln| processed_lines.include?(ln) }
-
-          result << pair
+        # Add the root object/array if it exists and isn't in a freeze block
+        # This is the top-level structural node that should be merged
+        root = root_object
+        if root&.start_line
+          # Check if root is in a freeze block
+          root_lines = (root.start_line..root.end_line).to_a
+          unless root_lines.any? { |ln| processed_lines.include?(ln) }
+            result << root
+          end
         end
 
         # Sort by start line
-        result.sort_by { |node| node.start_line || 0 }
+        result.sort_by { |node| node&.start_line || 0 }
       end
 
       def compute_node_signature(node)

@@ -82,7 +82,7 @@ Gem::Specification.new do |spec|
   spec.executables = []
 
   # Parser - tree_haver provides unified tree-sitter (supports JSONC with comments) & citrus interface
-  spec.add_dependency("tree_haver", "~> 3.2", ">= 3.2.6")                           # ruby >= 3.2.0
+  spec.add_dependency("tree_haver", "~> 5.0", ">= 5.0.1")                           # ruby >= 3.2.0
   # NOTE: tree-sitter-jsonc parser must be installed separately via your package manager
   #       e.g., built from source at https://gitlab.com/WhyNotHugo/tree-sitter-jsonc
   # A ruby interface for tree-sitter must also be installed (pick ONE):
@@ -91,7 +91,7 @@ Gem::Specification.new do |spec|
   # - ffi (MRI, JRuby, TruffleRuby; utilizes tree_haver's ffi backend)
 
   # Shared merge infrastructure
-  spec.add_dependency("ast-merge", "~> 3.0", ">= 3.0.0")                # ruby >= 3.2.0
+  spec.add_dependency("ast-merge", "~> 4.0", ">= 4.0.2")                # ruby >= 3.2.0
 
   # Utilities
   spec.add_dependency("version_gem", "~> 1.1", ">= 1.1.9")              # ruby >= 2.2.0

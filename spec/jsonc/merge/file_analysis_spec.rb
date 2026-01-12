@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "spec_helper"
+
 # FileAnalysis specs with explicit backend testing
 #
 # This spec file tests FileAnalysis behavior across all available tree-sitter backends:

@@ -123,15 +123,9 @@ RSpec.shared_examples "signature generation" do
 
       sig = root.signature
       expect(sig).to be_an(Array)
-      expect(sig.first).to eq(:object)
-
-      # Keys should be sorted
-      # Note: Some backends may not extract keys properly
-      if sig[1].empty?
-        skip "Backend does not support object key extraction"
-      else
-        expect(sig[1]).to eq(["a", "b"])
-      end
+      # Root-level objects use :root_object signature so they always match during merging
+      # (merging happens at the pair level for root objects)
+      expect(sig.first).to eq(:root_object)
     end
   end
 end
@@ -282,8 +276,8 @@ RSpec.shared_examples "comprehensive signature generation" do
       if array_node
         sig = array_node.signature
         expect(sig).to be_an(Array)
-        expect(sig.first).to eq(:array)
-        expect(sig[1]).to eq(3)
+        # Root-level arrays use :root_array signature so they always match during merging
+        expect(sig.first).to eq(:root_array)
       else
         skip "No array node found"
       end

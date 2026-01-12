@@ -74,6 +74,7 @@ module Jsonc
 
         # In JSONC tree-sitter, pair has key and value children
         key_node = find_child_by_field("key")
+
         return unless key_node
 
         # Key is typically a string, extract its content without quotes using byte positions
@@ -88,6 +89,7 @@ module Jsonc
         return unless pair?
 
         value = find_child_by_field("value")
+
         return unless value
 
         NodeWrapper.new(value, lines: @lines, source: @source)
@@ -148,20 +150,45 @@ module Jsonc
         object? || array?
       end
 
+      # Check if this is a root-level container (direct child of document)
+      # Root-level containers get a generic signature so they always match.
+      # @return [Boolean]
+      def root_level_container?
+        return false unless container?
+
+        # Check if parent is a document node
+        parent_node = @node.parent if @node.respond_to?(:parent)
+        return false unless parent_node
+
+        parent_node.type.to_s == "document"
+      end
+
       # Get the opening line for a container node (the line with { or [)
-      # Returns the full line content including any leading whitespace
+      # For multi-line containers, returns the full line.
+      # For single-line containers, returns just the opening bracket to avoid duplicating content.
       # @return [String, nil]
       def opening_line
         return unless container? && @start_line
+
+        # If this is a single-line container, just return the opening bracket
+        if @start_line == @end_line
+          return opening_bracket
+        end
 
         @lines[@start_line - 1]
       end
 
       # Get the closing line for a container node (the line with } or ])
-      # Returns the full line content including any leading whitespace
+      # For multi-line containers, returns the full line.
+      # For single-line containers, returns just the closing bracket to avoid duplicating content.
       # @return [String, nil]
       def closing_line
         return unless container? && @end_line
+
+        # If this is a single-line container, just return the closing bracket
+        if @start_line == @end_line
+          return closing_bracket
+        end
 
         @lines[@end_line - 1]
       end
@@ -226,14 +253,25 @@ module Jsonc
           child_type = child&.type&.to_s
           [:document, child_type]
         when "object"
-          # Objects identified by their keys
-          keys = extract_object_keys(node)
-          [:object, keys.sort]
+          # For root-level objects (direct child of document), use a generic signature
+          # that always matches so merging happens at the pair level.
+          if root_level_container?
+            [:root_object]
+          else
+            # Nested objects identified by their keys
+            keys = extract_object_keys(node)
+            [:object, keys.sort]
+          end
         when "array"
-          # Arrays identified by their length and first few elements
-          elements_count = 0
-          node.each { |c| elements_count += 1 unless %w[comment , \[ \]].include?(c.type.to_s) }
-          [:array, elements_count]
+          # For root-level arrays (direct child of document), use a generic signature
+          if root_level_container?
+            [:root_array]
+          else
+            # Nested arrays identified by their length and first few elements
+            elements_count = 0
+            node.each { |c| elements_count += 1 unless %w[comment , \[ \]].include?(c.type.to_s) }
+            [:array, elements_count]
+          end
         when "pair"
           # Pairs identified by their key name
           key = key_name
@@ -267,6 +305,17 @@ module Jsonc
           next unless child.type.to_s == "pair"
 
           key_node = child.respond_to?(:child_by_field_name) ? child.child_by_field_name("key") : nil
+
+          # Fallback for backends without field access (FFI)
+          unless key_node
+            child.each do |pair_child|
+              pair_child_type = pair_child.type.to_s
+              next if pair_child_type == ":" || pair_child_type == "comment"
+              key_node = pair_child
+              break
+            end
+          end
+
           next unless key_node
 
           key_text = node_text(key_node)&.gsub(/\A"|"\z/, "")

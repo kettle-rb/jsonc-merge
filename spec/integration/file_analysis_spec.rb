@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "spec_helper"
+
 # Integration tests for FileAnalysis with real JSON parsing scenarios
 
 RSpec.describe "Jsonc::Merge::FileAnalysis Integration", :jsonc_grammar do

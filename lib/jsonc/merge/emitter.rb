@@ -6,29 +6,36 @@ module Jsonc
     # This class provides utilities for emitting JSON while maintaining
     # the original structure, comments, and style choices.
     #
+    # Inherits common emitter functionality from Ast::Merge::EmitterBase.
+    #
     # @example Basic usage
     #   emitter = Emitter.new
     #   emitter.emit_object_start
     #   emitter.emit_pair("key", '"value"')
     #   emitter.emit_object_end
-    class Emitter
-      # @return [Array<String>] Output lines
-      attr_reader :lines
+    class Emitter < Ast::Merge::EmitterBase
+      # @return [Boolean] Whether next item needs a comma
+      attr_reader :needs_comma
 
-      # @return [Integer] Current indentation level
-      attr_reader :indent_level
-
-      # @return [Integer] Spaces per indent level
-      attr_reader :indent_size
-
-      # Initialize a new emitter
-      #
-      # @param indent_size [Integer] Number of spaces per indent level
-      def initialize(indent_size: 2)
-        @lines = []
-        @indent_level = 0
-        @indent_size = indent_size
+      # Initialize subclass-specific state (comma tracking for JSON)
+      def initialize_subclass_state(**options)
         @needs_comma = false
+      end
+
+      # Clear subclass-specific state
+      def clear_subclass_state
+        @needs_comma = false
+      end
+
+      # Emit a tracked comment from CommentTracker
+      # @param comment [Hash] Comment with :text, :indent, :block
+      def emit_tracked_comment(comment)
+        indent = " " * (comment[:indent] || 0)
+        @lines << if comment[:block]
+          "#{indent}/* #{comment[:text]} */"
+        else
+          "#{indent}// #{comment[:text]}"
+        end
       end
 
       # Emit a single-line comment
@@ -53,36 +60,17 @@ module Jsonc
         @lines << "#{current_indent}/* #{text} */"
       end
 
-      # Emit leading comments
-      #
-      # @param comments [Array<Hash>] Comment hashes from CommentTracker
-      def emit_leading_comments(comments)
-        comments.each do |comment|
-          indent = " " * (comment[:indent] || 0)
-          @lines << if comment[:block]
-            "#{indent}/* #{comment[:text]} */"
-          else
-            "#{indent}// #{comment[:text]}"
-          end
-        end
-      end
-
-      # Emit a blank line
-      def emit_blank_line
-        @lines << ""
-      end
-
       # Emit object start
       def emit_object_start
         add_comma_if_needed
         @lines << "#{current_indent}{"
-        @indent_level += 1
+        indent
         @needs_comma = false
       end
 
       # Emit object end
       def emit_object_end
-        @indent_level -= 1 if @indent_level > 0
+        dedent
         @lines << "#{current_indent}}"
         @needs_comma = true
       end
@@ -97,13 +85,13 @@ module Jsonc
         else
           "#{current_indent}["
         end
-        @indent_level += 1
+        indent
         @needs_comma = false
       end
 
       # Emit array end
       def emit_array_end
-        @indent_level -= 1 if @indent_level > 0
+        dedent
         @lines << "#{current_indent}]"
         @needs_comma = true
       end
@@ -133,38 +121,30 @@ module Jsonc
         @needs_comma = true
       end
 
-      # Emit raw lines (for preserving existing content)
-      #
-      # @param raw_lines [Array<String>] Lines to emit as-is
-      def emit_raw_lines(raw_lines)
-        raw_lines.each { |line| @lines << line.chomp }
-      end
-
-      # Get the output as a single string
-      #
-      # @return [String]
-      def to_json
-        content = @lines.join("\n")
-        content += "\n" unless content.empty? || content.end_with?("\n")
-        content
-      end
-
-      # Alias for consistency
-      # @return [String]
-      alias_method :to_s, :to_json
-
-      # Clear the output
-      def clear
-        @lines = []
-        @indent_level = 0
+      # Emit a key with opening brace for nested object
+      # @param key [String] Key name
+      def emit_nested_object_start(key)
+        add_comma_if_needed
+        @lines << "#{current_indent}\"#{key}\": {"
+        indent
         @needs_comma = false
       end
 
-      private
-
-      def current_indent
-        " " * (@indent_level * @indent_size)
+      # Emit closing brace for nested object
+      def emit_nested_object_end
+        dedent
+        @lines << "#{current_indent}}"
+        @needs_comma = true
       end
+
+      # Get the output as a JSON string
+      #
+      # @return [String]
+      def to_json
+        to_s
+      end
+
+      private
 
       def add_comma_if_needed
         return unless @needs_comma && @lines.any?

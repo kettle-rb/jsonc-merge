@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "spec_helper"
+
 # Integration tests for SmartMerger with real JSONC parsing and merging scenarios
 
 RSpec.describe "Jsonc::Merge::SmartMerger Integration", :jsonc_grammar do

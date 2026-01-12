@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "spec_helper"
+
 RSpec.describe Jsonc::Merge::ConflictResolver do
   let(:template_json) do
     <<~JSON

@@ -1,33 +1,19 @@
 # frozen_string_literal: true
 
-# Load shared dependency tags from tree_haver
+# Load shared dependency tags from tree_haver and ast-merge
 #
 # This file follows the standard spec/support/ convention. The actual
 # implementation is in tree_haver so it can be shared across all gems
 # in the TreeHaver/ast-merge family.
 #
+# For debugging, use TREE_HAVER_DEBUG=true which prints dependency
+# availability in a way that respects backend isolation (FFI vs MRI).
+#
 # @see TreeHaver::RSpec::DependencyTags
+# @see Ast::Merge::RSpec (shared examples for DebugLogger, FreezeNodeBase, MergeResultBase)
 
 require "tree_haver/rspec"
+require "ast/merge/rspec"
 
 # Alias for convenience in existing specs
 JsoncMergeDependencies = TreeHaver::RSpec::DependencyTags
-
-# Additional jsonc-merge specific configuration
-RSpec.configure do |config|
-  # Print dependency summary if JSONC_MERGE_DEBUG is set
-  config.before(:suite) do
-    if ENV["JSONC_MERGE_DEBUG"]
-      puts "\n=== Jsonc::Merge Test Dependencies ==="
-      TreeHaver::RSpec::DependencyTags.summary.each do |dep, available|
-        status = case available
-        when true then "✓ available"
-        when false then "✗ not available"
-        else available.to_s
-        end
-        puts "  #{dep}: #{status}"
-      end
-      puts "======================================\n"
-    end
-  end
-end

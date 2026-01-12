@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "spec_helper"
+
 RSpec.describe Jsonc::Merge::CommentTracker do
   let(:content_with_comments) do
     <<~JSON
