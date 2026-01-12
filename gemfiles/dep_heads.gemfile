@@ -2,6 +2,10 @@
 
 source "https://gem.coop"
 
-gemspec path: "../"
+gemspec :path => "../"
+
+eval_gemfile("modular/rspec.gemfile")
 
 eval_gemfile("modular/runtime_heads.gemfile")
+
+eval_gemfile("modular/tree_sitter.gemfile")
