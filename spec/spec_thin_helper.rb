@@ -50,4 +50,3 @@ RSpec.configure do |config|
     # NOTE: Do NOT reset backends_used! Once a backend is used, it stays recorded
   end
 end
-
