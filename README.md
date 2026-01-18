@@ -652,9 +652,7 @@ Support us with a monthly donation and help us continue our activities. [[Become
 NOTE: [kettle-readme-backers][kettle-readme-backers] updates this list every day, automatically.
 
 <!-- OPENCOLLECTIVE-INDIVIDUALS:START -->
-
 No backers yet. Be the first!
-
 <!-- OPENCOLLECTIVE-INDIVIDUALS:END -->
 
 ### Open Collective for Organizations
@@ -664,9 +662,7 @@ Become a sponsor and get your logo on our README on GitHub with a link to your s
 NOTE: [kettle-readme-backers][kettle-readme-backers] updates this list every day, automatically.
 
 <!-- OPENCOLLECTIVE-ORGANIZATIONS:START -->
-
 No sponsors yet. Be the first!
-
 <!-- OPENCOLLECTIVE-ORGANIZATIONS:END -->
 
 [kettle-readme-backers]: https://github.com/kettle-rb/jsonc-merge/blob/main/exe/kettle-readme-backers
