@@ -117,6 +117,37 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
       end
     end
 
+    context "with per-node-type preference" do
+      it "uses template values for typed nodes and destination for others" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
+
+        node_typing = {
+          "NodeWrapper" => lambda { |node|
+            if node.pair? && node.key_name == "version"
+              Ast::Merge::NodeTyping.with_merge_type(node, :version_key)
+            else
+              node
+            end
+          },
+        }
+
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          preference: {default: :destination, version_key: :template},
+          node_typing: node_typing,
+        )
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        output = result.to_json
+        expect(output).to include('"version": "2.0.0"')
+        expect(output).to include('"name": "my-package"')
+      end
+    end
+
     context "with add_template_only_nodes enabled" do
       let(:template_with_extra) do
         <<~JSON

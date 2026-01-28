@@ -18,14 +18,16 @@ module Jsonc
       #
       # @param template_analysis [FileAnalysis] Analyzed template file
       # @param dest_analysis [FileAnalysis] Analyzed destination file
-      # @param preference [Symbol] Which version to prefer when
+      # @param preference [Symbol, Hash] Which version to prefer when
       #   nodes have matching signatures:
       #   - :destination (default) - Keep destination version (customizations)
       #   - :template - Use template version (updates)
       # @param add_template_only_nodes [Boolean] Whether to add nodes only in template
       # @param match_refiner [#call, nil] Optional match refiner for fuzzy matching
       # @param options [Hash] Additional options for forward compatibility
-      def initialize(template_analysis, dest_analysis, preference: :destination, add_template_only_nodes: false, match_refiner: nil, **options)
+      # @param node_typing [Hash{Symbol,String => #call}, nil] Node typing configuration
+      #   for per-node-type preferences
+      def initialize(template_analysis, dest_analysis, preference: :destination, add_template_only_nodes: false, match_refiner: nil, node_typing: nil, **options)
         super(
           strategy: :batch,
           preference: preference,
@@ -35,6 +37,7 @@ module Jsonc
           match_refiner: match_refiner,
           **options
         )
+        @node_typing = node_typing
         @emitter = Emitter.new
       end
 
@@ -187,14 +190,14 @@ module Jsonc
 
             # Emit closing brace
             @emitter.emit_nested_object_end
-          elsif @preference == :destination
+          elsif preference_for_pair(template_node, dest_node) == :destination
             # Values are not both objects, or one/both are arrays - use preference and emit
             # Arrays are always replaced, not merged
             emit_node(dest_node, dest_analysis)
           else
             emit_node(template_node, template_analysis)
           end
-        elsif @preference == :destination
+        elsif preference_for_pair(template_node, dest_node) == :destination
           # Leaf nodes or mismatched types - use preference
           emit_node(dest_node, dest_analysis)
         else
@@ -232,6 +235,32 @@ module Jsonc
         elsif dest_node.array?
           @emitter.emit_array_end
         end
+      end
+
+      def preference_for_pair(template_node, dest_node)
+        return @preference unless @preference.is_a?(Hash)
+
+        typed_template = apply_node_typing(template_node)
+        typed_dest = apply_node_typing(dest_node)
+
+        if Ast::Merge::NodeTyping.typed_node?(typed_template)
+          merge_type = Ast::Merge::NodeTyping.merge_type_for(typed_template)
+          return @preference.fetch(merge_type) { default_preference } if merge_type
+        end
+
+        if Ast::Merge::NodeTyping.typed_node?(typed_dest)
+          merge_type = Ast::Merge::NodeTyping.merge_type_for(typed_dest)
+          return @preference.fetch(merge_type) { default_preference } if merge_type
+        end
+
+        default_preference
+      end
+
+      def apply_node_typing(node)
+        return node unless @node_typing
+        return node unless node
+
+        Ast::Merge::NodeTyping.process(node, @node_typing)
       end
 
       # Emit a single node to the emitter
