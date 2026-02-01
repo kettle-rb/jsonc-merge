@@ -109,6 +109,10 @@ Gem::Specification.new do |spec|
   #       Development dependencies that require strictly newer Ruby versions should be in a "gemfile",
   #       and preferably a modular one (see gemfiles/modular/*.gemfile).
 
+  # v2.6.3 is the version of json that shipped with Ruby 3.2
+  # But can't install on truffleruby
+  # spec.add_development_dependency("json", "~> 2.6")                                 # ruby >= 2.3,
+
   # Dev, Test, & Release Tasks
   spec.add_development_dependency("kettle-dev", "~> 1.1")                           # ruby >= 2.3.0
 

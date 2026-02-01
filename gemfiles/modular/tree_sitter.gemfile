@@ -18,6 +18,11 @@ if ENV.fetch("KETTLE_RB_DEV", "false").casecmp?("true")
   gem "ast-merge", path: "../../../../"
 end
 
+platforms :mri, :jruby do
+  # NOTE: Not truffleruby
+  gem "json", "~> 2.6"
+end
+
 platform :mri do
   # MRI Backend - use local patched version for tree-sitter 0.26 ABI
   # Rust Backend - use local patched version for tree-sitter 0.26 ABI
