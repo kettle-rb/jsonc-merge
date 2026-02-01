@@ -21,8 +21,13 @@ Please file a bug if you notice a violation of semantic versioning.
 ### Added
 
 - ConflictResolver now applies per-node-type preferences via `node_typing`.
+- Utilizes `Ast::Merge::RSpec::MergeGemRegistry` when running RSpec tests
 
 ### Changed
+
+- Documentation cleanup
+- Upgrade to [ast-merge v4.0.5](https://github.com/kettle-rb/ast-merge/releases/tag/v4.0.5)
+- Upgrade to [tree_haver v5.0.3](https://github.com/kettle-rb/tree_haver/releases/tag/v5.0.3)
 
 ### Deprecated
 
