@@ -5,7 +5,7 @@ require "spec_helper"
 # Regression tests for bugs that were discovered during JRuby CI investigation
 # These tests validate that the specific bugs we fixed stay fixed
 
-RSpec.describe "JSONC Merge Bug Regression Tests" do
+RSpec.describe "JSONC Merge Bug Regression Tests", :jsonc_grammar do
   describe "Bug: Statements returning pairs instead of root object" do
     # This bug caused merge to concatenate objects instead of merging them
 

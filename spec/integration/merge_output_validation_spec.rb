@@ -5,7 +5,7 @@ require "spec_helper"
 # Integration tests that validate actual merge output correctness
 # These tests would have caught the bugs we just fixed.
 
-RSpec.describe "JSONC Merge Output Validation" do
+RSpec.describe "JSONC Merge Output Validation", :jsonc_grammar do
   # Test the actual merge output, not just internal state
   describe "merge output validity" do
     let(:template_json) { '{"name": "template", "version": "1.0.0"}' }

@@ -156,7 +156,7 @@ RSpec.describe "JSONC Merge Backend Consistency" do
     end
   end
 
-  describe "edge cases on all backends" do
+  describe "edge cases on all backends", :jsonc_grammar do
     it "handles empty objects correctly", :jsonc_parsing do
       template = "{}"
       dest = '{"key": "value"}'
