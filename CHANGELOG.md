@@ -20,14 +20,7 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Added
 
-- ConflictResolver now applies per-node-type preferences via `node_typing`.
-- Utilizes `Ast::Merge::RSpec::MergeGemRegistry` when running RSpec tests
-
 ### Changed
-
-- Documentation cleanup
-- Upgrade to [ast-merge v4.0.5](https://github.com/kettle-rb/ast-merge/releases/tag/v4.0.5)
-- Upgrade to [tree_haver v5.0.3](https://github.com/kettle-rb/tree_haver/releases/tag/v5.0.3)
 
 ### Deprecated
 
@@ -35,15 +28,13 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Fixed
 
-- loading of backends for tree_haver in specs
-
 ### Security
 
-## [1.0.0] - 2026-01-12
+## [1.0.0] - 2026-02-01
 
 - TAG: [v1.0.0][1.0.0t]
-- COVERAGE: 93.00% -- 624/671 lines in 11 files
-- BRANCH COVERAGE: 69.25% -- 223/322 branches in 11 files
+- COVERAGE: 93.01% -- 639/687 lines in 11 files
+- BRANCH COVERAGE: 68.75% -- 231/336 branches in 11 files
 - 96.43% documented
 
 ### Added

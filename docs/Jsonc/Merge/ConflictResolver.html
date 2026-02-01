@@ -152,7 +152,7 @@ which resolves all conflicts at once using signature maps.</p>
         <li class="public ">
   <span class="summary_signature">
     
-      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(template_analysis, dest_analysis, preference: :destination, add_template_only_nodes: false, match_refiner: nil, **options)  &#x21d2; ConflictResolver </a>
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(template_analysis, dest_analysis, preference: :destination, add_template_only_nodes: false, match_refiner: nil, node_typing: nil, **options)  &#x21d2; ConflictResolver </a>
     
 
     
@@ -184,7 +184,7 @@ which resolves all conflicts at once using signature maps.</p>
     <div class="method_details first">
   <h3 class="signature first" id="initialize-instance_method">
   
-    #<strong>initialize</strong>(template_analysis, dest_analysis, preference: :destination, add_template_only_nodes: false, match_refiner: nil, **options)  &#x21d2; <tt><span class='object_link'><a href="" title="Jsonc::Merge::ConflictResolver (class)">ConflictResolver</a></span></tt> 
+    #<strong>initialize</strong>(template_analysis, dest_analysis, preference: :destination, add_template_only_nodes: false, match_refiner: nil, node_typing: nil, **options)  &#x21d2; <tt><span class='object_link'><a href="" title="Jsonc::Merge::ConflictResolver (class)">ConflictResolver</a></span></tt> 
   
 
   
@@ -236,7 +236,7 @@ which resolves all conflicts at once using signature maps.</p>
         <span class='name'>preference</span>
       
       
-        <span class='type'>(<tt>Symbol</tt>)</span>
+        <span class='type'>(<tt>Symbol</tt>, <tt>Hash</tt>)</span>
       
       
         <em class="default">(defaults to: <tt>:destination</tt>)</em>
@@ -302,6 +302,24 @@ nodes have matching signatures:</p>
       
     </li>
   
+    <li>
+      
+        <span class='name'>node_typing</span>
+      
+      
+        <span class='type'>(<tt>Hash{Symbol,String =&gt; #call}</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Node typing configuration<br />
+for per-node-type preferences</p>
+</div>
+      
+    </li>
+  
 </ul>
 
 
@@ -311,8 +329,6 @@ nodes have matching signatures:</p>
       <pre class="lines">
 
 
-28
-29
 30
 31
 32
@@ -322,12 +338,15 @@ nodes have matching signatures:</p>
 36
 37
 38
-39</pre>
+39
+40
+41
+42</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/jsonc/merge/conflict_resolver.rb', line 28</span>
+      <pre class="code"><span class="info file"># File 'lib/jsonc/merge/conflict_resolver.rb', line 30</span>
 
-<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_template_analysis'>template_analysis</span><span class='comma'>,</span> <span class='id identifier rubyid_dest_analysis'>dest_analysis</span><span class='comma'>,</span> <span class='label'>preference:</span> <span class='symbol'>:destination</span><span class='comma'>,</span> <span class='label'>add_template_only_nodes:</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='label'>match_refiner:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='id identifier rubyid_template_analysis'>template_analysis</span><span class='comma'>,</span> <span class='id identifier rubyid_dest_analysis'>dest_analysis</span><span class='comma'>,</span> <span class='label'>preference:</span> <span class='symbol'>:destination</span><span class='comma'>,</span> <span class='label'>add_template_only_nodes:</span> <span class='kw'>false</span><span class='comma'>,</span> <span class='label'>match_refiner:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>node_typing:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='op'>**</span><span class='id identifier rubyid_options'>options</span><span class='rparen'>)</span>
   <span class='kw'>super</span><span class='lparen'>(</span>
     <span class='label'>strategy:</span> <span class='symbol'>:batch</span><span class='comma'>,</span>
     <span class='label'>preference:</span> <span class='id identifier rubyid_preference'>preference</span><span class='comma'>,</span>
@@ -337,6 +356,7 @@ nodes have matching signatures:</p>
     <span class='label'>match_refiner:</span> <span class='id identifier rubyid_match_refiner'>match_refiner</span><span class='comma'>,</span>
     <span class='op'>**</span><span class='id identifier rubyid_options'>options</span>
   <span class='rparen'>)</span>
+  <span class='ivar'>@node_typing</span> <span class='op'>=</span> <span class='id identifier rubyid_node_typing'>node_typing</span>
   <span class='ivar'>@emitter</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="Emitter.html" title="Jsonc::Merge::Emitter (class)">Emitter</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span>
 <span class='kw'>end</span></pre>
     </td>
@@ -350,9 +370,9 @@ nodes have matching signatures:</p>
 </div>
 
       <div id="footer">
-  Generated on Mon Jan 12 07:06:35 2026 by
+  Generated on Sun Feb  1 03:46:48 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.38 (ruby-4.0.0).
+  0.9.38 (ruby-4.0.1).
 </div>
 
     </div>
