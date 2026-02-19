@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  File: AGENTS
+  
+    &mdash; Documentation by YARD 0.9.38
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" />
+
+<script type="text/javascript">
+  pathId = "AGENTS";
+  relpath = '';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div class="nav_wrap">
+      <iframe id="nav" src="file_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: AGENTS</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><div id='filecontents'><h1 id="agentsmd---jsonc-merge-development-guide">AGENTS.md - jsonc-merge Development Guide</h1>
+
+<h2 id="-project-overview">🎯 Project Overview</h2>
+
+<p><code>jsonc-merge</code> is a <strong>format-specific implementation of the <code>*-merge</code> gem family</strong> for JSONC (JSON with Comments) files. It provides intelligent JSONC file merging using AST analysis with tree-sitter JSONC parser.</p>
+
+<p><strong>Core Philosophy</strong>: Intelligent JSONC merging that preserves structure, comments, and formatting while applying updates from templates.</p>
+
+<p><strong>Repository</strong>: https://github.com/kettle-rb/jsonc-merge<br>
+<strong>Current Version</strong>: 1.0.1<br>
+<strong>Required Ruby</strong>: &gt;= 3.2.0 (currently developed against Ruby 4.0.1)</p>
+
+<h2 id="️-architecture-format-specific-implementation">🏗️ Architecture: Format-Specific Implementation</h2>
+
+<h3 id="what-jsonc-merge-provides">What jsonc-merge Provides</h3>
+
+<ul>
+  <li>
+<strong><code>Jsonc::Merge::SmartMerger</code></strong> – JSONC-specific SmartMerger implementation</li>
+  <li>
+<strong><code>Jsonc::Merge::FileAnalysis</code></strong> – JSONC file analysis with object/array extraction</li>
+  <li>
+<strong><code>Jsonc::Merge::NodeWrapper</code></strong> – Wrapper for JSONC AST nodes</li>
+  <li>
+<strong><code>Jsonc::Merge::MergeResult</code></strong> – JSONC-specific merge result</li>
+  <li>
+<strong><code>Jsonc::Merge::ConflictResolver</code></strong> – JSONC conflict resolution</li>
+  <li>
+<strong><code>Jsonc::Merge::FreezeNode</code></strong> – JSONC freeze block support</li>
+  <li>
+<strong><code>Jsonc::Merge::DebugLogger</code></strong> – JSONC-specific debug logging</li>
+</ul>
+
+<h3 id="key-dependencies">Key Dependencies</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Gem</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+<code>ast-merge</code> (~&gt; 4.0)</td>
+      <td>Base classes and shared infrastructure</td>
+    </tr>
+    <tr>
+      <td>
+<code>tree_haver</code> (~&gt; 5.0)</td>
+      <td>Unified parser adapter (tree-sitter)</td>
+    </tr>
+    <tr>
+      <td>
+<code>version_gem</code> (~&gt; 1.1)</td>
+      <td>Version management</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="parser-backend-support">Parser Backend Support</h3>
+
+<p>jsonc-merge works with tree-sitter JSONC parser via TreeHaver:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Backend</th>
+      <th>Parser</th>
+      <th>Platform</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>:mri</code></td>
+      <td>tree-sitter-jsonc</td>
+      <td>MRI only</td>
+      <td>Best performance, requires native library</td>
+    </tr>
+    <tr>
+      <td><code>:rust</code></td>
+      <td>tree-sitter-jsonc</td>
+      <td>MRI only</td>
+      <td>Rust implementation via tree_stump</td>
+    </tr>
+    <tr>
+      <td><code>:ffi</code></td>
+      <td>tree-sitter-jsonc</td>
+      <td>All platforms</td>
+      <td>FFI binding, works on JRuby/TruffleRuby</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="-project-structure">📁 Project Structure</h2>
+
+<pre class="code ruby"><code class="ruby">lib/jsonc/merge/
+├── smart_merger.rb          # Main SmartMerger implementation
+├── file_analysis.rb         # JSONC file analysis
+├── node_wrapper.rb          # AST node wrapper
+├── merge_result.rb          # Merge result object
+├── conflict_resolver.rb     # Conflict resolution
+├── freeze_node.rb           # Freeze block support
+├── debug_logger.rb          # Debug logging
+└── version.rb
+
+spec/jsonc/merge/
+├── smart_merger_spec.rb
+├── file_analysis_spec.rb
+├── node_wrapper_spec.rb
+└── integration/
+</code></pre>
+
+<h2 id="-development-workflows">🔧 Development Workflows</h2>
+
+<h3 id="running-tests">Running Tests</h3>
+
+<pre class="code language-bash"><code class="language-bash"># Full suite
+bundle exec rspec
+
+# Single file (disable coverage threshold check)
+K_SOUP_COV_MIN_HARD=false bundle exec rspec spec/jsonc/merge/smart_merger_spec.rb
+
+# Specific backend tests
+bundle exec rspec --tag mri_backend
+bundle exec rspec --tag rust_backend
+bundle exec rspec --tag ffi_backend
+</code></pre>
+
+<h3 id="coverage-reports">Coverage Reports</h3>
+
+<pre class="code language-bash"><code class="language-bash">cd /home/pboling/src/kettle-rb/ast-merge/vendor/jsonc-merge
+bin/rake coverage &amp;&amp; bin/kettle-soup-cover -d
+</code></pre>
+
+<h2 id="-project-conventions">📝 Project Conventions</h2>
+
+<h3 id="api-conventions">API Conventions</h3>
+
+<h4 id="smartmerger-api">SmartMerger API</h4>
+<ul>
+  <li>
+<code>merge</code> – Returns a <strong>String</strong> (the merged JSONC content)</li>
+  <li>
+<code>merge_result</code> – Returns a <strong>MergeResult</strong> object</li>
+  <li>
+<code>to_s</code> on MergeResult returns the merged content as a string</li>
+</ul>
+
+<h4 id="jsonc-specific-features">JSONC-Specific Features</h4>
+
+<p><strong>Comment Support</strong>:</p>
+<pre class="code language-jsonc"><code class="language-jsonc">{
+  // Line comment
+  &quot;key&quot;: &quot;value&quot;,
+  /* Block comment */
+  &quot;another&quot;: &quot;value&quot;
+}
+</code></pre>
+
+<p><strong>Freeze Blocks</strong>:</p>
+<pre class="code language-jsonc"><code class="language-jsonc">{
+  &quot;config&quot;: {
+    // jsonc-merge:freeze
+    &quot;customValue&quot;: &quot;don&#39;t override&quot;,
+    &quot;preserveThis&quot;: 42
+    // jsonc-merge:unfreeze
+  }
+}
+</code></pre>
+
+<h2 id="-testing-patterns">🧪 Testing Patterns</h2>
+
+<h3 id="treehaver-dependency-tags">TreeHaver Dependency Tags</h3>
+
+<p><strong>Available tags</strong>:</p>
+<ul>
+  <li>
+<code>:jsonc_grammar</code> – Requires JSONC grammar (any backend)</li>
+  <li>
+<code>:mri_backend</code> – Requires tree-sitter MRI backend</li>
+  <li>
+<code>:rust_backend</code> – Requires tree-sitter Rust backend</li>
+  <li>
+<code>:ffi_backend</code> – Requires tree-sitter FFI backend</li>
+  <li>
+<code>:jsonc_parsing</code> – Requires any JSONC parser</li>
+</ul>
+
+<p>✅ <strong>CORRECT</strong>:</p>
+<pre class="code language-ruby"><code class="language-ruby">RSpec.describe Jsonc::Merge::SmartMerger, :jsonc_grammar do
+  # Skipped if no JSONC parser available
+end
+</code></pre>
+
+<p>❌ <strong>WRONG</strong>:</p>
+<pre class="code language-ruby"><code class="language-ruby">before do
+  skip &quot;Requires tree-sitter&quot; unless tree_sitter_available?  # DO NOT DO THIS
+end
+</code></pre>
+
+<h2 id="-key-insights">💡 Key Insights</h2>
+
+<ol>
+  <li>
+<strong>JSONC = JSON + Comments</strong>: Full comment support unlike plain JSON</li>
+  <li>
+<strong>Comment preservation</strong>: Comments are associated with nodes and preserved during merge</li>
+  <li>
+<strong>Freeze blocks use <code>// jsonc-merge:freeze</code></strong>: Standard comment syntax</li>
+  <li>
+<strong>Multi-backend support</strong>: Works with MRI, Rust, and FFI backends</li>
+  <li>
+<strong>Backend isolation is critical</strong>: Always use <code>TreeHaver.with_backend</code>
+</li>
+</ol>
+
+<h2 id="-common-pitfalls">🚫 Common Pitfalls</h2>
+
+<ol>
+  <li>
+<strong>NEVER mix FFI and MRI backends</strong> – Use <code>TreeHaver.with_backend</code> for isolation</li>
+  <li>
+<strong>NEVER use manual skip checks</strong> – Use dependency tags (<code>:jsonc_grammar</code>, <code>:mri_backend</code>)</li>
+  <li>
+<strong>Do NOT load vendor gems</strong> – They are not part of this project; they do not exist in CI</li>
+  <li>
+<strong>Use <code>tmp/</code> for temporary files</strong> – Never use <code>/tmp</code> or other system directories</li>
+</ol>
+
+<h2 id="-jsonc-specific-notes">🔧 JSONC-Specific Notes</h2>
+
+<h3 id="comment-types">Comment Types</h3>
+<pre class="code language-jsonc"><code class="language-jsonc">// Single-line comment
+/* Multi-line
+   comment */
+{
+  &quot;key&quot;: &quot;value&quot; // Trailing comment
+}
+</code></pre>
+
+<h3 id="merge-behavior">Merge Behavior</h3>
+<ul>
+  <li>
+<strong>Objects</strong>: Matched by key name; deep merging of nested objects</li>
+  <li>
+<strong>Arrays</strong>: Can be merged or replaced based on preference</li>
+  <li>
+<strong>Comments</strong>: Preserved and associated with their nodes</li>
+  <li>
+<strong>Freeze blocks</strong>: Protect customizations from template updates</li>
+</ul>
+</div></div>
+
+      <div id="footer">
+  Generated on Thu Feb 19 09:34:51 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.38 (ruby-4.0.1).
+</div>
+
+    </div>
+  </body>
+</html>
