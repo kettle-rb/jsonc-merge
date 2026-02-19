@@ -22,9 +22,6 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Changed
 
-- Updated documentation on hostile takeover of RubyGems
-    - https://dev.to/galtzo/hostile-takeover-of-rubygems-my-thoughts-5hlo
-
 ### Deprecated
 
 ### Removed
@@ -32,6 +29,29 @@ Please file a bug if you notice a violation of semantic versioning.
 ### Fixed
 
 ### Security
+
+## [1.0.1] - 2026-02-19
+
+- TAG: [v1.0.1][1.0.1t]
+- COVERAGE: 93.01% -- 639/687 lines in 11 files
+- BRANCH COVERAGE: 68.75% -- 231/336 branches in 11 files
+- 96.43% documented
+
+### Added
+
+- AGENTS.md
+
+### Changed
+
+- appraisal2 v3.0.6
+- kettle-test v1.0.10
+- stone_checksums v1.0.3
+- ast-merge v4.0.6
+- tree_haver v5.0.5
+- tree_stump v0.2.0
+  - fork no longer required, updates all applied upstream
+- Updated documentation on hostile takeover of RubyGems
+  - https://dev.to/galtzo/hostile-takeover-of-rubygems-my-thoughts-5hlo
 
 ## [1.0.0] - 2026-02-01
 
@@ -46,6 +66,8 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Security
 
-[Unreleased]: https://github.com/kettle-rb/jsonc-merge/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/kettle-rb/jsonc-merge/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/kettle-rb/jsonc-merge/compare/v1.0.0...v1.0.1
+[1.0.1t]: https://github.com/kettle-rb/jsonc-merge/releases/tag/v1.0.1
 [1.0.0]: https://github.com/kettle-rb/jsonc-merge/compare/f1cc25b1d9b79c598270e3aa203fa56787e6c6fc...v1.0.0
 [1.0.0t]: https://github.com/kettle-rb/jsonc-merge/tags/v1.0.0
