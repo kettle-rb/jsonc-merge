@@ -82,7 +82,7 @@ Gem::Specification.new do |spec|
   spec.executables = []
 
   # Parser - tree_haver provides a unified tree-sitter (supports JSONC with comments) & citrus interface
-  spec.add_dependency("tree_haver", "~> 5.0", ">= 5.0.3")                           # ruby >= 3.2.0
+  spec.add_dependency("tree_haver", "~> 5.0", ">= 5.0.5")                           # ruby >= 3.2.0
   # NOTE: tree-sitter-jsonc parser must be installed separately via your package manager
   #       e.g., built from source at https://gitlab.com/WhyNotHugo/tree-sitter-jsonc
   # A ruby interface for tree-sitter must also be installed (pick ONE):
