@@ -462,7 +462,7 @@ bindings to tree-sitter. Alternatively, on JRuby the jtreesitter maven package w
 | [jtreesitter][jtreesitter] | JRuby                   | used by tree\_haver's Java backend)                      |
 
 [ruby_tree_sitter]: https://github.com/Faveod/ruby_tree_sitter
-[tree_stump]: https://github.com/nickstenning/tree_stump
+[tree_stump]: https://github.com/joker1007/tree_stump
 [ffi]: https://github.com/ffi/ffi
 [jtreesitter]: https://central.sonatype.com/artifact/io.github.tree-sitter/jtreesitter
 
