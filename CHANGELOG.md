@@ -28,11 +28,11 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Fixed
 
-- ConflictResolver no longer collapses nodes that share the same signature. Uses
-  cursor-based positional matching (consumed indices + per-signature cursor) instead
-  of `processed_*_sigs` Sets. While duplicate keys are invalid in JSONC (same as JSON),
-  the recursive merge already scopes each level, and this fix ensures correctness
-  for any edge cases where the same key signature appears multiple times.
+- ConflictResolver no longer collapses nodes that share the same signature.
+  Multiple nodes with identical signatures are now matched 1:1 in order via
+  cursor-based positional matching, instead of being treated as a single node.
+  While duplicate keys are invalid in JSONC (same as JSON), the recursive merge
+  already scopes each level, and this fix ensures correctness for any edge cases.
 
 ### Security
 
