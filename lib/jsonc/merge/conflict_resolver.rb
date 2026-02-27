@@ -95,9 +95,11 @@ module Jsonc
         refined_matches = build_refined_matches(template_nodes, dest_nodes, template_by_sig, dest_by_sig)
         refined_dest_to_template = refined_matches.invert
 
-        # Track which nodes have been processed
-        processed_template_sigs = ::Set.new
-        processed_dest_sigs = ::Set.new
+        # Track consumed individual node indices (not just signatures) so that
+        # multiple nodes sharing the same signature are matched 1:1 in order
+        # rather than collapsed into a single match.
+        consumed_template_indices = ::Set.new
+        sig_cursor = Hash.new(0)
 
         # First pass: Process destination nodes
         dest_nodes.each do |dest_node|
@@ -106,52 +108,72 @@ module Jsonc
           # Freeze blocks from destination are always preserved
           if freeze_node?(dest_node)
             emit_freeze_block(dest_node)
-            processed_dest_sigs << dest_sig if dest_sig
             next
           end
 
           # Check for signature match
           if dest_sig && template_by_sig[dest_sig]
-            template_info = template_by_sig[dest_sig].first
-            template_node = template_info[:node]
+            # Find the next unconsumed template node with this signature
+            candidates = template_by_sig[dest_sig]
+            cursor = sig_cursor[dest_sig]
+            template_info = nil
 
-            # Both have this node - merge them (recursively if containers)
-            merge_matched_nodes_to_emitter(template_node, dest_node, template_analysis, dest_analysis)
+            while cursor < candidates.size
+              candidate = candidates[cursor]
+              unless consumed_template_indices.include?(candidate[:index])
+                template_info = candidate
+                break
+              end
+              cursor += 1
+            end
 
-            processed_dest_sigs << dest_sig
-            processed_template_sigs << dest_sig
+            if template_info
+              template_node = template_info[:node]
+
+              # Both have this node - merge them (recursively if containers)
+              merge_matched_nodes_to_emitter(template_node, dest_node, template_analysis, dest_analysis)
+
+              consumed_template_indices << template_info[:index]
+              sig_cursor[dest_sig] = cursor + 1
+            else
+              # All template copies consumed — keep dest copy
+              emit_node(dest_node, dest_analysis)
+            end
           elsif refined_dest_to_template.key?(dest_node)
             # Found refined match
             template_node = refined_dest_to_template[dest_node]
             template_sig = template_analysis.generate_signature(template_node)
 
+            # Find and consume the matching template index
+            if template_sig && template_by_sig[template_sig]
+              template_by_sig[template_sig].each do |info|
+                unless consumed_template_indices.include?(info[:index])
+                  consumed_template_indices << info[:index]
+                  break
+                end
+              end
+            end
+
             # Merge matched nodes
             merge_matched_nodes_to_emitter(template_node, dest_node, template_analysis, dest_analysis)
-
-            processed_dest_sigs << dest_sig if dest_sig
-            processed_template_sigs << template_sig if template_sig
           else
             # Destination-only node - always keep
             emit_node(dest_node, dest_analysis)
-            processed_dest_sigs << dest_sig if dest_sig
           end
         end
 
         # Second pass: Add template-only nodes if configured
         return unless @add_template_only_nodes
 
-        template_nodes.each do |template_node|
-          template_sig = template_analysis.generate_signature(template_node)
-
-          # Skip if already processed
-          next if template_sig && processed_template_sigs.include?(template_sig)
+        template_nodes.each_with_index do |template_node, idx|
+          # Skip if consumed by a match in the first pass
+          next if consumed_template_indices.include?(idx)
 
           # Skip freeze blocks from template
           next if freeze_node?(template_node)
 
           # Add template-only node
           emit_node(template_node, template_analysis)
-          processed_template_sigs << template_sig if template_sig
         end
       end
 
