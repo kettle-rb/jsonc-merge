@@ -114,7 +114,7 @@ Gem::Specification.new do |spec|
   # spec.add_development_dependency("json", "~> 2.6")                                 # ruby >= 2.3,
 
   # Dev, Test, & Release Tasks
-  spec.add_development_dependency("kettle-dev", "~> 1.1")                           # ruby >= 2.3.0
+  spec.add_development_dependency("kettle-dev", "~> 2.0")                           # ruby >= 2.3.0
 
   # Security
   spec.add_development_dependency("bundler-audit", "~> 0.9.2")                      # ruby >= 2.0.0
