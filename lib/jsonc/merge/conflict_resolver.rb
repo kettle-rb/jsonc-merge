@@ -27,13 +27,14 @@ module Jsonc
       # @param options [Hash] Additional options for forward compatibility
       # @param node_typing [Hash{Symbol,String => #call}, nil] Node typing configuration
       #   for per-node-type preferences
-      def initialize(template_analysis, dest_analysis, preference: :destination, add_template_only_nodes: false, match_refiner: nil, node_typing: nil, **options)
+      def initialize(template_analysis, dest_analysis, preference: :destination, add_template_only_nodes: false, remove_template_missing_nodes: false, match_refiner: nil, node_typing: nil, **options)
         super(
           strategy: :batch,
           preference: preference,
           template_analysis: template_analysis,
           dest_analysis: dest_analysis,
           add_template_only_nodes: add_template_only_nodes,
+          remove_template_missing_nodes: remove_template_missing_nodes,
           match_refiner: match_refiner,
           **options
         )
@@ -54,6 +55,8 @@ module Jsonc
           # Clear emitter for fresh merge
           @emitter.clear
 
+          emit_document_prelude(@dest_analysis, nodes: dest_statements)
+
           # Merge root-level statements via emitter
           merge_node_lists_to_emitter(
             template_statements,
@@ -61,6 +64,8 @@ module Jsonc
             @template_analysis,
             @dest_analysis,
           )
+
+          emit_document_postlude(@dest_analysis, fallback_node: dest_statements.last)
 
           # Transfer emitter output to result
           # For now, add as single content block - we'll improve decision tracking later
@@ -157,8 +162,12 @@ module Jsonc
             # Merge matched nodes
             merge_matched_nodes_to_emitter(template_node, dest_node, template_analysis, dest_analysis)
           else
-            # Destination-only node - always keep
-            emit_node(dest_node, dest_analysis)
+            # Destination-only node
+            if @remove_template_missing_nodes
+              emit_removed_destination_node_comments(dest_node, dest_analysis)
+            else
+              emit_node(dest_node, dest_analysis)
+            end
           end
         end
 
@@ -195,14 +204,15 @@ module Jsonc
           template_value = template_node.value_node
           dest_value = dest_node.value_node
 
-          # Only recursively merge if BOTH values are objects (not arrays)
-          # Arrays are replaced atomically based on preference
-          if template_value&.type == :object && dest_value&.type == :object &&
-              template_value.container? && dest_value.container?
-            # Both values are objects - recursively merge
-            @emitter.emit_nested_object_start(dest_node.key_name)
+          if template_value&.container? && dest_value&.container? && template_value.type == dest_value.type
+            key_name = dest_node.key_name || template_node.key_name
 
-            # Recursively merge the value objects
+            if template_value.object?
+              @emitter.emit_nested_object_start(key_name)
+            elsif template_value.array?
+              @emitter.emit_array_start(key_name)
+            end
+
             merge_node_lists_to_emitter(
               template_value.mergeable_children,
               dest_value.mergeable_children,
@@ -210,20 +220,32 @@ module Jsonc
               dest_analysis,
             )
 
-            # Emit closing brace
-            @emitter.emit_nested_object_end
+            if template_value.object?
+              @emitter.emit_nested_object_end
+            elsif template_value.array?
+              @emitter.emit_array_end
+            end
           elsif preference_for_pair(template_node, dest_node) == :destination
-            # Values are not both objects, or one/both are arrays - use preference and emit
-            # Arrays are always replaced, not merged
+            # Values are not both mergeable containers - use preference and emit
             emit_node(dest_node, dest_analysis)
           else
-            emit_node(template_node, template_analysis)
+            emit_node(
+              template_node,
+              template_analysis,
+              comment_source_node: dest_node,
+              comment_analysis: dest_analysis,
+            )
           end
         elsif preference_for_pair(template_node, dest_node) == :destination
           # Leaf nodes or mismatched types - use preference
           emit_node(dest_node, dest_analysis)
         else
-          emit_node(template_node, template_analysis)
+          emit_node(
+            template_node,
+            template_analysis,
+            comment_source_node: dest_node,
+            comment_analysis: dest_analysis,
+          )
         end
       end
 
@@ -288,14 +310,21 @@ module Jsonc
       # Emit a single node to the emitter
       # @param node [NodeWrapper] Node to emit
       # @param analysis [FileAnalysis] Analysis for accessing source
-      def emit_node(node, analysis)
+      def emit_node(node, analysis, comment_source_node: nil, comment_analysis: analysis)
         return if freeze_node?(node) # Freeze nodes handled separately
 
+        source_node = comment_source_node || node
+        source_analysis = comment_source_node ? comment_analysis : analysis
+
         # Emit leading comments
-        if node.start_line
-          leading = analysis.comment_tracker.leading_comments_before(node.start_line)
+        if source_node.start_line
+          leading = source_analysis.comment_tracker.leading_comments_before(source_node.start_line)
           leading.each do |comment|
             @emitter.emit_tracked_comment(comment)
+          end
+
+          if leading.any?
+            emit_blank_lines_in_range(leading.last[:line] + 1, source_node.start_line - 1, source_analysis)
           end
         end
 
@@ -306,39 +335,52 @@ module Jsonc
           value_node = node.value_node
 
           if value_node
-            # Check if value is an object (not array) and needs recursive emission
-            if value_node.type == :object && value_node.container?
-              # Object value - emit structure recursively
-              @emitter.emit_nested_object_start(key)
-              # Recursively emit object children
+            if value_node.container?
+              if value_node.object?
+                @emitter.emit_nested_object_start(key)
+              elsif value_node.array?
+                @emitter.emit_array_start(key)
+              end
+
               value_node.mergeable_children.each do |child|
                 emit_node(child, analysis)
               end
-              @emitter.emit_nested_object_end
-            else
-              # Leaf value or array - get its text and emit as simple pair
-              # Arrays are emitted as raw text (not recursively) because Emitter doesn't have emit_array_start(key)
-              value_text = if value_node.start_line == value_node.end_line
-                value_node.text
-              else
-                # Multi-line value - get all lines
-                lines = []
-                (value_node.start_line..value_node.end_line).each do |ln|
-                  lines << analysis.line_at(ln)
-                end
-                lines.join("\n")
-              end
 
-              @emitter.emit_pair(key, value_text) if key && value_text
+              if value_node.object?
+                @emitter.emit_nested_object_end
+              elsif value_node.array?
+                @emitter.emit_array_end
+              end
+            else
+              inline_comment = source_analysis.comment_tracker.inline_comment_at(source_node.end_line || source_node.start_line)
+              inline_text = inline_comment&.dig(:text)
+
+              @emitter.emit_pair(key, value_node.text, inline_comment: inline_text) if key
             end
           end
+        elsif node.container?
+          if node.object?
+            @emitter.emit_object_start
+          elsif node.array?
+            @emitter.emit_array_start
+          end
+
+          node.mergeable_children.each do |child|
+            emit_node(child, analysis)
+          end
+
+          if node.object?
+            @emitter.emit_object_end
+          elsif node.array?
+            @emitter.emit_array_end
+          end
         elsif node.start_line && node.end_line
-          # Emit raw content for non-pair nodes
+          inline_comment = source_analysis.comment_tracker.inline_comment_at(source_node.end_line || source_node.start_line)
+          inline_text = inline_comment&.dig(:text)
+
           if node.start_line == node.end_line
-            # Single line - add directly
-            @emitter.lines << node.text
+            @emitter.emit_array_element(node.text, inline_comment: inline_text)
           else
-            # Multi-line - collect and emit
             lines = []
             (node.start_line..node.end_line).each do |ln|
               line = analysis.line_at(ln)
@@ -353,6 +395,102 @@ module Jsonc
       # @param freeze_node [FreezeNode] Freeze block to emit
       def emit_freeze_block(freeze_node)
         @emitter.emit_raw_lines(freeze_node.lines)
+      end
+
+      def emit_removed_destination_node_comments(node, analysis)
+        return unless node.respond_to?(:start_line) && node.start_line
+
+        leading = analysis.comment_tracker.leading_comments_before(node.start_line)
+        leading.each do |comment|
+          @emitter.emit_tracked_comment(comment)
+        end
+
+        inline_comment = analysis.comment_tracker.inline_comment_at(node.end_line || node.start_line)
+        return unless inline_comment
+
+        line = analysis.line_at(inline_comment[:line])
+        indent = line.to_s[/\A\s*/].to_s.length
+        @emitter.emit_tracked_comment(
+          inline_comment.merge(
+            indent: indent,
+            full_line: true,
+            block: false,
+          )
+        )
+      end
+
+      def emit_document_prelude(analysis, nodes: [])
+        augmenter = document_comment_augmenter_for(analysis)
+        return unless augmenter
+
+        normalized_nodes = Array(nodes)
+        regions = []
+        preamble = augmenter.preamble_region
+        regions << preamble if preamble && !preamble.empty?
+
+        if normalized_nodes.any?
+          first_attachment = augmenter.attachment_for(normalized_nodes.first)
+          first_leading = first_attachment&.leading_region
+          if first_leading && !first_leading.empty?
+            duplicate = regions.any? do |region|
+              region.start_line == first_leading.start_line && region.end_line == first_leading.end_line
+            end
+            regions << first_leading unless duplicate
+          end
+        end
+
+        if normalized_nodes.empty?
+          augmenter.orphan_regions.each do |region|
+            regions << region if region && !region.empty?
+          end
+        end
+
+        regions.each do |region|
+          emit_comment_region_lines(region, analysis)
+        end
+
+        return if regions.empty?
+
+        last_region_end = regions.last.end_line
+        if normalized_nodes.any?
+          first_node_start = normalized_nodes.first.start_line
+          emit_blank_lines_in_range(last_region_end + 1, first_node_start - 1, analysis) if last_region_end && first_node_start
+        else
+          emit_blank_lines_in_range(last_region_end + 1, analysis.lines.length, analysis) if last_region_end
+        end
+      end
+
+      def emit_document_postlude(analysis, fallback_node: nil)
+        augmenter = document_comment_augmenter_for(analysis)
+        postlude = augmenter&.postlude_region
+        return unless postlude && !postlude.empty?
+
+        if fallback_node && postlude.respond_to?(:start_line) && postlude.start_line
+          emit_blank_lines_in_range(fallback_node.end_line + 1, postlude.start_line - 1, analysis) if fallback_node.respond_to?(:end_line) && fallback_node.end_line
+        end
+
+        emit_comment_region_lines(postlude, analysis)
+      end
+
+      def document_comment_augmenter_for(analysis)
+        @document_comment_augmenters ||= {}
+        @document_comment_augmenters[analysis.object_id] ||= analysis.comment_augmenter
+      end
+
+      def emit_comment_region_lines(region, analysis)
+        return unless region&.start_line && region.end_line
+
+        lines = (region.start_line..region.end_line).filter_map { |line_num| analysis.line_at(line_num) }
+        @emitter.emit_raw_lines(lines) if lines.any?
+      end
+
+      def emit_blank_lines_in_range(start_line, end_line, analysis)
+        return unless start_line && end_line
+        return if end_line < start_line
+
+        (start_line..end_line).each do |line_num|
+          @emitter.emit_blank_line if analysis.comment_tracker.blank_line?(line_num)
+        end
       end
 
       # Build a map of refined matches using match_refiner

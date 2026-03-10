@@ -378,3 +378,269 @@ RSpec.shared_examples "JSONC support" do
     end
   end
 end
+
+RSpec.shared_examples "document boundary comments" do
+  describe "document boundary comments" do
+    it "preserves destination header and footer comments around a root object merge" do
+      template = <<~JSON
+        {
+          "name": "template"
+        }
+      JSON
+      dest = <<~JSON
+        // Destination header
+
+        {
+          "name": "destination"
+        }
+
+        // Destination footer
+      JSON
+
+      merger = described_class.new(template, dest)
+      result = merger.merge
+
+      expect(result).to include("// Destination header")
+      expect(result).to include("// Destination footer")
+      expect(result).to include("// Destination header\n\n{")
+      expect(result).to end_with("}\n\n// Destination footer\n")
+    end
+
+    it "preserves destination header and footer comments around a root array merge" do
+      template = <<~JSON
+        [
+          1,
+          2
+        ]
+      JSON
+      dest = <<~JSON
+        // Destination header
+
+        [
+          9,
+          8
+        ]
+
+        // Destination footer
+      JSON
+
+      merger = described_class.new(template, dest)
+      result = merger.merge
+
+      expect(result).to include("// Destination header")
+      expect(result).to include("// Destination footer")
+      expect(result).to include("// Destination header\n\n[")
+      expect(result).to end_with("]\n\n// Destination footer\n")
+    end
+
+    it "preserves a comment-only destination when no structural nodes exist" do
+      template = <<~JSON
+        {
+          "name": "template"
+        }
+      JSON
+      dest = <<~JSON
+        // Destination docs
+
+        // More destination docs
+      JSON
+
+      merger = described_class.new(template, dest)
+      result = merger.merge
+
+      expect(result).to eq(dest)
+    end
+  end
+end
+
+RSpec.shared_examples "matched and removed pair comments" do
+  describe "pair comment preservation" do
+    it "preserves destination leading and inline comments when a matched template-preferred pair wins" do
+      template = <<~JSON
+        {
+          "keep": 1,
+          "shared": "template"
+        }
+      JSON
+      dest = <<~JSON
+        {
+          "keep": 1,
+          // Shared docs
+          "shared": "destination" // destination inline
+        }
+      JSON
+
+      merger = described_class.new(template, dest, preference: :template)
+      result = merger.merge
+
+      expect(result).to include("// Shared docs")
+      expect(result).to include('"shared": "template" // destination inline')
+      json_without_comments = result.gsub(%r{//.*$}, "")
+      expect { JSON.parse(json_without_comments) }.not_to raise_error
+      expect(result).to include('"keep": 1,')
+    end
+
+    it "preserves comments for removed destination-only pairs when removal is enabled" do
+      template = <<~JSON
+        {
+          "keep": 1,
+          "tail": 3
+        }
+      JSON
+      dest = <<~JSON
+        {
+          "keep": 1,
+          // Remove docs
+          "remove": 2, // remove inline
+          "tail": 3
+        }
+      JSON
+
+      merger = described_class.new(
+        template,
+        dest,
+        remove_template_missing_nodes: true,
+      )
+      result = merger.merge
+
+      expect(result).to include("// Remove docs")
+      expect(result).to include("// remove inline")
+      expect(result).not_to include('"remove": 2')
+      json_without_comments = result.gsub(%r{//.*$}, "")
+      expect { JSON.parse(json_without_comments) }.not_to raise_error
+      expect(result).to include('"keep": 1,')
+    end
+  end
+end
+
+RSpec.shared_examples "nested object comments" do
+  describe "nested object comment preservation" do
+    it "keeps commas before inline comments when nested template-preferred pairs win" do
+      template = <<~JSON
+        {
+          "config": {
+            "keep": 1,
+            "add": 2
+          }
+        }
+      JSON
+      dest = <<~JSON
+        {
+          "config": {
+            // Keep docs
+            "keep": 9 // keep inline
+          }
+        }
+      JSON
+
+      merger = described_class.new(template, dest, preference: :template, add_template_only_nodes: true)
+      result = merger.merge
+
+      expect(result).to include('"keep": 1, // keep inline')
+      expect(result).to include('"add": 2')
+      json_without_comments = result.gsub(%r{//.*$}, "")
+      expect { JSON.parse(json_without_comments) }.not_to raise_error
+    end
+
+    it "preserves blank lines between nested leading comment blocks and content" do
+      template = <<~JSON
+        {
+          "config": {
+            "keep": 1,
+            "add": 2
+          }
+        }
+      JSON
+      dest = <<~JSON
+        {
+          "config": {
+            // Keep docs
+            // More keep docs
+
+            "keep": 9
+          }
+        }
+      JSON
+
+      merger = described_class.new(template, dest, preference: :template, add_template_only_nodes: true)
+      result = merger.merge
+
+      expect(result).to include("// Keep docs\n    // More keep docs\n\n    \"keep\": 1")
+    end
+  end
+end
+
+RSpec.shared_examples "mixed object and array comments" do
+  describe "mixed object/array comment preservation" do
+    it "recursively merges keyed arrays of objects without duplicating the array key" do
+      template = <<~JSON
+        {
+          "items": [
+            {
+              "name": "shared",
+              "enabled": true
+            },
+            {
+              "id": "added",
+              "enabled": true
+            }
+          ]
+        }
+      JSON
+      dest = <<~JSON
+        {
+          "items": [
+            {
+              // Shared docs
+              "name": "shared",
+              "enabled": false // inline note
+            }
+          ]
+        }
+      JSON
+
+      merger = described_class.new(template, dest, preference: :template, add_template_only_nodes: true)
+      result = merger.merge
+
+      expect(result.scan('"items":').count).to eq(1)
+      expect(result).to include("// Shared docs")
+      expect(result).to include('"enabled": true // inline note')
+      expect(result).to include('"id": "added"')
+      json_without_comments = result.gsub(%r{//.*$}, "")
+      expect { JSON.parse(json_without_comments) }.not_to raise_error
+    end
+
+    it "preserves comments for removed destination-only array items when removal is enabled" do
+      template = <<~JSON
+        {
+          "items": [
+            1,
+            3
+          ]
+        }
+      JSON
+      dest = <<~JSON
+        {
+          "items": [
+            1,
+            // Remove docs
+            2, // remove inline
+            3
+          ]
+        }
+      JSON
+
+      merger = described_class.new(
+        template,
+        dest,
+        remove_template_missing_nodes: true,
+      )
+      result = merger.merge
+
+      expect(result).to include("// Remove docs")
+      expect(result).to include("// remove inline")
+      json_without_comments = result.gsub(%r{//.*$}, "")
+      expect(JSON.parse(json_without_comments).fetch("items")).to eq([1, 3])
+    end
+  end
+end

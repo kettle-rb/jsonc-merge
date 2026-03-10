@@ -100,4 +100,76 @@ RSpec.describe "Jsonc::Merge::ConflictResolver Integration", :jsonc_grammar do
       expect(output).not_to include("templateOnly")
     end
   end
+
+  describe "comment preservation for matched and removed pairs" do
+    it "preserves destination leading and inline comments when a matched template-preferred pair wins" do
+      template_json = <<~JSON
+        {
+          "keep": 1,
+          "shared": "template"
+        }
+      JSON
+      dest_json = <<~JSON
+        {
+          "keep": 1,
+          // Shared docs
+          "shared": "destination" // destination inline
+        }
+      JSON
+
+      template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
+      dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
+
+      result = Jsonc::Merge::MergeResult.new
+      resolver = Jsonc::Merge::ConflictResolver.new(
+        template_analysis,
+        dest_analysis,
+        preference: :template,
+      )
+
+      resolver.resolve(result)
+      output = result.to_json
+
+      expect(output).to include("// Shared docs")
+      expect(output).to include('"shared": "template" // destination inline')
+      json_without_comments = output.gsub(%r{//.*$}, "")
+      expect { JSON.parse(json_without_comments) }.not_to raise_error
+    end
+
+    it "preserves comments for removed destination-only pairs when removal is enabled" do
+      template_json = <<~JSON
+        {
+          "keep": 1,
+          "tail": 3
+        }
+      JSON
+      dest_json = <<~JSON
+        {
+          "keep": 1,
+          // Remove docs
+          "remove": 2, // remove inline
+          "tail": 3
+        }
+      JSON
+
+      template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
+      dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
+
+      result = Jsonc::Merge::MergeResult.new
+      resolver = Jsonc::Merge::ConflictResolver.new(
+        template_analysis,
+        dest_analysis,
+        remove_template_missing_nodes: true,
+      )
+
+      resolver.resolve(result)
+      output = result.to_json
+
+      expect(output).to include("// Remove docs")
+      expect(output).to include("// remove inline")
+      expect(output).not_to include('"remove": 2')
+      json_without_comments = output.gsub(%r{//.*$}, "")
+      expect { JSON.parse(json_without_comments) }.not_to raise_error
+    end
+  end
 end

@@ -80,6 +80,54 @@ module Jsonc
         @errors.empty? && !@ast.nil?
       end
 
+      # Get shared comment capability information for this analysis.
+      #
+      # @return [Ast::Merge::Comment::Capability]
+      def comment_capability
+        @comment_capability ||= comment_tracker.augment(owners: []).capability
+      end
+
+      # Get all supported comments converted to shared Ast::Merge comment nodes.
+      #
+      # @return [Array<Ast::Merge::Comment::Line>]
+      def comment_nodes
+        comment_tracker.comment_nodes
+      end
+
+      # Get a shared Ast::Merge comment node at a specific line.
+      #
+      # @param line_num [Integer] 1-based line number
+      # @return [Ast::Merge::Comment::Line, nil]
+      def comment_node_at(line_num)
+        comment_tracker.comment_node_at(line_num)
+      end
+
+      # Get comments in a line range converted to a shared comment region.
+      #
+      # @param range [Range] Range of 1-based line numbers
+      # @param kind [Symbol] Region kind (:leading, :inline, :orphan, etc.)
+      # @param full_line_only [Boolean] Whether to keep only full-line comments
+      # @return [Ast::Merge::Comment::Region]
+      def comment_region_for_range(range, kind:, full_line_only: false)
+        comment_tracker.comment_region_for_range(
+          range,
+          kind: kind,
+          full_line_only: full_line_only,
+        )
+      end
+
+      # Build a passive shared comment augmenter for this analysis.
+      #
+      # @param owners [Array<#start_line,#end_line>, nil] Owners used for attachment inference
+      # @param options [Hash] Additional augmenter options
+      # @return [Ast::Merge::Comment::Augmenter]
+      def comment_augmenter(owners: nil, **options)
+        comment_tracker.augment(
+          owners: owners || comment_augmenter_default_owners,
+          **options
+        )
+      end
+
       # The base module uses 'statements' - provide both names for compatibility
       # @return [Array<NodeWrapper, FreezeNode>]
       def statements
@@ -183,7 +231,43 @@ module Jsonc
         obj.pairs
       end
 
+      # Build a passive shared comment attachment for an owner.
+      #
+      # @param owner [Object] Structural owner for the attachment
+      # @param line_num [Integer, nil] Optional line number override
+      # @param options [Hash] Additional attachment metadata
+      # @return [Ast::Merge::Comment::Attachment]
+      def comment_attachment_for(owner, line_num: nil, **options)
+        @comment_tracker.comment_attachment_for(owner, line_num: line_num, **options)
+      end
+
       private
+
+      def comment_augmenter_default_owners
+        statements.select { |statement| statement.respond_to?(:start_line) && statement.respond_to?(:end_line) }
+      end
+
+      def root_merge_node
+        return unless valid?
+
+        root = @ast.root_node
+        return unless root
+
+        root_type = root.type.to_s
+        if %w[object array].include?(root_type)
+          return NodeWrapper.new(root, lines: @lines, source: @source)
+        end
+
+        root.each do |child|
+          child_type = child.type.to_s
+          next if child_type == "comment"
+          next unless %w[object array].include?(child_type)
+
+          return NodeWrapper.new(child, lines: @lines, source: @source)
+        end
+
+        nil
+      end
 
       def parse_json
         # Use TreeHaver's high-level API - it handles:
@@ -299,7 +383,7 @@ module Jsonc
 
         # Add the root object/array if it exists and isn't in a freeze block
         # This is the top-level structural node that should be merged
-        root = root_object
+        root = root_merge_node
         if root&.start_line
           # Check if root is in a freeze block
           root_lines = (root.start_line..root.end_line).to_a

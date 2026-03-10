@@ -232,5 +232,182 @@ RSpec.describe "JSONC Merge Output Validation", :jsonc_grammar do
       json_without_comments = result.gsub(%r{//.*$}, "")
       expect { JSON.parse(json_without_comments) }.not_to raise_error
     end
+
+    it "preserves destination leading and inline comments when a matched template-preferred pair wins" do
+      template = <<~JSON
+        {
+          "keep": 1,
+          "shared": "template"
+        }
+      JSON
+      dest = <<~JSON
+        {
+          "keep": 1,
+          // Shared docs
+          "shared": "destination" // destination inline
+        }
+      JSON
+
+      merger = Jsonc::Merge::SmartMerger.new(template, dest, preference: :template)
+      result = merger.merge
+
+      expect(result).to include("// Shared docs")
+      expect(result).to include('"shared": "template" // destination inline')
+      json_without_comments = result.gsub(%r{//.*$}, "")
+      expect { JSON.parse(json_without_comments) }.not_to raise_error
+    end
+
+    it "preserves removed destination-only pair comments when removal is enabled" do
+      template = <<~JSON
+        {
+          "keep": 1,
+          "tail": 3
+        }
+      JSON
+      dest = <<~JSON
+        {
+          "keep": 1,
+          // Remove docs
+          "remove": 2, // remove inline
+          "tail": 3
+        }
+      JSON
+
+      merger = Jsonc::Merge::SmartMerger.new(
+        template,
+        dest,
+        remove_template_missing_nodes: true,
+      )
+      result = merger.merge
+
+      expect(result).to include("// Remove docs")
+      expect(result).to include("// remove inline")
+      expect(result).not_to include('"remove": 2')
+      json_without_comments = result.gsub(%r{//.*$}, "")
+      expect { JSON.parse(json_without_comments) }.not_to raise_error
+    end
+
+    it "keeps commas before inline comments for nested template-preferred pairs" do
+      template = <<~JSON
+        {
+          "config": {
+            "keep": 1,
+            "add": 2
+          }
+        }
+      JSON
+      dest = <<~JSON
+        {
+          "config": {
+            // Keep docs
+            "keep": 9 // keep inline
+          }
+        }
+      JSON
+
+      merger = Jsonc::Merge::SmartMerger.new(template, dest, preference: :template, add_template_only_nodes: true)
+      result = merger.merge
+
+      expect(result).to include('"keep": 1, // keep inline')
+      json_without_comments = result.gsub(%r{//.*$}, "")
+      expect { JSON.parse(json_without_comments) }.not_to raise_error
+    end
+
+    it "preserves blank lines between nested comment blocks and content" do
+      template = <<~JSON
+        {
+          "config": {
+            "keep": 1,
+            "add": 2
+          }
+        }
+      JSON
+      dest = <<~JSON
+        {
+          "config": {
+            // Keep docs
+            // More keep docs
+
+            "keep": 9
+          }
+        }
+      JSON
+
+      merger = Jsonc::Merge::SmartMerger.new(template, dest, preference: :template, add_template_only_nodes: true)
+      result = merger.merge
+
+      expect(result).to include("// Keep docs\n    // More keep docs\n\n    \"keep\": 1")
+    end
+
+    it "recursively merges keyed arrays of objects without duplicating the array key" do
+      template = <<~JSON
+        {
+          "items": [
+            {
+              "name": "shared",
+              "enabled": true
+            },
+            {
+              "id": "added",
+              "enabled": true
+            }
+          ]
+        }
+      JSON
+      dest = <<~JSON
+        {
+          "items": [
+            {
+              // Shared docs
+              "name": "shared",
+              "enabled": false // inline note
+            }
+          ]
+        }
+      JSON
+
+      merger = Jsonc::Merge::SmartMerger.new(template, dest, preference: :template, add_template_only_nodes: true)
+      result = merger.merge
+
+      expect(result.scan('"items":').count).to eq(1)
+      expect(result).to include("// Shared docs")
+      expect(result).to include('"enabled": true // inline note')
+      expect(result).to include('"id": "added"')
+      json_without_comments = result.gsub(%r{//.*$}, "")
+      expect { JSON.parse(json_without_comments) }.not_to raise_error
+    end
+
+    it "preserves comments for removed destination-only array items when removal is enabled" do
+      template = <<~JSON
+        {
+          "items": [
+            1,
+            3
+          ]
+        }
+      JSON
+      dest = <<~JSON
+        {
+          "items": [
+            1,
+            // Remove docs
+            2, // remove inline
+            3
+          ]
+        }
+      JSON
+
+      merger = Jsonc::Merge::SmartMerger.new(
+        template,
+        dest,
+        remove_template_missing_nodes: true,
+      )
+      result = merger.merge
+
+      expect(result).to include("// Remove docs")
+      expect(result).to include("// remove inline")
+      json_without_comments = result.gsub(%r{//.*$}, "")
+      expect(JSON.parse(json_without_comments).fetch("items")).to eq([1, 3])
+    end
   end
 end

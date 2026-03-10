@@ -149,14 +149,44 @@ module Jsonc
       def add_comma_if_needed
         return unless @needs_comma && @lines.any?
 
-        # Add comma to the previous line if it doesn't already have one
-        last_line = @lines.last
-        return if last_line.strip.empty?
-        return if last_line.rstrip.end_with?(",")
-        return if last_line.rstrip.end_with?("{")
-        return if last_line.rstrip.end_with?("[")
+        line_index = @lines.length - 1
+        while line_index >= 0
+          line = @lines[line_index]
+          stripped = line.strip
+          if stripped.empty? || comment_line?(stripped)
+            line_index -= 1
+            next
+          end
 
-        @lines[-1] = "#{last_line},"
+          break
+        end
+
+        return if line_index.negative?
+
+        # Add comma to the previous structural line if it doesn't already have one
+        last_line = @lines[line_index]
+        @lines[line_index] = add_comma_to_line(last_line)
+      end
+
+      def comment_line?(stripped_line)
+        stripped_line.start_with?("//", "/*", "*", "*/")
+      end
+
+      def add_comma_to_line(line)
+        return line if line.strip.empty?
+
+        inline_match = line.match(%r{\A(?<content>.*?)(?<spacing>\s+)(?<comment>//.*)\z})
+        if inline_match
+          content = inline_match[:content].rstrip
+          return line if content.end_with?(",", "{", "[")
+
+          return "#{content}, #{inline_match[:comment]}"
+        end
+
+        stripped = line.rstrip
+        return line if stripped.end_with?(",", "{", "[")
+
+        "#{line},"
       end
     end
   end

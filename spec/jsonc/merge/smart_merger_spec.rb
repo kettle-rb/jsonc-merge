@@ -27,6 +27,10 @@ RSpec.describe Jsonc::Merge::SmartMerger do
     it_behaves_like "invalid template detection"
     it_behaves_like "invalid destination detection"
     it_behaves_like "JSONC support"
+    it_behaves_like "document boundary comments"
+    it_behaves_like "matched and removed pair comments"
+    it_behaves_like "nested object comments"
+    it_behaves_like "mixed object and array comments"
   end
 
   # ============================================================
@@ -48,6 +52,10 @@ RSpec.describe Jsonc::Merge::SmartMerger do
     it_behaves_like "invalid template detection"
     it_behaves_like "invalid destination detection"
     it_behaves_like "JSONC support"
+    it_behaves_like "document boundary comments"
+    it_behaves_like "matched and removed pair comments"
+    it_behaves_like "nested object comments"
+    it_behaves_like "mixed object and array comments"
   end
 
   # ============================================================
@@ -69,6 +77,10 @@ RSpec.describe Jsonc::Merge::SmartMerger do
     it_behaves_like "invalid template detection"
     it_behaves_like "invalid destination detection"
     it_behaves_like "JSONC support"
+    it_behaves_like "document boundary comments"
+    it_behaves_like "matched and removed pair comments"
+    it_behaves_like "nested object comments"
+    it_behaves_like "mixed object and array comments"
   end
 
   # ============================================================
@@ -111,5 +123,9 @@ RSpec.describe Jsonc::Merge::SmartMerger do
     it_behaves_like "invalid template detection"
     it_behaves_like "invalid destination detection"
     it_behaves_like "JSONC support"
+    it_behaves_like "document boundary comments"
+    it_behaves_like "matched and removed pair comments"
+    it_behaves_like "nested object comments"
+    it_behaves_like "mixed object and array comments"
   end
 end

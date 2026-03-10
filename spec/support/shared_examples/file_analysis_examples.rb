@@ -500,6 +500,70 @@ RSpec.shared_examples "comment tracker" do
   end
 end
 
+RSpec.shared_examples "shared comment capability" do
+  describe "shared comment capability" do
+    let(:json_with_boundary_comments) do
+      <<~JSON
+        // Header docs
+
+        {
+          "name": "test"
+        }
+
+        // Footer docs
+      JSON
+    end
+
+    it "reports source-augmented comment capability" do
+      analysis = described_class.new(json_with_boundary_comments)
+
+      expect(analysis.comment_capability).to be_a(Ast::Merge::Comment::Capability)
+      expect(analysis.comment_capability.source_augmented?).to be true
+    end
+
+    it "builds a comment augmenter with preamble and postlude regions" do
+      analysis = described_class.new(json_with_boundary_comments)
+      augmenter = analysis.comment_augmenter
+      owner = analysis.statements.first
+      attachment = augmenter.attachment_for(owner)
+
+      expect(attachment.leading_region).to be_a(Ast::Merge::Comment::Region)
+      expect(attachment.leading_region.normalized_content).to eq("Header docs")
+      expect(augmenter.postlude_region).to be_a(Ast::Merge::Comment::Region)
+      expect(augmenter.postlude_region.normalized_content).to eq("Footer docs")
+    end
+
+    it "builds shared comment nodes for line comments" do
+      analysis = described_class.new(json_with_boundary_comments)
+
+      expect(analysis.comment_nodes).not_to be_empty
+      expect(analysis.comment_nodes.first).to be_a(Ast::Merge::Comment::Line)
+      expect(analysis.comment_nodes.first.content).to eq("Header docs")
+    end
+
+    it "builds a comment attachment for the root structural node" do
+      analysis = described_class.new(json_with_boundary_comments)
+      owner = analysis.statements.first
+      attachment = analysis.comment_attachment_for(owner)
+
+      expect(attachment).to be_a(Ast::Merge::Comment::Attachment)
+      expect(attachment.leading_region).to be_a(Ast::Merge::Comment::Region)
+      expect(attachment.leading_region.normalized_content).to eq("Header docs")
+    end
+  end
+
+  describe "root array integration" do
+    it "includes a top-level array as a mergeable statement" do
+      analysis = described_class.new("[\n  1,\n  2\n]\n")
+
+      expect(analysis.valid?).to be true
+      expect(analysis.statements.size).to eq(1)
+      expect(analysis.statements.first).to be_a(Jsonc::Merge::NodeWrapper)
+      expect(analysis.statements.first.array?).to be true
+    end
+  end
+end
+
 RSpec.shared_examples "parser path handling" do
   describe "parser path handling" do
     let(:simple_json) do

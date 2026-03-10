@@ -228,6 +228,45 @@ RSpec.describe Jsonc::Merge::CommentTracker do
     end
   end
 
+  describe "shared comment augmentation" do
+    it "builds a source-augmented capability for line comments" do
+      content = <<~JSON
+        // Header docs
+
+        {
+          "key": "value"
+        }
+
+        // Footer docs
+      JSON
+
+      tracker = described_class.new(content)
+      owner = Struct.new(:start_line, :end_line).new(3, 5)
+      augmenter = tracker.augment(owners: [owner])
+      attachment = augmenter.attachment_for(owner)
+
+      expect(augmenter.capability).to be_a(Ast::Merge::Comment::Capability)
+      expect(augmenter.capability.source_augmented?).to be true
+      expect(attachment.leading_region.normalized_content).to eq("Header docs")
+      expect(augmenter.postlude_region.normalized_content).to eq("Footer docs")
+    end
+
+    it "builds shared line comment nodes" do
+      tracker = described_class.new("// Header docs\n{}\n")
+
+      expect(tracker.comment_nodes).not_to be_empty
+      expect(tracker.comment_nodes.first).to be_a(Ast::Merge::Comment::Line)
+      expect(tracker.comment_nodes.first.content).to eq("Header docs")
+    end
+
+    it "does not expose block comments through the shared line-comment node adapter yet" do
+      tracker = described_class.new("/* Block docs */\n{}\n")
+
+      expect(tracker.comment_nodes).to eq([])
+      expect(tracker.comment_node_at(1)).to be_nil
+    end
+  end
+
   describe "comment indentation tracking" do
     it "tracks indent level of comments" do
       content = <<~JSON

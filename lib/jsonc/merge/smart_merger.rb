@@ -47,6 +47,7 @@ module Jsonc
         signature_generator: nil,
         preference: :destination,
         add_template_only_nodes: false,
+        remove_template_missing_nodes: false,
         freeze_token: nil,
         match_refiner: nil,
         regions: nil,
@@ -54,12 +55,15 @@ module Jsonc
         node_typing: nil,
         **options
       )
+        @remove_template_missing_nodes = remove_template_missing_nodes
+
         super(
           template_content,
           dest_content,
           signature_generator: signature_generator,
           preference: preference,
           add_template_only_nodes: add_template_only_nodes,
+          remove_template_missing_nodes: remove_template_missing_nodes,
           freeze_token: freeze_token,
           match_refiner: match_refiner,
           regions: regions,
@@ -76,6 +80,7 @@ module Jsonc
         {
           preference: @preference,
           add_template_only_nodes: @add_template_only_nodes,
+          remove_template_missing_nodes: @remove_template_missing_nodes,
           match_refiner: @match_refiner,
         }
       end
@@ -123,6 +128,7 @@ module Jsonc
           @dest_analysis,
           preference: @preference,
           add_template_only_nodes: @add_template_only_nodes,
+          remove_template_missing_nodes: @remove_template_missing_nodes,
           match_refiner: @match_refiner,
           node_typing: @node_typing,
         )
