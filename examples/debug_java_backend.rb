@@ -4,15 +4,25 @@
 # Debug script to investigate Java backend behavior with jtreesitter
 #
 # Usage (from jsonc-merge root directory):
-#   jruby debug_java_backend.rb
+#   jruby examples/debug_java_backend.rb
+
+WORKSPACE_ROOT = File.expand_path("../..", __dir__)
+ENV["KETTLE_RB_DEV"] = WORKSPACE_ROOT unless ENV.key?("KETTLE_RB_DEV")
 
 require "bundler/inline"
 
 gemfile do
   source "https://gem.coop"
-  gem "ast-merge", path: File.expand_path("../../../../", __dir__)
-  gem "jsonc-merge", path: File.expand_path("..", __dir__)
-  gem "tree_haver", path: File.expand_path("../tree_haver", __dir__)
+  require File.expand_path("nomono/lib/nomono/bundler", WORKSPACE_ROOT)
+
+  eval_nomono_gems(
+    gems: %w[ast-merge jsonc-merge tree_haver],
+    prefix: "KETTLE_RB",
+    path_env: "KETTLE_RB_DEV",
+    vendored_gems_env: "VENDORED_GEMS",
+    vendor_gem_dir_env: "VENDOR_GEM_DIR",
+    debug_env: "KETTLE_DEV_DEBUG"
+  )
 end
 
 require "jsonc/merge"

@@ -62,7 +62,21 @@ Bring the shared Comment AST & Merge capability from `psych-merge` into `jsonc-m
 - Phase 1 target.
 - Recommended as the first active implementation after `psych-merge` because it combines high value with a clear source-augmented comment model.
 
+## Latest `ast-merge` Comment Logic Checklist (2026-03-13)
+- [x] Shared capability plumbing: `comment_capability`, `comment_augmenter`, normalized region/attachment access
+- [x] Document boundary ownership: prelude/postlude and comment-only file handling
+- [x] Matched-node fallback: destination leading/inline preservation under template preference
+- [x] Removed-node preservation: destination-only pair/array-item comment preservation and inline promotion
+- [x] Recursive/fixture parity: nested object/array scenarios and reproducible comment-heavy fixtures
+
+Current parity status: complete for the latest shared `ast-merge` comment rollout shape, and the local workspace-path gem wiring has now been revalidated under `KETTLE_RB_DEV`.
+
 ## Progress
+- 2026-03-13: Local workspace-path validation rechecked after modular gemfile wiring normalization.
+- Replaced direct local `path:` overrides in modular tree-sitter / templating gemfiles with the shared `nomono` local-override pattern and reran the full `jsonc-merge` suite in workspace mode; the suite is green with the existing backend-availability pending examples only.
+- 2026-03-11: Plan sync completed.
+- Confirmed `jsonc-merge` remains aligned to the latest shared `ast-merge` comment checklist with all rollout slices complete.
+- This plan now serves as a completed Phase 1 reference alongside `dotenv-merge`.
 - 2026-03-09: Phase 1 / Slice 1 completed.
 - Landed the minimal shared comment capability surface in `CommentTracker` and `FileAnalysis`.
 - Preserved document-boundary destination comments for top-level object and top-level array merges.
@@ -113,10 +127,10 @@ Status: complete on 2026-03-09.
 
 Status: complete on 2026-03-09.
 Completed: nested-object inline-comment comma placement, nested blank-line comment-block preservation, keyed-array recursive comment preservation, removed-array-item comment preservation, and reproducible fixture promotion for the strongest recursive comment-heavy scenarios.
-Next recommended resume point: move to the next Phase 1 gem (`dotenv-merge`) and start Slice 1 shared comment capability reconnaissance.
+Next recommended resume point: keep `jsonc-merge` in regression-only mode and continue the remaining Phase 1 rollout in `toml-merge`.
 
 ## Dependencies / Resume Notes
-- Reference `vendor/psych-merge/lib/psych/merge/comment_tracker.rb` and `vendor/psych-merge/lib/psych/merge/conflict_resolver.rb` for source-augmented ownership rules.
+- Reference sibling `psych-merge` sources `../psych-merge/lib/psych/merge/comment_tracker.rb` and `../psych-merge/lib/psych/merge/conflict_resolver.rb` for source-augmented ownership rules.
 - Start in `lib/jsonc/merge/file_analysis.rb` and `lib/jsonc/merge/conflict_resolver.rb` before touching emitter details.
 - Keep strict JSON behavior boundaries aligned with `json-merge`.
 
