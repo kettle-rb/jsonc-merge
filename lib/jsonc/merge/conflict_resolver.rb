@@ -319,9 +319,7 @@ module Jsonc
         # Emit leading comments
         if source_node.start_line
           leading = source_analysis.comment_tracker.leading_comments_before(source_node.start_line)
-          leading.each do |comment|
-            @emitter.emit_tracked_comment(comment)
-          end
+          emit_tracked_comments_with_internal_blank_lines(leading, source_analysis)
 
           if leading.any?
             emit_blank_lines_in_range(leading.last[:line] + 1, source_node.start_line - 1, source_analysis)
@@ -401,22 +399,42 @@ module Jsonc
         return unless node.respond_to?(:start_line) && node.start_line
 
         leading = analysis.comment_tracker.leading_comments_before(node.start_line)
-        leading.each do |comment|
-          @emitter.emit_tracked_comment(comment)
-        end
+        emit_tracked_comments_with_internal_blank_lines(leading, analysis)
 
         inline_comment = analysis.comment_tracker.inline_comment_at(node.end_line || node.start_line)
-        return unless inline_comment
-
-        line = analysis.line_at(inline_comment[:line])
-        indent = line.to_s[/\A\s*/].to_s.length
-        @emitter.emit_tracked_comment(
-          inline_comment.merge(
-            indent: indent,
-            full_line: true,
-            block: false,
+        if inline_comment
+          line = analysis.line_at(inline_comment[:line])
+          indent = line.to_s[/\A\s*/].to_s.length
+          @emitter.emit_tracked_comment(
+            inline_comment.merge(
+              indent: indent,
+              full_line: true,
+              block: false,
+            )
           )
-        )
+        end
+
+        emit_following_removed_node_blank_lines(node, analysis)
+      end
+
+      def emit_following_removed_node_blank_lines(node, analysis)
+        line_num = (node.end_line || node.start_line) + 1
+
+        while line_num <= analysis.lines.length && analysis.comment_tracker.blank_line?(line_num)
+          @emitter.emit_blank_line
+          line_num += 1
+        end
+      end
+
+      def emit_tracked_comments_with_internal_blank_lines(comments, analysis)
+        Array(comments).each_with_index do |comment, index|
+          @emitter.emit_tracked_comment(comment)
+
+          next_comment = comments[index + 1]
+          next unless next_comment
+
+          emit_blank_lines_in_range(comment[:line] + 1, next_comment[:line] - 1, analysis)
+        end
       end
 
       def emit_document_prelude(analysis, nodes: [])

@@ -20,7 +20,12 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Added
 
+- Added shared comment capability and augmenter exposure with normalized region and attachment access for root object / array files, comment-only documents, and reproducible comment-heavy fixtures
+
 ### Changed
+
+- Preserved destination leading and inline comments through template-preferred matched pair and recursive object / array merges while keeping comment association stable through nested JSONC shapes
+- Preserved or promoted comments for removed destination-only pairs and array items when `remove_template_missing_nodes: true` is enabled, while keeping comma placement and stripped JSON validity intact
 
 ### Deprecated
 
