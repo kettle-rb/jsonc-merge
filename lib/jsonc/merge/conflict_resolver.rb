@@ -14,6 +14,7 @@ module Jsonc
     #
     # @see Ast::Merge::ConflictResolverBase
     class ConflictResolver < Ast::Merge::ConflictResolverBase
+      include ::Ast::Merge::TrailingGroups::DestIterate
       # Creates a new ConflictResolver
       #
       # @param template_analysis [FileAnalysis] Analyzed template file
@@ -100,11 +101,26 @@ module Jsonc
         refined_matches = build_refined_matches(template_nodes, dest_nodes, template_by_sig, dest_by_sig)
         refined_dest_to_template = refined_matches.invert
 
-        # Track consumed individual node indices (not just signatures) so that
-        # multiple nodes sharing the same signature are matched 1:1 in order
-        # rather than collapsed into a single match.
         consumed_template_indices = ::Set.new
         sig_cursor = Hash.new(0)
+
+        # Pre-compute position-aware trailing groups for template-only nodes.
+        dest_sigs = ::Set.new
+        dest_nodes.each { |n| sig = dest_analysis.generate_signature(n); dest_sigs << sig if sig }
+        refined_template_ids = ::Set.new(refined_matches.keys.map(&:object_id))
+
+        trailing_groups, all_matched_indices = build_dest_iterate_trailing_groups(
+          template_nodes: template_nodes,
+          dest_sigs: dest_sigs,
+          signature_for: ->(node) { template_analysis.generate_signature(node) },
+          refined_template_ids: refined_template_ids,
+          add_template_only_nodes: @add_template_only_nodes,
+        )
+
+        emit_prefix_trailing_group(trailing_groups, consumed_template_indices) do |info|
+          next if freeze_node?(info[:node])
+          emit_node(info[:node], template_analysis)
+        end
 
         # First pass: Process destination nodes
         dest_nodes.each do |dest_node|
@@ -118,7 +134,6 @@ module Jsonc
 
           # Check for signature match
           if dest_sig && template_by_sig[dest_sig]
-            # Find the next unconsumed template node with this signature
             candidates = template_by_sig[dest_sig]
             cursor = sig_cursor[dest_sig]
             template_info = nil
@@ -134,22 +149,16 @@ module Jsonc
 
             if template_info
               template_node = template_info[:node]
-
-              # Both have this node - merge them (recursively if containers)
               merge_matched_nodes_to_emitter(template_node, dest_node, template_analysis, dest_analysis)
-
               consumed_template_indices << template_info[:index]
               sig_cursor[dest_sig] = cursor + 1
             else
-              # All template copies consumed — keep dest copy
               emit_node(dest_node, dest_analysis)
             end
           elsif refined_dest_to_template.key?(dest_node)
-            # Found refined match
             template_node = refined_dest_to_template[dest_node]
             template_sig = template_analysis.generate_signature(template_node)
 
-            # Find and consume the matching template index
             if template_sig && template_by_sig[template_sig]
               template_by_sig[template_sig].each do |info|
                 unless consumed_template_indices.include?(info[:index])
@@ -159,31 +168,39 @@ module Jsonc
               end
             end
 
-            # Merge matched nodes
             merge_matched_nodes_to_emitter(template_node, dest_node, template_analysis, dest_analysis)
           else
-            # Destination-only node
             if @remove_template_missing_nodes
               emit_removed_destination_node_comments(dest_node, dest_analysis)
             else
               emit_node(dest_node, dest_analysis)
             end
           end
+
+          # Flush interior trailing groups that are ready
+          flush_ready_trailing_groups(
+            trailing_groups: trailing_groups,
+            matched_indices: all_matched_indices,
+            consumed_indices: consumed_template_indices,
+          ) do |info|
+            next if freeze_node?(info[:node])
+            emit_node(info[:node], template_analysis)
+          end
         end
 
-        # Second pass: Add template-only nodes if configured
-        return unless @add_template_only_nodes
-
-        template_nodes.each_with_index do |template_node, idx|
-          # Skip if consumed by a match in the first pass
-          next if consumed_template_indices.include?(idx)
-
-          # Skip freeze blocks from template
-          next if freeze_node?(template_node)
-
-          # Add template-only node
-          emit_node(template_node, template_analysis)
+        # Emit remaining trailing groups (tail + safety net)
+        emit_remaining_trailing_groups(
+          trailing_groups: trailing_groups,
+          consumed_indices: consumed_template_indices,
+        ) do |info|
+          next if freeze_node?(info[:node])
+          emit_node(info[:node], template_analysis)
         end
+      end
+
+      # Override hook: freeze nodes are treated as matched for trailing group purposes.
+      def trailing_group_node_matched?(node, _signature)
+        freeze_node?(node)
       end
 
       # Keep old merge_node_lists for now (will be removed later)
