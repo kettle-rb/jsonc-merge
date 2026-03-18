@@ -223,11 +223,20 @@ module Jsonc
 
           if template_value&.container? && dest_value&.container? && template_value.type == dest_value.type
             key_name = dest_node.key_name || template_node.key_name
+            comment_source_node, comment_source_analysis = preferred_comment_source(
+              dest_node,
+              dest_analysis,
+              fallback_node: template_node,
+              fallback_analysis: template_analysis,
+            )
+
+            emit_leading_comments_for(comment_source_node, comment_source_analysis)
+            inline_text = inline_comment_text_for(comment_source_node, comment_source_analysis)
 
             if template_value.object?
-              @emitter.emit_nested_object_start(key_name)
+              @emitter.emit_nested_object_start(key_name, inline_comment: inline_text)
             elsif template_value.array?
-              @emitter.emit_array_start(key_name)
+              @emitter.emit_array_start(key_name, inline_comment: inline_text)
             end
 
             merge_node_lists_to_emitter(
@@ -236,6 +245,14 @@ module Jsonc
               template_analysis,
               dest_analysis,
             )
+
+            trailing_source_node, trailing_source_analysis = preferred_container_comment_source(
+              dest_value,
+              dest_analysis,
+              fallback_node: template_value,
+              fallback_analysis: template_analysis,
+            )
+            emit_container_trailing_lines(trailing_source_node, trailing_source_analysis)
 
             if template_value.object?
               @emitter.emit_nested_object_end
@@ -290,6 +307,14 @@ module Jsonc
           dest_analysis,
         )
 
+        trailing_source_node, trailing_source_analysis = preferred_container_comment_source(
+          dest_node,
+          dest_analysis,
+          fallback_node: template_node,
+          fallback_analysis: template_analysis,
+        )
+        emit_container_trailing_lines(trailing_source_node, trailing_source_analysis)
+
         # Emit closing bracket
         if dest_node.object?
           @emitter.emit_object_end
@@ -333,33 +358,30 @@ module Jsonc
         source_node = comment_source_node || node
         source_analysis = comment_source_node ? comment_analysis : analysis
 
-        # Emit leading comments
-        if source_node.start_line
-          leading = source_analysis.comment_tracker.leading_comments_before(source_node.start_line)
-          emit_tracked_comments_with_internal_blank_lines(leading, source_analysis)
-
-          if leading.any?
-            emit_blank_lines_in_range(leading.last[:line] + 1, source_node.start_line - 1, source_analysis)
-          end
-        end
+        emit_leading_comments_for(source_node, source_analysis)
 
         # Emit the node content
         if node.pair?
           # Emit as pair
           key = node.key_name
           value_node = node.value_node
+          source_value_node = source_node.respond_to?(:value_node) ? source_node.value_node : nil
 
           if value_node
             if value_node.container?
+              inline_text = inline_comment_text_for(source_node, source_analysis)
+
               if value_node.object?
-                @emitter.emit_nested_object_start(key)
+                @emitter.emit_nested_object_start(key, inline_comment: inline_text)
               elsif value_node.array?
-                @emitter.emit_array_start(key)
+                @emitter.emit_array_start(key, inline_comment: inline_text)
               end
 
               value_node.mergeable_children.each do |child|
                 emit_node(child, analysis)
               end
+
+              emit_container_trailing_lines(source_value_node || value_node, source_analysis)
 
               if value_node.object?
                 @emitter.emit_nested_object_end
@@ -367,8 +389,7 @@ module Jsonc
                 @emitter.emit_array_end
               end
             else
-              inline_comment = source_analysis.comment_tracker.inline_comment_at(source_node.end_line || source_node.start_line)
-              inline_text = inline_comment&.dig(:text)
+              inline_text = inline_comment_text_for(source_node, source_analysis)
 
               @emitter.emit_pair(key, value_node.text, inline_comment: inline_text) if key
             end
@@ -384,14 +405,15 @@ module Jsonc
             emit_node(child, analysis)
           end
 
+          emit_container_trailing_lines(source_node, source_analysis)
+
           if node.object?
             @emitter.emit_object_end
           elsif node.array?
             @emitter.emit_array_end
           end
         elsif node.start_line && node.end_line
-          inline_comment = source_analysis.comment_tracker.inline_comment_at(source_node.end_line || source_node.start_line)
-          inline_text = inline_comment&.dig(:text)
+          inline_text = inline_comment_text_for(source_node, source_analysis)
 
           if node.start_line == node.end_line
             @emitter.emit_array_element(node.text, inline_comment: inline_text)
@@ -406,6 +428,102 @@ module Jsonc
         end
       end
 
+
+      def preferred_comment_source(node, analysis, fallback_node: nil, fallback_analysis: nil)
+        return [node, analysis] if node_has_emittable_comments?(node, analysis)
+        return [fallback_node, fallback_analysis] if fallback_node && node_has_emittable_comments?(fallback_node, fallback_analysis)
+
+        [node, analysis]
+      end
+
+      def preferred_container_comment_source(node, analysis, fallback_node: nil, fallback_analysis: nil)
+        return [node, analysis] if container_has_trailing_comments?(node, analysis)
+        return [fallback_node, fallback_analysis] if fallback_node && container_has_trailing_comments?(fallback_node, fallback_analysis)
+
+        [node, analysis]
+      end
+
+      def node_has_emittable_comments?(node, analysis)
+        return false unless node&.respond_to?(:start_line) && node.start_line
+
+        analysis.comment_tracker.leading_comments_before(node.start_line).any? ||
+          !inline_comment_text_for(node, analysis).nil?
+      end
+
+      def emit_leading_comments_for(node, analysis)
+        return unless node&.respond_to?(:start_line) && node.start_line
+
+        leading = analysis.comment_tracker.leading_comments_before(node.start_line)
+        emit_tracked_comments_with_internal_blank_lines(leading, analysis)
+
+        if leading.any?
+          emit_blank_lines_in_range(leading.last[:line] + 1, node.start_line - 1, analysis)
+        end
+      end
+
+      def inline_comment_text_for(node, analysis)
+        return unless node&.respond_to?(:start_line) && node.start_line
+
+        inline_comment = analysis.comment_tracker.inline_comment_at(node.end_line || node.start_line)
+        inline_comment&.dig(:text)
+      end
+
+      def emit_container_trailing_lines(container_node, analysis)
+        range = trailing_container_line_range(container_node)
+        return unless range
+
+        emit_comment_and_blank_lines_in_range(range.begin, range.end, analysis)
+      end
+
+      def container_has_trailing_comments?(container_node, analysis)
+        range = trailing_container_line_range(container_node)
+        return false unless range
+
+        range.any? do |line_num|
+          stripped = analysis.line_at(line_num).to_s.strip
+          comment_like_line?(stripped)
+        end
+      end
+
+      def trailing_container_line_range(container_node)
+        return unless container_node&.container?
+        return unless container_node.respond_to?(:start_line) && container_node.respond_to?(:end_line)
+        return unless container_node.start_line && container_node.end_line
+
+        children = container_node.mergeable_children
+        start_line = if children.any?
+          last_child = children.last
+          (last_child.end_line || last_child.start_line) + 1
+        else
+          container_node.start_line + 1
+        end
+        end_line = container_node.end_line - 1
+        return unless end_line >= start_line
+
+        start_line..end_line
+      end
+
+      def emit_comment_and_blank_lines_in_range(start_line, end_line, analysis)
+        return unless start_line && end_line
+        return if end_line < start_line
+
+        lines = []
+        (start_line..end_line).each do |line_num|
+          line = analysis.line_at(line_num)
+          next unless line
+
+          stripped = line.strip
+          next unless stripped.empty? || comment_like_line?(stripped)
+
+          lines << line
+        end
+
+        @emitter.emit_raw_lines(lines) if lines.any?
+      end
+
+      def comment_like_line?(stripped_line)
+        stripped_line.start_with?("//", "/*", "*", "*/")
+      end
       # Emit a freeze block
       # @param freeze_node [FreezeNode] Freeze block to emit
       def emit_freeze_block(freeze_node)

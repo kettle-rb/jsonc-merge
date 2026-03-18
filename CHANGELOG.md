@@ -33,6 +33,7 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Fixed
 
+- Preserved comments on matched object / array container pairs and trailing container comment blocks when equivalent JSONC comments differ only by whitespace, including devcontainer-style recursive merges
 - ConflictResolver no longer collapses nodes that share the same signature.
   Multiple nodes with identical signatures are now matched 1:1 in order via
   cursor-based positional matching, instead of being treated as a single node.

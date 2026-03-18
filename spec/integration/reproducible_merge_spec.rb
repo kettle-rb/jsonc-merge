@@ -28,5 +28,12 @@ RSpec.describe "JSONC reproducible merge", :jsonc_grammar do
         remove_template_missing_nodes: true,
       }
     end
+
+    context "when matched container comments differ only by whitespace they are still preserved" do
+      it_behaves_like "a reproducible merge", "04_devcontainer_whitespace_only_comment_preservation", {
+        preference: :template,
+        add_template_only_nodes: true,
+      }
+    end
   end
 end

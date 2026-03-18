@@ -78,13 +78,16 @@ module Jsonc
       # Emit array start
       #
       # @param key [String, nil] Key name if this array is a value in an object
-      def emit_array_start(key = nil)
+      # @param inline_comment [String, nil] Optional inline comment for the opening line
+      def emit_array_start(key = nil, inline_comment: nil)
         add_comma_if_needed
-        @lines << if key
+        line = if key
           "#{current_indent}\"#{key}\": ["
         else
           "#{current_indent}["
         end
+        line += " // #{inline_comment}" if inline_comment
+        @lines << line
         indent
         @needs_comma = false
       end
@@ -123,9 +126,12 @@ module Jsonc
 
       # Emit a key with opening brace for nested object
       # @param key [String] Key name
-      def emit_nested_object_start(key)
+      # @param inline_comment [String, nil] Optional inline comment for the opening line
+      def emit_nested_object_start(key, inline_comment: nil)
         add_comma_if_needed
-        @lines << "#{current_indent}\"#{key}\": {"
+        line = "#{current_indent}\"#{key}\": {"
+        line += " // #{inline_comment}" if inline_comment
+        @lines << line
         indent
         @needs_comma = false
       end
