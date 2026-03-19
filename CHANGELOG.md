@@ -24,6 +24,7 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Changed
 
+- Adopted the shared `Ast::Merge::Layout` contract for root-level JSONC layout gaps, including shared layout compliance coverage across the supported backend paths
 - Preserved destination leading and inline comments through template-preferred matched pair and recursive object / array merges while keeping comment association stable through nested JSONC shapes
 - Preserved or promoted comments for removed destination-only pairs and array items when `remove_template_missing_nodes: true` is enabled, while keeping comma placement and stripped JSON validity intact
 - Adopted `Ast::Merge::TrailingGroups::DestIterate` for position-aware template-only pair and array-item insertion while preserving JSONC freeze blocks and comment-bearing recursive container merges

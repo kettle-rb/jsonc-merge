@@ -191,4 +191,41 @@ RSpec.describe "Jsonc::Merge::FileAnalysis Integration", :jsonc_grammar do
       expect(analysis.root_pairs).to eq([])
     end
   end
+
+  describe "shared layout compliance" do
+    let(:jsonc_with_layout_gaps) do
+      <<~JSON
+        {
+
+          "alpha": 1,
+
+          "beta": 2
+
+        }
+      JSON
+    end
+
+    it "builds shared layout attachments for stable root-pair owners" do
+      analysis = Jsonc::Merge::FileAnalysis.new(jsonc_with_layout_gaps)
+      expect(analysis.valid?).to be(true)
+
+      first_owner = analysis.root_pairs.first
+      second_owner = analysis.root_pairs[1]
+      expect(first_owner).not_to be_nil
+      expect(second_owner).not_to be_nil
+
+      augmenter = analysis.layout_augmenter(owners: [first_owner, second_owner])
+      attachment = augmenter.attachment_for(first_owner)
+
+      expect(augmenter.preamble_gap.start_line..augmenter.preamble_gap.end_line).to eq(2..2)
+      expect(augmenter.interstitial_gaps.map { |gap| gap.start_line..gap.end_line }).to eq([4..4])
+      expect(augmenter.postlude_gap.start_line..augmenter.postlude_gap.end_line).to eq(6..6)
+
+      expect(attachment.leading_gap&.kind).to eq(:preamble)
+      expect(attachment.trailing_gap&.kind).to eq(:interstitial)
+      expect(attachment.gaps.map { |gap| gap.start_line..gap.end_line }).to eq([2..2, 4..4])
+      expect(attachment.leading_controls_output?).to be(true)
+      expect(attachment.trailing_controls_output?).to be(false)
+    end
+  end
 end
