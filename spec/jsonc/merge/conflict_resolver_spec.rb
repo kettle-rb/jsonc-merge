@@ -344,6 +344,46 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
         expect(output).to include("dest_only")
       end
 
+      it "compacts matched empty nested objects while keeping comment indentation aligned" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          {
+            "features": {
+              // comment from template
+              "./apt-install": {}
+            }
+          }
+        JSONC
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          {
+            "features": {
+              // comment from destination
+              "./apt-install": {
+              }
+            }
+          }
+        JSONC
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          preference: :template,
+        )
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        expect(result.to_json).to eq(<<~JSONC)
+          {
+            "features": {
+              // comment from destination
+              "./apt-install": {}
+            }
+          }
+        JSONC
+      end
+
       it "uses destination values by default in nested objects" do
         template_analysis = Jsonc::Merge::FileAnalysis.new(template_with_nested)
         dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_with_nested)

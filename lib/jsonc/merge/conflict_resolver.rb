@@ -232,32 +232,37 @@ module Jsonc
 
             emit_leading_comments_for(comment_source_node, comment_source_analysis)
             inline_text = inline_comment_text_for(comment_source_node, comment_source_analysis)
-
-            if template_value.object?
-              @emitter.emit_nested_object_start(key_name, inline_comment: inline_text)
-            elsif template_value.array?
-              @emitter.emit_array_start(key_name, inline_comment: inline_text)
-            end
-
-            merge_node_lists_to_emitter(
-              template_value.mergeable_children,
-              dest_value.mergeable_children,
-              template_analysis,
-              dest_analysis,
-            )
-
             trailing_source_node, trailing_source_analysis = preferred_container_comment_source(
               dest_value,
               dest_analysis,
               fallback_node: template_value,
               fallback_analysis: template_analysis,
             )
-            emit_container_trailing_lines(trailing_source_node, trailing_source_analysis)
+            compact_source_node = trailing_source_node || dest_value || template_value
 
-            if template_value.object?
-              @emitter.emit_nested_object_end
+            if compact_empty_container?(template_value, compact_source_node, trailing_source_analysis)
+              @emitter.emit_pair(key_name, compact_container_literal_for(template_value), inline_comment: inline_text)
+            elsif template_value.object?
+              @emitter.emit_nested_object_start(key_name, inline_comment: inline_text)
             elsif template_value.array?
-              @emitter.emit_array_end
+              @emitter.emit_array_start(key_name, inline_comment: inline_text)
+            end
+
+            unless compact_empty_container?(template_value, compact_source_node, trailing_source_analysis)
+              merge_node_lists_to_emitter(
+                template_value.mergeable_children,
+                dest_value.mergeable_children,
+                template_analysis,
+                dest_analysis,
+              )
+
+              emit_container_trailing_lines(trailing_source_node, trailing_source_analysis)
+
+              if template_value.object?
+                @emitter.emit_nested_object_end
+              elsif template_value.array?
+                @emitter.emit_array_end
+              end
             end
           elsif preference_for_pair(template_node, dest_node) == :destination
             # Values are not both mergeable containers - use preference and emit
@@ -370,23 +375,28 @@ module Jsonc
           if value_node
             if value_node.container?
               inline_text = inline_comment_text_for(source_node, source_analysis)
+              container_comment_source = source_value_node || value_node
 
-              if value_node.object?
+              if compact_empty_container?(value_node, container_comment_source, source_analysis)
+                @emitter.emit_pair(key, compact_container_literal_for(value_node), inline_comment: inline_text) if key
+              elsif value_node.object?
                 @emitter.emit_nested_object_start(key, inline_comment: inline_text)
               elsif value_node.array?
                 @emitter.emit_array_start(key, inline_comment: inline_text)
               end
 
-              value_node.mergeable_children.each do |child|
-                emit_node(child, analysis)
-              end
+              unless compact_empty_container?(value_node, container_comment_source, source_analysis)
+                value_node.mergeable_children.each do |child|
+                  emit_node(child, analysis)
+                end
 
-              emit_container_trailing_lines(source_value_node || value_node, source_analysis)
+                emit_container_trailing_lines(container_comment_source, source_analysis)
 
-              if value_node.object?
-                @emitter.emit_nested_object_end
-              elsif value_node.array?
-                @emitter.emit_array_end
+                if value_node.object?
+                  @emitter.emit_nested_object_end
+                elsif value_node.array?
+                  @emitter.emit_array_end
+                end
               end
             else
               inline_text = inline_comment_text_for(source_node, source_analysis)
@@ -454,6 +464,7 @@ module Jsonc
         return unless node&.respond_to?(:start_line) && node.start_line
 
         leading = analysis.comment_tracker.leading_comments_before(node.start_line)
+        emit_blank_lines_before_leading_comments(leading.first[:line], analysis) if leading.any?
         emit_tracked_comments_with_internal_blank_lines(leading, analysis)
 
         if leading.any?
@@ -524,6 +535,7 @@ module Jsonc
       def comment_like_line?(stripped_line)
         stripped_line.start_with?("//", "/*", "*", "*/")
       end
+
       # Emit a freeze block
       # @param freeze_node [FreezeNode] Freeze block to emit
       def emit_freeze_block(freeze_node)
@@ -540,13 +552,13 @@ module Jsonc
         if inline_comment
           line = analysis.line_at(inline_comment[:line])
           indent = line.to_s[/\A\s*/].to_s.length
-          @emitter.emit_tracked_comment(
+          @emitter.emit_tracked_comment(normalize_comment_indent(
             inline_comment.merge(
               indent: indent,
               full_line: true,
               block: false,
-            )
-          )
+            ),
+          ))
         end
 
         emit_following_removed_node_blank_lines(node, analysis)
@@ -563,7 +575,7 @@ module Jsonc
 
       def emit_tracked_comments_with_internal_blank_lines(comments, analysis)
         Array(comments).each_with_index do |comment, index|
-          @emitter.emit_tracked_comment(comment)
+          @emitter.emit_tracked_comment(normalize_comment_indent(comment))
 
           next_comment = comments[index + 1]
           next unless next_comment
@@ -644,6 +656,40 @@ module Jsonc
         (start_line..end_line).each do |line_num|
           @emitter.emit_blank_line if analysis.comment_tracker.blank_line?(line_num)
         end
+      end
+
+      def emit_blank_lines_before_leading_comments(first_comment_line, analysis)
+        return unless first_comment_line
+
+        blank_lines = []
+        line_num = first_comment_line - 1
+        while line_num >= 1 && analysis.comment_tracker.blank_line?(line_num)
+          blank_lines << line_num
+          line_num -= 1
+        end
+
+        blank_lines.reverse_each { @emitter.emit_blank_line }
+      end
+
+      def normalize_comment_indent(comment)
+        return comment unless comment
+
+        comment.merge(indent: current_emitter_indent)
+      end
+
+      def current_emitter_indent
+        @emitter.indent_level * @emitter.indent_size
+      end
+
+      def compact_empty_container?(container_node, source_node, source_analysis)
+        return false unless container_node&.container?
+        return false unless container_node.mergeable_children.empty?
+
+        !container_has_trailing_comments?(source_node || container_node, source_analysis)
+      end
+
+      def compact_container_literal_for(container_node)
+        container_node.object? ? "{}" : "[]"
       end
 
       # Build a map of refined matches using match_refiner
