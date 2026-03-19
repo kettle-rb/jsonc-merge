@@ -546,6 +546,7 @@ module Jsonc
         return unless node.respond_to?(:start_line) && node.start_line
 
         leading = analysis.comment_tracker.leading_comments_before(node.start_line)
+        emit_blank_lines_before_leading_comments(leading.first[:line], analysis) if leading.any?
         emit_tracked_comments_with_internal_blank_lines(leading, analysis)
 
         inline_comment = analysis.comment_tracker.inline_comment_at(node.end_line || node.start_line)
@@ -566,6 +567,13 @@ module Jsonc
 
       def emit_following_removed_node_blank_lines(node, analysis)
         line_num = (node.end_line || node.start_line) + 1
+        first_nonblank_line = line_num
+
+        while first_nonblank_line <= analysis.lines.length && analysis.comment_tracker.blank_line?(first_nonblank_line)
+          first_nonblank_line += 1
+        end
+
+        return if analysis.comment_tracker.full_line_comment?(first_nonblank_line)
 
         while line_num <= analysis.lines.length && analysis.comment_tracker.blank_line?(line_num)
           @emitter.emit_blank_line

@@ -564,6 +564,51 @@ RSpec.shared_examples "shared comment capability" do
   end
 end
 
+RSpec.shared_examples "shared layout compliance" do
+  describe "shared layout compliance" do
+    let(:json_with_layout_gaps) do
+      <<~JSON
+        {
+
+          "alpha": 1,
+
+          "beta": 2
+
+        }
+      JSON
+    end
+
+    let(:analysis) { described_class.new(json_with_layout_gaps) }
+    let(:first_owner) { analysis.root_pairs.first }
+    let(:second_owner) { analysis.root_pairs[1] }
+    let(:layout_augmenter) { analysis.layout_augmenter(owners: [first_owner, second_owner].compact) }
+    let(:layout_attachment) { layout_augmenter.attachment_for(first_owner) }
+
+    it "finds stable root-pair owners for layout inference" do
+      expect(first_owner).not_to be_nil
+      expect(second_owner).not_to be_nil
+    end
+
+    it_behaves_like "Ast::Merge::Layout::Attachment" do
+      let(:expected_attachment_owner) { first_owner }
+      let(:expected_leading_gap_kind) { :preamble }
+      let(:expected_trailing_gap_kind) { :interstitial }
+      let(:expected_gap_ranges) { [2..2, 4..4] }
+      let(:expected_leading_controls_output) { true }
+      let(:expected_trailing_controls_output) { false }
+    end
+
+    it_behaves_like "Ast::Merge::Layout::Augmenter" do
+      let(:augmenter_owner) { first_owner }
+      let(:expected_preamble_range) { 2..2 }
+      let(:expected_postlude_range) { 6..6 }
+      let(:expected_interstitial_ranges) { [4..4] }
+      let(:expected_owner_leading_gap_kind) { :preamble }
+      let(:expected_owner_trailing_gap_kind) { :interstitial }
+    end
+  end
+end
+
 RSpec.shared_examples "parser path handling" do
   describe "parser path handling" do
     let(:simple_json) do
