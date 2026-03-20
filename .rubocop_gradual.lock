@@ -1,0 +1,13 @@
+{
+  "gemfiles/modular/tree_sitter.gemfile:281822793": [
+    [17, 1, 112, "Style/InvertibleUnlessCondition: Prefer `if ENV.fetch(\"KETTLE_RB_DEV\", \"false\").casecmp(\"false\").nonzero?` over `unless ENV.fetch(\"KETTLE_RB_DEV\", \"false\").casecmp(\"false\").zero?`.", 2718008714]
+  ],
+  "lib/jsonc/merge/conflict_resolver.rb:4072093467": [
+    [379, 15, 67, "Style/IdenticalConditionalBranches: Move `inline_text = inline_comment_text_for(source_node, source_analysis)` out of the conditional.", 2820123439],
+    [404, 15, 67, "Style/IdenticalConditionalBranches: Move `inline_text = inline_comment_text_for(source_node, source_analysis)` out of the conditional.", 2820123439],
+    [513, 9, 36, "Style/InvertibleUnlessCondition: Prefer `if end_line < start_line` over `unless end_line >= start_line`.", 2942502673]
+  ],
+  "spec/integration/removal_mode_compliance_spec.rb:951602126": [
+    [6, 1, 56, "RSpec/SpecFilePathFormat: Spec path should end with `jsonc/merge/smart_merger*_spec.rb`.", 1472018996]
+  ]
+}

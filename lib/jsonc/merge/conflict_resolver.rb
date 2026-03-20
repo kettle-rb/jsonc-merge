@@ -15,6 +15,7 @@ module Jsonc
     # @see Ast::Merge::ConflictResolverBase
     class ConflictResolver < Ast::Merge::ConflictResolverBase
       include ::Ast::Merge::TrailingGroups::DestIterate
+
       # Creates a new ConflictResolver
       #
       # @param template_analysis [FileAnalysis] Analyzed template file
@@ -106,7 +107,10 @@ module Jsonc
 
         # Pre-compute position-aware trailing groups for template-only nodes.
         dest_sigs = ::Set.new
-        dest_nodes.each { |n| sig = dest_analysis.generate_signature(n); dest_sigs << sig if sig }
+        dest_nodes.each { |n|
+          sig = dest_analysis.generate_signature(n)
+          dest_sigs << sig if sig
+        }
         refined_template_ids = ::Set.new(refined_matches.keys.map(&:object_id))
 
         trailing_groups, all_matched_indices = build_dest_iterate_trailing_groups(
@@ -169,12 +173,10 @@ module Jsonc
             end
 
             merge_matched_nodes_to_emitter(template_node, dest_node, template_analysis, dest_analysis)
+          elsif @remove_template_missing_nodes
+            emit_removed_destination_node_comments(dest_node, dest_analysis)
           else
-            if @remove_template_missing_nodes
-              emit_removed_destination_node_comments(dest_node, dest_analysis)
-            else
-              emit_node(dest_node, dest_analysis)
-            end
+            emit_node(dest_node, dest_analysis)
           end
 
           # Flush interior trailing groups that are ready
@@ -229,9 +231,9 @@ module Jsonc
               fallback_node: template_node,
               fallback_analysis: template_analysis,
             )
+            comment_attachment = shared_line_comment_attachment_for(comment_source_node, comment_source_analysis)
 
-            emit_leading_comments_for(comment_source_node, comment_source_analysis)
-            inline_text = inline_comment_text_for(comment_source_node, comment_source_analysis)
+            emit_preferred_leading_comments_for(comment_source_node, comment_source_analysis, shared_attachment: comment_attachment)
             trailing_source_node, trailing_source_analysis = preferred_container_comment_source(
               dest_value,
               dest_analysis,
@@ -241,11 +243,17 @@ module Jsonc
             compact_source_node = trailing_source_node || dest_value || template_value
 
             if compact_empty_container?(template_value, compact_source_node, trailing_source_analysis)
-              @emitter.emit_pair(key_name, compact_container_literal_for(template_value), inline_comment: inline_text)
+              emit_with_preferred_inline_comment(comment_source_node, comment_source_analysis, shared_attachment: comment_attachment) do |inline_text|
+                @emitter.emit_pair(key_name, compact_container_literal_for(template_value), inline_comment: inline_text)
+              end
             elsif template_value.object?
-              @emitter.emit_nested_object_start(key_name, inline_comment: inline_text)
+              emit_with_preferred_inline_comment(comment_source_node, comment_source_analysis, shared_attachment: comment_attachment) do |inline_text|
+                @emitter.emit_nested_object_start(key_name, inline_comment: inline_text)
+              end
             elsif template_value.array?
-              @emitter.emit_array_start(key_name, inline_comment: inline_text)
+              emit_with_preferred_inline_comment(comment_source_node, comment_source_analysis, shared_attachment: comment_attachment) do |inline_text|
+                @emitter.emit_array_start(key_name, inline_comment: inline_text)
+              end
             end
 
             unless compact_empty_container?(template_value, compact_source_node, trailing_source_analysis)
@@ -362,8 +370,9 @@ module Jsonc
 
         source_node = comment_source_node || node
         source_analysis = comment_source_node ? comment_analysis : analysis
+        source_attachment = shared_line_comment_attachment_for(source_node, source_analysis)
 
-        emit_leading_comments_for(source_node, source_analysis)
+        emit_preferred_leading_comments_for(source_node, source_analysis, shared_attachment: source_attachment)
 
         # Emit the node content
         if node.pair?
@@ -374,15 +383,20 @@ module Jsonc
 
           if value_node
             if value_node.container?
-              inline_text = inline_comment_text_for(source_node, source_analysis)
               container_comment_source = source_value_node || value_node
 
               if compact_empty_container?(value_node, container_comment_source, source_analysis)
-                @emitter.emit_pair(key, compact_container_literal_for(value_node), inline_comment: inline_text) if key
+                emit_with_preferred_inline_comment(source_node, source_analysis, shared_attachment: source_attachment) do |inline_text|
+                  @emitter.emit_pair(key, compact_container_literal_for(value_node), inline_comment: inline_text) if key
+                end
               elsif value_node.object?
-                @emitter.emit_nested_object_start(key, inline_comment: inline_text)
+                emit_with_preferred_inline_comment(source_node, source_analysis, shared_attachment: source_attachment) do |inline_text|
+                  @emitter.emit_nested_object_start(key, inline_comment: inline_text)
+                end
               elsif value_node.array?
-                @emitter.emit_array_start(key, inline_comment: inline_text)
+                emit_with_preferred_inline_comment(source_node, source_analysis, shared_attachment: source_attachment) do |inline_text|
+                  @emitter.emit_array_start(key, inline_comment: inline_text)
+                end
               end
 
               unless compact_empty_container?(value_node, container_comment_source, source_analysis)
@@ -399,9 +413,9 @@ module Jsonc
                 end
               end
             else
-              inline_text = inline_comment_text_for(source_node, source_analysis)
-
-              @emitter.emit_pair(key, value_node.text, inline_comment: inline_text) if key
+              emit_with_preferred_inline_comment(source_node, source_analysis, shared_attachment: source_attachment) do |inline_text|
+                @emitter.emit_pair(key, value_node.text, inline_comment: inline_text) if key
+              end
             end
           end
         elsif node.container?
@@ -423,10 +437,10 @@ module Jsonc
             @emitter.emit_array_end
           end
         elsif node.start_line && node.end_line
-          inline_text = inline_comment_text_for(source_node, source_analysis)
-
           if node.start_line == node.end_line
-            @emitter.emit_array_element(node.text, inline_comment: inline_text)
+            emit_with_preferred_inline_comment(source_node, source_analysis, shared_attachment: source_attachment) do |inline_text|
+              @emitter.emit_array_element(node.text, inline_comment: inline_text)
+            end
           else
             lines = []
             (node.start_line..node.end_line).each do |ln|
@@ -437,7 +451,6 @@ module Jsonc
           end
         end
       end
-
 
       def preferred_comment_source(node, analysis, fallback_node: nil, fallback_analysis: nil)
         return [node, analysis] if node_has_emittable_comments?(node, analysis)
@@ -460,6 +473,20 @@ module Jsonc
           !inline_comment_text_for(node, analysis).nil?
       end
 
+      def emit_preferred_leading_comments_for(node, analysis, shared_attachment: nil)
+        attachment = shared_attachment || shared_line_comment_attachment_for(node, analysis)
+        region = attachment&.leading_region
+
+        unless region && !region.empty?
+          emit_leading_comments_for(node, analysis)
+          return
+        end
+
+        emit_blank_lines_before_leading_comments(region.start_line, analysis)
+        @emitter.emit_comment_attachment(attachment, leading: true, inline: false, source_lines: analysis.lines)
+        emit_blank_lines_in_range((region.end_line || node.start_line).to_i + 1, node.start_line.to_i - 1, analysis)
+      end
+
       def emit_leading_comments_for(node, analysis)
         return unless node&.respond_to?(:start_line) && node.start_line
 
@@ -475,15 +502,63 @@ module Jsonc
       def inline_comment_text_for(node, analysis)
         return unless node&.respond_to?(:start_line) && node.start_line
 
-        inline_comment = analysis.comment_tracker.inline_comment_at(node.end_line || node.start_line)
+        inline_comment = analysis.comment_tracker.inline_comment_at(inline_comment_line_for(node))
         inline_comment&.dig(:text)
+      end
+
+      def emit_with_preferred_inline_comment(node, analysis, shared_attachment: nil)
+        attachment = shared_attachment || shared_line_comment_attachment_for(node, analysis)
+        inline_region = attachment&.inline_region
+
+        unless inline_region && !inline_region.empty?
+          yield inline_comment_text_for(node, analysis)
+          return
+        end
+
+        yield nil
+        @emitter.emit_comment_attachment(attachment, leading: false, inline: true, source_lines: analysis.lines)
+      end
+
+      def shared_line_comment_attachment_for(node, analysis)
+        return unless node && analysis
+        return unless node.respond_to?(:start_line) && node.start_line
+
+        tracker = analysis.comment_tracker
+        leading_comments = tracker.leading_comments_before(node.start_line)
+        return if leading_comments.any? { |comment| comment[:block] }
+
+        inline_comment = tracker.inline_comment_at(inline_comment_line_for(node))
+        return unless leading_comments.any? || inline_comment
+
+        analysis.comment_attachment_for(
+          node,
+          line_num: node.start_line,
+          leading_comments: leading_comments,
+          inline_comment: inline_comment,
+        )
+      end
+
+      def inline_comment_line_for(node)
+        return unless node
+        return node.start_line if node.respond_to?(:pair?) && node.pair?
+        return node.start_line if node.respond_to?(:container?) && node.container?
+
+        node.end_line || node.start_line
       end
 
       def emit_container_trailing_lines(container_node, analysis)
         range = trailing_container_line_range(container_node)
         return unless range
 
-        emit_comment_and_blank_lines_in_range(range.begin, range.end, analysis)
+        region = shared_trailing_line_comment_region_for(range, analysis)
+        unless region && !region.empty?
+          emit_comment_and_blank_lines_in_range(range.begin, range.end, analysis)
+          return
+        end
+
+        emit_blank_lines_in_range(range.begin, region.start_line - 1, analysis)
+        @emitter.emit_comment_region(region, source_lines: analysis.lines)
+        emit_blank_lines_in_range(region.end_line + 1, range.end, analysis)
       end
 
       def container_has_trailing_comments?(container_node, analysis)
@@ -532,6 +607,27 @@ module Jsonc
         @emitter.emit_raw_lines(lines) if lines.any?
       end
 
+      def shared_trailing_line_comment_region_for(range, analysis)
+        return unless range && analysis
+        return unless trailing_range_supports_shared_line_region?(range, analysis)
+
+        region = analysis.comment_region_for_range(range, kind: :trailing, full_line_only: true)
+        return unless region && !region.empty?
+
+        region
+      end
+
+      def trailing_range_supports_shared_line_region?(range, analysis)
+        range.each do |line_num|
+          stripped = analysis.line_at(line_num).to_s.strip
+          next if stripped.empty?
+          return false unless stripped.start_with?("//")
+          return false unless analysis.comment_tracker.full_line_comment?(line_num)
+        end
+
+        true
+      end
+
       def comment_like_line?(stripped_line)
         stripped_line.start_with?("//", "/*", "*", "*/")
       end
@@ -545,17 +641,13 @@ module Jsonc
       def emit_removed_destination_node_comments(node, analysis)
         return unless node.respond_to?(:start_line) && node.start_line
 
-        leading = analysis.comment_tracker.leading_comments_before(node.start_line)
-        emit_blank_lines_before_leading_comments(leading.first[:line], analysis) if leading.any?
-        emit_tracked_comments_with_internal_blank_lines(leading, analysis)
+        emit_preferred_leading_comments_for(node, analysis)
 
-        inline_comment = analysis.comment_tracker.inline_comment_at(node.end_line || node.start_line)
+        inline_comment = removed_inline_comment_for(node, analysis)
         if inline_comment
-          line = analysis.line_at(inline_comment[:line])
-          indent = line.to_s[/\A\s*/].to_s.length
           @emitter.emit_tracked_comment(normalize_comment_indent(
             inline_comment.merge(
-              indent: indent,
+              indent: current_emitter_indent,
               full_line: true,
               block: false,
             ),
@@ -579,6 +671,17 @@ module Jsonc
           @emitter.emit_blank_line
           line_num += 1
         end
+      end
+
+      def removed_inline_comment_for(node, analysis)
+        line_num = inline_comment_line_for(node)
+        return unless line_num
+
+        region = analysis.comment_tracker.inline_comment_region_at(line_num)
+        tracked = Array(region&.metadata&.dig(:tracked_hashes)).first
+        return tracked if tracked
+
+        analysis.comment_tracker.inline_comment_at(line_num)
       end
 
       def emit_tracked_comments_with_internal_blank_lines(comments, analysis)
@@ -619,7 +722,7 @@ module Jsonc
         end
 
         regions.each do |region|
-          emit_comment_region_lines(region, analysis)
+          @emitter.emit_comment_region(region, source_lines: analysis.lines)
         end
 
         return if regions.empty?
@@ -628,8 +731,8 @@ module Jsonc
         if normalized_nodes.any?
           first_node_start = normalized_nodes.first.start_line
           emit_blank_lines_in_range(last_region_end + 1, first_node_start - 1, analysis) if last_region_end && first_node_start
-        else
-          emit_blank_lines_in_range(last_region_end + 1, analysis.lines.length, analysis) if last_region_end
+        elsif last_region_end
+          emit_blank_lines_in_range(last_region_end + 1, analysis.lines.length, analysis)
         end
       end
 
@@ -642,7 +745,7 @@ module Jsonc
           emit_blank_lines_in_range(fallback_node.end_line + 1, postlude.start_line - 1, analysis) if fallback_node.respond_to?(:end_line) && fallback_node.end_line
         end
 
-        emit_comment_region_lines(postlude, analysis)
+        @emitter.emit_comment_region(postlude, source_lines: analysis.lines)
       end
 
       def document_comment_augmenter_for(analysis)
@@ -650,12 +753,6 @@ module Jsonc
         @document_comment_augmenters[analysis.object_id] ||= analysis.comment_augmenter
       end
 
-      def emit_comment_region_lines(region, analysis)
-        return unless region&.start_line && region.end_line
-
-        lines = (region.start_line..region.end_line).filter_map { |line_num| analysis.line_at(line_num) }
-        @emitter.emit_raw_lines(lines) if lines.any?
-      end
 
       def emit_blank_lines_in_range(start_line, end_line, analysis)
         return unless start_line && end_line

@@ -4,6 +4,16 @@ require "spec_helper"
 require "ast/merge/rspec/shared_examples"
 
 RSpec.describe Jsonc::Merge::ConflictResolver do
+  AnalysisDouble = Struct.new(:lines, :comment_tracker) do
+    def line_at(line_num)
+      lines[line_num - 1]
+    end
+
+    def comment_region_for_range(range, kind:, full_line_only: false)
+      comment_tracker.comment_region_for_range(range, kind: kind, full_line_only: full_line_only)
+    end
+  end
+
   it_behaves_like "Ast::Merge::ConflictResolverBase" do
     let(:conflict_resolver_class) { described_class }
     let(:strategy) { :batch }
@@ -247,6 +257,138 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
       end
     end
 
+    context "with document boundary comments", :jsonc_grammar do
+      it "replays destination prelude and postlude comments around a root object merge" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSON)
+          {
+            "name": "template"
+          }
+        JSON
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          // Destination header
+
+          {
+            "name": "destination"
+          }
+
+          // Destination footer
+        JSONC
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(template_analysis, dest_analysis)
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        expect(result.to_json).to eq(<<~JSONC)
+          // Destination header
+
+          {
+            "name": "destination"
+          }
+
+          // Destination footer
+        JSONC
+      end
+
+      it "preserves a comment-only destination when no structural nodes exist" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSON)
+          {
+            "name": "template"
+          }
+        JSON
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          // Destination docs
+
+          // More destination docs
+        JSONC
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(template_analysis, dest_analysis)
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        expect(result.to_json).to eq(<<~JSONC)
+          // Destination docs
+
+          // More destination docs
+        JSONC
+      end
+
+      it "preserves destination line comments on matched container opening lines" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSON)
+          {
+            "config": {
+              "keep": 1
+            }
+          }
+        JSON
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          {
+            // Config docs
+            "config": { // destination inline
+              "keep": 9
+            }
+          }
+        JSONC
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          preference: :template,
+        )
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        expect(result.to_json).to eq(<<~JSONC)
+          {
+            // Config docs
+            "config": { // destination inline
+              "keep": 1
+            }
+          }
+        JSONC
+      end
+
+      it "falls back to manual replay when matched leading comments include block comments" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSON)
+          {
+            "shared": "template"
+          }
+        JSON
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          {
+            /* Shared docs */
+            "shared": "destination" // destination inline
+          }
+        JSONC
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          preference: :template,
+        )
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        expect(result.to_json).to eq(<<~JSONC)
+          {
+            /* Shared docs */
+            "shared": "template" // destination inline
+          }
+        JSONC
+      end
+    end
+
     context "with nodes that have no signature" do
       it "handles nodes without signatures gracefully" do
         template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
@@ -257,6 +399,82 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
 
         # Should not raise
         expect { resolver.resolve(result) }.not_to raise_error
+      end
+    end
+
+    context "with removed destination node comments", :jsonc_grammar do
+      it "falls back to manual replay when removed leading comments include block comments" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSON)
+          {
+            "keep": 1,
+            "tail": 3
+          }
+        JSON
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          {
+            "keep": 1,
+            /* Remove docs */
+            "remove": 2, // remove inline
+            "tail": 3
+          }
+        JSONC
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          remove_template_missing_nodes: true,
+        )
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        expect(result.to_json).to eq(<<~JSONC)
+          {
+            "keep": 1,
+            /* Remove docs */
+            // remove inline
+            "tail": 3
+          }
+        JSONC
+      end
+
+      it "promotes inline comments from removed containers using the opening line" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSON)
+          {
+            "keep": 1,
+            "tail": 3
+          }
+        JSON
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          {
+            "keep": 1,
+            "remove": { // remove inline
+              "nested": true
+            },
+            "tail": 3
+          }
+        JSONC
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          remove_template_missing_nodes: true,
+        )
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        expect(result.to_json).to eq(<<~JSONC)
+          {
+            "keep": 1,
+            // remove inline
+            "tail": 3
+          }
+        JSONC
       end
     end
 
@@ -379,6 +597,84 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
             "features": {
               // comment from destination
               "./apt-install": {}
+            }
+          }
+        JSONC
+      end
+
+      it "preserves trailing line comments inside matched nested objects with surrounding blank lines" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSON)
+          {
+            "config": {
+              "keep": 1
+            }
+          }
+        JSON
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          {
+            "config": {
+              "keep": 9,
+
+              // trailing destination note
+            }
+          }
+        JSONC
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          preference: :template,
+        )
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        expect(result.to_json).to eq(<<~JSONC)
+          {
+            "config": {
+              "keep": 1,
+
+              // trailing destination note
+            }
+          }
+        JSONC
+      end
+
+      it "falls back to raw trailing replay when matched nested objects end with block comments" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSON)
+          {
+            "config": {
+              "keep": 1
+            }
+          }
+        JSON
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          {
+            "config": {
+              "keep": 9,
+              /* trailing destination note */
+            }
+          }
+        JSONC
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          preference: :template,
+        )
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        expect(result.to_json).to eq(<<~JSONC)
+          {
+            "config": {
+              "keep": 1,
+              /* trailing destination note */
             }
           }
         JSONC
@@ -515,6 +811,74 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
 
         expect { resolver.resolve(result) }.not_to raise_error
       end
+    end
+  end
+
+  describe "trailing container replay helpers" do
+    let(:resolver) { described_class.new(double("TemplateAnalysis"), double("DestAnalysis")) }
+
+    it "replays blank lines and full-line // comments in trailing container ranges through a shared region" do
+      source = <<~JSONC
+        {
+          "config": {
+            "keep": 9,
+
+            // trailing destination note
+
+          }
+        }
+      JSONC
+      tracker = Jsonc::Merge::CommentTracker.new(source)
+      analysis = AnalysisDouble.new(source.lines.map(&:chomp), tracker)
+      child = Struct.new(:start_line, :end_line).new(3, 3)
+      container_node = double(
+        "ContainerNode",
+        container?: true,
+        start_line: 2,
+        end_line: 7,
+        mergeable_children: [child],
+      )
+
+      expect(analysis).to receive(:comment_region_for_range)
+        .with(4..6, kind: :trailing, full_line_only: true)
+        .and_call_original
+
+      resolver.send(:emit_container_trailing_lines, container_node, analysis)
+
+      expect(resolver.instance_variable_get(:@emitter).lines).to eq([
+        "",
+        "    // trailing destination note",
+        "",
+      ])
+    end
+
+    it "falls back to raw replay when trailing container ranges include block comments" do
+      source = <<~JSONC
+        {
+          "config": {
+            "keep": 9,
+            /* trailing destination note */
+          }
+        }
+      JSONC
+      tracker = Jsonc::Merge::CommentTracker.new(source)
+      analysis = AnalysisDouble.new(source.lines.map(&:chomp), tracker)
+      child = Struct.new(:start_line, :end_line).new(3, 3)
+      container_node = double(
+        "ContainerNode",
+        container?: true,
+        start_line: 2,
+        end_line: 5,
+        mergeable_children: [child],
+      )
+
+      expect(analysis).not_to receive(:comment_region_for_range)
+
+      resolver.send(:emit_container_trailing_lines, container_node, analysis)
+
+      expect(resolver.instance_variable_get(:@emitter).lines).to eq([
+        "    /* trailing destination note */",
+      ])
     end
   end
 end
