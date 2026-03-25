@@ -495,7 +495,7 @@ module Jsonc
         emit_tracked_comments_with_internal_blank_lines(leading, analysis)
 
         if leading.any?
-          emit_blank_lines_in_range(leading.last[:line] + 1, node.start_line - 1, analysis)
+          emit_blank_lines_in_range(comment_end_line(leading.last) + 1, node.start_line - 1, analysis)
         end
       end
 
@@ -641,6 +641,7 @@ module Jsonc
       def emit_removed_destination_node_comments(node, analysis)
         return unless node.respond_to?(:start_line) && node.start_line
 
+        leading_comments = analysis.comment_tracker.leading_comments_before(node.start_line)
         emit_preferred_leading_comments_for(node, analysis)
 
         inline_comment = removed_inline_comment_for(node, analysis)
@@ -649,12 +650,12 @@ module Jsonc
             inline_comment.merge(
               indent: current_emitter_indent,
               full_line: true,
-              block: false,
+              block: inline_comment[:block] || false,
             ),
           ))
         end
 
-        emit_following_removed_node_blank_lines(node, analysis)
+        emit_following_removed_node_blank_lines(node, analysis) if leading_comments.any? || inline_comment
       end
 
       def emit_following_removed_node_blank_lines(node, analysis)
@@ -681,18 +682,64 @@ module Jsonc
         tracked = Array(region&.metadata&.dig(:tracked_hashes)).first
         return tracked if tracked
 
-        analysis.comment_tracker.inline_comment_at(line_num)
+        analysis.comment_tracker.inline_comment_at(line_num) || removed_inline_block_comment_at(line_num, analysis)
+      end
+
+      def removed_inline_block_comment_at(line_num, analysis)
+        line = analysis.line_at(line_num).to_s
+        return if line.empty?
+
+        start_idx = line.index("/*")
+        end_idx = start_idx && line.index("*/", start_idx + 2)
+        return unless start_idx && end_idx
+
+        before_comment = line[0...start_idx].to_s
+        after_comment = line[(end_idx + 2)..].to_s
+        return if before_comment.strip.empty?
+        return unless after_comment.strip.empty?
+
+        quote_count = before_comment.count('"') - before_comment.scan('\\"').count
+        return unless quote_count.even?
+
+        {
+          line: line_num,
+          indent: 0,
+          text: line[(start_idx + 2)...end_idx].to_s.strip,
+          full_line: false,
+          block: true,
+          raw: line[start_idx..(end_idx + 1)],
+        }
       end
 
       def emit_tracked_comments_with_internal_blank_lines(comments, analysis)
         Array(comments).each_with_index do |comment, index|
-          @emitter.emit_tracked_comment(normalize_comment_indent(comment))
+          emit_tracked_comment_preserving_raw_layout(comment, analysis)
 
           next_comment = comments[index + 1]
           next unless next_comment
 
-          emit_blank_lines_in_range(comment[:line] + 1, next_comment[:line] - 1, analysis)
+          emit_blank_lines_in_range(comment_end_line(comment) + 1, next_comment[:line] - 1, analysis)
         end
+      end
+
+      def emit_tracked_comment_preserving_raw_layout(comment, analysis)
+        if multiline_block_comment?(comment)
+          lines = (comment[:line]..comment_end_line(comment)).map { |line_num| analysis.line_at(line_num) }.compact
+          @emitter.emit_raw_lines(lines) if lines.any?
+          return
+        end
+
+        @emitter.emit_tracked_comment(normalize_comment_indent(comment))
+      end
+
+      def multiline_block_comment?(comment)
+        comment && comment[:block] && comment_end_line(comment) > comment[:line]
+      end
+
+      def comment_end_line(comment)
+        return unless comment
+
+        comment[:end_line] || comment[:line]
       end
 
       def emit_document_prelude(analysis, nodes: [])

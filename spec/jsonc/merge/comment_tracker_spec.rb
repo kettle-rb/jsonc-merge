@@ -167,6 +167,23 @@ RSpec.describe Jsonc::Merge::CommentTracker do
       comments = tracker.comments.select { |c| c[:block] }
       expect(comments.size).to be >= 1
     end
+
+    it "treats covered lines inside a multi-line block comment as full-line comments for lookup" do
+      content = <<~JSON
+        {
+          /* This is a
+             multi-line
+             block comment */
+          "key": "value"
+        }
+      JSON
+
+      tracker = described_class.new(content)
+
+      expect(tracker.comment_at(3)).to include(block: true, line: 2, end_line: 4)
+      expect(tracker.full_line_comment?(4)).to be true
+      expect(tracker.leading_comments_before(5).map { |comment| [comment[:line], comment[:end_line]] }).to eq([[2, 4]])
+    end
   end
 
   describe "inline comments with special cases" do

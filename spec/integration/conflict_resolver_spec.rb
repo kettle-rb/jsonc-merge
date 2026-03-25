@@ -171,5 +171,77 @@ RSpec.describe "Jsonc::Merge::ConflictResolver Integration", :jsonc_grammar do
       json_without_comments = output.gsub(%r{//.*$}, "")
       expect { JSON.parse(json_without_comments) }.not_to raise_error
     end
+
+    it "preserves inline block comments for removed destination-only pairs when removal is enabled" do
+      template_json = <<~JSON
+        {
+          "keep": 1,
+          "tail": 3
+        }
+      JSON
+      dest_json = <<~JSONC
+        {
+          "keep": 1,
+          "remove": 2, /* remove inline */
+          "tail": 3
+        }
+      JSONC
+
+      template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
+      dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
+
+      result = Jsonc::Merge::MergeResult.new
+      resolver = Jsonc::Merge::ConflictResolver.new(
+        template_analysis,
+        dest_analysis,
+        remove_template_missing_nodes: true,
+      )
+
+      resolver.resolve(result)
+      output = result.to_json
+
+      expect(output).to include("/* remove inline */")
+      expect(output).not_to include('"remove": 2')
+      json_without_comments = output.gsub(%r{//.*$}, "").gsub(%r{/\*.*?\*/}m, "")
+      expect { JSON.parse(json_without_comments) }.not_to raise_error
+    end
+
+    it "preserves multi-line leading block comments for removed destination-only pairs when removal is enabled" do
+      template_json = <<~JSON
+        {
+          "keep": 1,
+          "tail": 3
+        }
+      JSON
+      dest_json = <<~JSONC
+        {
+          "keep": 1,
+          /* Remove docs
+           * spanning lines
+           */
+          "remove": 2, // remove inline
+          "tail": 3
+        }
+      JSONC
+
+      template_analysis = Jsonc::Merge::FileAnalysis.new(template_json)
+      dest_analysis = Jsonc::Merge::FileAnalysis.new(dest_json)
+
+      result = Jsonc::Merge::MergeResult.new
+      resolver = Jsonc::Merge::ConflictResolver.new(
+        template_analysis,
+        dest_analysis,
+        remove_template_missing_nodes: true,
+      )
+
+      resolver.resolve(result)
+      output = result.to_json
+
+      expect(output).to include("/* Remove docs\n   * spanning lines\n   */")
+      expect(output).to include("// remove inline")
+      expect(output).not_to include('"remove": 2')
+      json_without_comments = output.gsub(%r{//.*$}, "").gsub(%r{/\*.*?\*/}m, "")
+      expect { JSON.parse(json_without_comments) }.not_to raise_error
+    end
   end
 end

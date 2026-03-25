@@ -387,6 +387,42 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
           }
         JSONC
       end
+
+      it "replays multi-line leading block comments without collapsing them when a matched template-preferred pair wins" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSON)
+          {
+            "shared": "template"
+          }
+        JSON
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          {
+            /* Shared docs
+             * spanning lines
+             */
+            "shared": "destination" // destination inline
+          }
+        JSONC
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          preference: :template,
+        )
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        expect(result.to_json).to eq(<<~JSONC)
+          {
+            /* Shared docs
+             * spanning lines
+             */
+            "shared": "template" // destination inline
+          }
+        JSONC
+      end
     end
 
     context "with nodes that have no signature" do
@@ -403,6 +439,41 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
     end
 
     context "with removed destination node comments", :jsonc_grammar do
+      it "does not preserve separator blank lines for removed nodes without promoted comments" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSON)
+          {
+            "keep": 1,
+            "tail": 3
+          }
+        JSON
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          {
+            "keep": 1,
+            "remove": 2,
+
+            "tail": 3
+          }
+        JSONC
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          remove_template_missing_nodes: true,
+        )
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        expect(result.to_json).to eq(<<~JSONC)
+          {
+            "keep": 1,
+            "tail": 3
+          }
+        JSONC
+      end
+
       it "falls back to manual replay when removed leading comments include block comments" do
         template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSON)
           {
@@ -434,6 +505,47 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
           {
             "keep": 1,
             /* Remove docs */
+            // remove inline
+            "tail": 3
+          }
+        JSONC
+      end
+
+      it "replays multi-line leading block comments for removed destination nodes without collapsing them" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSON)
+          {
+            "keep": 1,
+            "tail": 3
+          }
+        JSON
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          {
+            "keep": 1,
+            /* Remove docs
+             * spanning lines
+             */
+            "remove": 2, // remove inline
+            "tail": 3
+          }
+        JSONC
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          remove_template_missing_nodes: true,
+        )
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        expect(result.to_json).to eq(<<~JSONC)
+          {
+            "keep": 1,
+            /* Remove docs
+             * spanning lines
+             */
             // remove inline
             "tail": 3
           }
@@ -472,6 +584,43 @@ RSpec.describe Jsonc::Merge::ConflictResolver do
           {
             "keep": 1,
             // remove inline
+            "tail": 3
+          }
+        JSONC
+      end
+
+      it "promotes inline block comments from removed containers using the opening line" do
+        template_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSON)
+          {
+            "keep": 1,
+            "tail": 3
+          }
+        JSON
+        dest_analysis = Jsonc::Merge::FileAnalysis.new(<<~JSONC)
+          {
+            "keep": 1,
+            "remove": { /* remove inline */
+              "nested": true
+            },
+            "tail": 3
+          }
+        JSONC
+
+        skip "FileAnalysis not valid" unless template_analysis.valid? && dest_analysis.valid?
+
+        resolver = described_class.new(
+          template_analysis,
+          dest_analysis,
+          remove_template_missing_nodes: true,
+        )
+        result = Jsonc::Merge::MergeResult.new
+
+        resolver.resolve(result)
+
+        expect(result.to_json).to eq(<<~JSONC)
+          {
+            "keep": 1,
+            /* remove inline */
             "tail": 3
           }
         JSONC
