@@ -7,8 +7,8 @@ Gem::Specification.new do |spec|
   spec.authors = ["Peter H. Boling"]
   spec.email = ["floss@galtzo.com"]
 
-  spec.summary = "☯️ Intelligent JSONC file merging using tree-sitter AST analysis"
-  spec.description = "☯️ Jsonc::Merge provides smart JSONC (JSON with Comments) file merging that preserves comments, understands JSON structure, and supports freeze blocks for protecting destination content. Perfect for merging configuration files like devcontainer.json, tsconfig.json, package.json, and VS Code settings."
+  spec.summary = "☯️ Compatibility shim for JSONC merging via json-merge"
+  spec.description = "☯️ Jsonc::Merge is now a compatibility shim. JSONC support lives in json-merge, which now preserves JSONC comments through the tree-sitter JSON parser path. Keep depending on jsonc-merge temporarily if you need the legacy gem name, but prefer json-merge for new setups."
   spec.homepage = "https://github.com/kettle-rb/jsonc-merge"
   spec.licenses = ["MIT"]
   spec.required_ruby_version = ">= 3.2.0"
@@ -81,20 +81,18 @@ Gem::Specification.new do |spec|
   # Listed files are the relative paths from bindir above.
   spec.executables = []
 
-  # Parser - tree_haver provides a unified tree-sitter (supports JSONC with comments) & citrus interface
-  spec.add_dependency("tree_haver", "~> 5.0", ">= 5.0.5")                           # ruby >= 3.2.0
-  # NOTE: tree-sitter-jsonc parser must be installed separately via your package manager
-  #       e.g., built from source at https://gitlab.com/WhyNotHugo/tree-sitter-jsonc
-  # A ruby interface for tree-sitter must also be installed (pick ONE):
-  # - ruby_tree_sitter (MRI only; recommended for MRI users)
-  # - tree_stump (Rust-based; MRI, and maybe JRuby)
-  # - ffi (MRI, JRuby, TruffleRuby; utilizes tree_haver's ffi backend)
+  spec.add_dependency("json-merge", ">= 1.1.2")
 
-  # Shared merge infrastructure
-  spec.add_dependency("ast-merge", "~> 4.0", ">= 4.0.6")                # ruby >= 3.2.0
+  spec.post_install_message = <<~MESSAGE
+    jsonc-merge is now a compatibility shim.
 
-  # Utilities
-  spec.add_dependency("version_gem", "~> 1.1", ">= 1.1.9")              # ruby >= 2.2.0
+    JSONC support lives in json-merge, which now preserves JSONC comments directly.
+    New projects should prefer:
+      gem "json-merge"
+      require "json/merge"
+
+    Existing `require "jsonc/merge"` callers continue to forward to json-merge for now.
+  MESSAGE
 
   # NOTE: It is preferable to list development dependencies in the gemspec due to increased
   #       visibility and discoverability.

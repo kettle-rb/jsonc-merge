@@ -20,21 +20,12 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Added
 
-- Added shared comment capability and augmenter exposure with normalized region and attachment access for root object / array files, comment-only documents, and reproducible comment-heavy fixtures
+- Added a compatibility-shim install message directing users to `json-merge`, which now owns JSONC-aware parsing and comment-preserving merge behavior
 
 ### Changed
 
-- Rebased `Jsonc::Merge::CommentTracker` onto the shared
-  `Ast::Merge::Comment::CStyleTrackerBase`, keeping only JSONC-specific owner
-  resolution and block-comment policy local
-- Adopted the shared `Ast::Merge::Layout` contract for root-level JSONC layout gaps, including shared layout compliance coverage across the supported backend paths
-- Preserved destination leading and inline comments through template-preferred matched pair and recursive object / array merges while keeping comment association stable through nested JSONC shapes
-- Preserved or promoted comments for removed destination-only pairs and array items when `remove_template_missing_nodes: true` is enabled, while keeping comma placement and stripped JSON validity intact
-- Adopted `Ast::Merge::TrailingGroups::DestIterate` for position-aware template-only pair and array-item insertion while preserving JSONC freeze blocks and comment-bearing recursive container merges
-- Reused the shared emitter comment-region helpers for document-boundary replay,
-  line-comment-only matched-node emission, bounded removed-node promotion, and
-  safe trailing-container replay while keeping broader block-comment fallback
-  behavior local to JSONC
+- `jsonc-merge` now depends on `json-merge` and forwards the legacy `Jsonc::Merge` namespace / require paths to the unified implementation
+- JSONC parsing, comment preservation, and removal-mode comment promotion are now documented and tested in `json-merge` instead of living in a separate runtime implementation here
 
 ### Deprecated
 
@@ -42,18 +33,7 @@ Please file a bug if you notice a violation of semantic versioning.
 
 ### Fixed
 
-- Preserved comments on matched object / array container pairs and trailing container comment blocks when equivalent JSONC comments differ only by whitespace, including devcontainer-style recursive merges
-- ConflictResolver no longer collapses nodes that share the same signature.
-  Multiple nodes with identical signatures are now matched 1:1 in order via
-  cursor-based positional matching, instead of being treated as a single node.
-  While duplicate keys are invalid in JSONC (same as JSON), the recursive merge
-  already scopes each level, and this fix ensures correctness for any edge cases.
-- Removal-mode separator blank lines are now preserved only when promoted comment
-  content is actually emitted, preventing stray vertical gaps after uncommented
-  destination-only removals
-- Matched and removed JSONC nodes now preserve single-line and multi-line
-  `/* ... */` comment spans more faithfully by replaying tracked raw source
-  lines when block-comment fallback is required
+- Existing `require "jsonc/merge"` callers now resolve through the unified `json-merge` JSONC-aware code path instead of loading a divergent implementation
 
 ### Security
 

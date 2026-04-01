@@ -28,25 +28,15 @@ I've summarized my thoughts in [this blog post](https://dev.to/galtzo/hostile-ta
 
 ## 🌻 Synopsis
 
-Jsonc::Merge is a standalone Ruby module that intelligently merges two versions of a JSONC (JSON with Comments) file using tree-sitter AST analysis. It's like a smart "git merge" specifically designed for JSONC configuration files. Built on top of [ast-merge][ast-merge], it shares the same architecture as [prism-merge][prism-merge] for Ruby source files.
+Jsonc::Merge is now a compatibility shim for [json-merge][json-merge]. The underlying tree-sitter JSON parser used by `json-merge` can now parse JSONC in this workspace, so JSONC-aware merging and comment preservation live in `json-merge` directly.
 
-For standard JSON (without comments) support, see the [json-merge][json-merge] gem.
+Keep `jsonc-merge` only if you need the legacy gem name or `require "jsonc/merge"` entrypoint. For all new setups, prefer `json-merge`.
 
 ### Key Features
 
-- **Tree-Sitter Powered**: Uses tree-sitter-jsonc for accurate AST parsing
-- **JSONC Support**: Handles JSON with Comments (`//` and `/* */` style)
-- **Intelligent**: Matches objects and arrays by structural signatures
-- **Comment-Preserving**: Comments in JSONC files are preserved in context
-- **Freeze Block Support**: Respects freeze markers (default: `jsonc-merge:freeze` / `jsonc-merge:unfreeze`) for merge control - customizable to match your project's conventions
-- **Full Provenance**: Tracks origin of every node
-- **Standalone**: Minimal dependencies - just `ast-merge` and `ruby_tree_sitter`
-- **Customizable**:
-    - `signature_generator` - callable custom signature generators
-    - `preference` - setting of `:template`, `:destination`, or a Hash for per-node-type preferences
-    - `node_splitter` - Hash mapping node types to callables for per-node-type merge customization (see [ast-merge][ast-merge] docs)
-    - `add_template_only_nodes` - setting to retain nodes that do not exist in destination
-    - `freeze_token` - customize freeze block markers (default: `"jsonc-merge"`)
+- **Compatibility Wrapper**: Preserves the `jsonc-merge` gem name and `Jsonc::Merge` namespace
+- **Delegates to `json-merge`**: JSONC parsing, comment preservation, and merge behavior now live in `json-merge`
+- **Migration Friendly**: Existing `require "jsonc/merge"` callers continue to work while you transition
 
 ### Supported Node Types
 
@@ -63,15 +53,15 @@ For standard JSON (without comments) support, see the [json-merge][json-merge] g
 ### Example
 
 ```ruby
-require "jsonc/merge"
+require "json/merge"
 
 template = File.read("template.jsonc")
 destination = File.read("destination.jsonc")
 
-merger = Jsonc::Merge::SmartMerger.new(template, destination)
+merger = Json::Merge::SmartMerger.new(template, destination)
 result = merger.merge
 
-File.write("merged.jsonc", result.to_jsonc)
+File.write("merged.jsonc", result)
 ```
 
 ### JSONC Example with Freeze Blocks
