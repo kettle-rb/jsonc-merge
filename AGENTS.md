@@ -253,10 +253,11 @@ mise exec -C /path/to/project -- bin/kettle-soup-cover -d
 ```
 
 **Key ENV variables** (set in `mise.toml`, with local overrides in `.env.local`):
-- `K_SOUP_COV_DO=true` – Enable coverage
-- `K_SOUP_COV_MIN_LINE` – Line coverage threshold
-- `K_SOUP_COV_MIN_BRANCH` – Branch coverage threshold
-- `K_SOUP_COV_MIN_HARD=true` – Fail if thresholds not met
+
+- Running tests (`bundle exec rspec`)
+- Installing dependencies (`bundle install`)
+- Simple commands that do not require much shell escaping
+- Running scripts (prefer writing a script over a complicated command with shell escaping)
 
 ### Code Quality
 
@@ -329,7 +330,6 @@ Gemfiles are split into modular components under `gemfiles/modular/`. Each compo
 
 ### TreeHaver Dependency Tags
 
-**Available tags**:
 ✅ **PREFERRED** — Use internal tools:
 
 - `grep_search` instead of `grep` command
@@ -396,9 +396,9 @@ end
 
 Only use terminal for:
 
-- Running tests (`bundle exec rspec`)
-- Installing dependencies (`bundle install`)
-- Simple commands that do not require much shell escaping
-- Running scripts (prefer writing a script over a complicated command with shell escaping)
+- `K_SOUP_COV_DO=true` – Enable coverage
+- `K_SOUP_COV_MIN_LINE` – Line coverage threshold
+- `K_SOUP_COV_MIN_BRANCH` – Branch coverage threshold
+- `K_SOUP_COV_MIN_HARD=true` – Fail if thresholds not met
 
 1. **NEVER pipe test output through `head`/`tail`** — Run tests without truncation so you can inspect the full output.
