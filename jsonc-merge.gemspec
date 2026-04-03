@@ -87,6 +87,19 @@ Gem::Specification.new do |spec|
   # Listed files are the relative paths from bindir above.
   spec.executables = []
 
+  spec.post_install_message = <<~MESSAGE
+    jsonc-merge is now a compatibility shim.
+
+    JSONC support lives in json-merge, which now preserves JSONC comments directly.
+    New projects should prefer:
+      gem "json-merge"
+      require "json/merge"
+
+    Existing `require "jsonc/merge"` callers continue to forward to json-merge for now.
+  MESSAGE
+
+  spec.add_dependency("json-merge", ">= 2.0")
+
   # Utilities
   spec.add_dependency("version_gem", "~> 1.1", ">= 1.1.9")              # ruby >= 2.2.0
 
