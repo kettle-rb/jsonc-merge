@@ -7,9 +7,25 @@
 # jsonc-merge will then preserve content between those markers across template runs.
 # kettle-jem:unfreeze
 
+gem_version =
+  if RUBY_VERSION >= "3.1" # rubocop:disable Gemspec/RubyVersionGlobalsUsage
+    # Loading Version into an anonymous module allows version.rb to get code coverage from SimpleCov!
+    # See: https://github.com/simplecov-ruby/simplecov/issues/557#issuecomment-2630782358
+    # See: https://github.com/panorama-ed/memo_wise/pull/397
+    Module.new.tap { |mod| Kernel.load("#{__dir__}/lib/jsonc/merge/version.rb", mod) }::Jsonc::Merge::Version::VERSION
+  else
+    # NOTE: Use __FILE__ or __dir__ until removal of Ruby 1.x support
+    # __dir__ introduced in Ruby 1.9.1
+    # lib = File.expand_path("../lib", __FILE__)
+    lib = File.expand_path("lib", __dir__)
+    $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+    require "jsonc/merge/version"
+    Jsonc::Merge::Version::VERSION
+  end
+
 Gem::Specification.new do |spec|
   spec.name = "jsonc-merge"
-  spec.version = Module.new.tap { |mod| Kernel.load("#{__dir__}/lib/jsonc/merge/version.rb", mod) }::Jsonc::Merge::Version::VERSION
+  spec.version = gem_version
   spec.authors = ["Peter H. Boling"]
   spec.email = ["floss@galtzo.com"]
 
@@ -86,19 +102,6 @@ Gem::Specification.new do |spec|
   spec.bindir = "exe"
   # Listed files are the relative paths from bindir above.
   spec.executables = []
-
-  spec.add_dependency("json-merge", ">= 2.0")
-
-  spec.post_install_message = <<~MESSAGE
-    jsonc-merge is now a compatibility shim.
-
-    JSONC support lives in json-merge, which now preserves JSONC comments directly.
-    New projects should prefer:
-      gem "json-merge"
-      require "json/merge"
-
-    Existing `require "jsonc/merge"` callers continue to forward to json-merge for now.
-  MESSAGE
 
   # Utilities
   spec.add_dependency("version_gem", "~> 1.1", ">= 1.1.9")              # ruby >= 2.2.0
