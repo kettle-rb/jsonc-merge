@@ -81,7 +81,7 @@ Gem::Specification.new do |spec|
   # Listed files are the relative paths from bindir above.
   spec.executables = []
 
-  spec.add_dependency("json-merge", ">= 1.1.2")
+  spec.add_dependency("json-merge", "~> 2.0")
 
   spec.post_install_message = <<~MESSAGE
     jsonc-merge is now a compatibility shim.

@@ -5,7 +5,7 @@ module Jsonc
     # Version information for Jsonc::Merge
     module Version
       # Current version of the json-merge gem
-      VERSION = "1.0.1"
+      VERSION = "2.0.0"
     end
     VERSION = Version::VERSION # traditional location
   end
