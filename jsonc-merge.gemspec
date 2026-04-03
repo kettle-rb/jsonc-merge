@@ -1,16 +1,38 @@
 # coding: utf-8
 # frozen_string_literal: true
 
+# kettle-jem:freeze
+# To retain chunks of comments & code during jsonc-merge templating:
+# Wrap custom sections with freeze markers (e.g., as above and below this comment chunk).
+# jsonc-merge will then preserve content between those markers across template runs.
+# kettle-jem:unfreeze
+
+gem_version =
+  if RUBY_VERSION >= "3.1" # rubocop:disable Gemspec/RubyVersionGlobalsUsage
+    # Loading Version into an anonymous module allows version.rb to get code coverage from SimpleCov!
+    # See: https://github.com/simplecov-ruby/simplecov/issues/557#issuecomment-2630782358
+    # See: https://github.com/panorama-ed/memo_wise/pull/397
+    Module.new.tap { |mod| Kernel.load("#{__dir__}/lib/jsonc/merge/version.rb", mod) }::Jsonc::Merge::Version::VERSION
+  else
+    # NOTE: Use __FILE__ or __dir__ until removal of Ruby 1.x support
+    # __dir__ introduced in Ruby 1.9.1
+    # lib = File.expand_path("../lib", __FILE__)
+    lib = File.expand_path("lib", __dir__)
+    $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+    require "jsonc/merge/version"
+    Jsonc::Merge::Version::VERSION
+  end
+
 Gem::Specification.new do |spec|
   spec.name = "jsonc-merge"
-  spec.version = Module.new.tap { |mod| Kernel.load("#{__dir__}/lib/jsonc/merge/version.rb", mod) }::Jsonc::Merge::Version::VERSION
+  spec.version = gem_version
   spec.authors = ["Peter H. Boling"]
   spec.email = ["floss@galtzo.com"]
 
-  spec.summary = "☯️ Compatibility shim for JSONC merging via json-merge"
-  spec.description = "☯️ Jsonc::Merge is now a compatibility shim. JSONC support lives in json-merge, which now preserves JSONC comments through the tree-sitter JSON parser path. Keep depending on jsonc-merge temporarily if you need the legacy gem name, but prefer json-merge for new setups."
+  spec.summary = "🍲 Compatibility shim for JSONC merging via json-merge"
+  spec.description = "🍲 Jsonc::Merge is now a compatibility shim. JSONC support lives in json-merge, which now preserves JSONC comments through the tree-sitter JSON parser path. Keep depending on jsonc-merge temporarily if you need the legacy gem name, but prefer json-merge for new setups."
   spec.homepage = "https://github.com/kettle-rb/jsonc-merge"
-  spec.licenses = ["MIT"]
+  spec.licenses = ["AGPL-3.0-only", "PolyForm-Small-Business-1.0.0", "LicenseRef-Big-Time-Public-License"]
   spec.required_ruby_version = ">= 3.2.0"
 
   # Linux distros often package gems and securely certify them independent
@@ -31,7 +53,7 @@ Gem::Specification.new do |spec|
     end
   end
 
-  spec.metadata["homepage_uri"] = "https://#{spec.name.tr("_", "-")}.galtzo.com/"
+  spec.metadata["homepage_uri"] = "https://jsonc-merge.galtzo.com/"
   spec.metadata["source_code_uri"] = "#{spec.homepage}/tree/v#{spec.version}"
   spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/v#{spec.version}/CHANGELOG.md"
   spec.metadata["bug_tracker_uri"] = "#{spec.homepage}/issues"
@@ -81,18 +103,8 @@ Gem::Specification.new do |spec|
   # Listed files are the relative paths from bindir above.
   spec.executables = []
 
-  spec.add_dependency("json-merge", "~> 2.0")
-
-  spec.post_install_message = <<~MESSAGE
-    jsonc-merge is now a compatibility shim.
-
-    JSONC support lives in json-merge, which now preserves JSONC comments directly.
-    New projects should prefer:
-      gem "json-merge"
-      require "json/merge"
-
-    Existing `require "jsonc/merge"` callers continue to forward to json-merge for now.
-  MESSAGE
+  # Utilities
+  spec.add_dependency("version_gem", "~> 1.1", ">= 1.1.9")              # ruby >= 2.2.0
 
   # NOTE: It is preferable to list development dependencies in the gemspec due to increased
   #       visibility and discoverability.
@@ -107,15 +119,11 @@ Gem::Specification.new do |spec|
   #       Development dependencies that require strictly newer Ruby versions should be in a "gemfile",
   #       and preferably a modular one (see gemfiles/modular/*.gemfile).
 
-  # v2.6.3 is the version of json that shipped with Ruby 3.2
-  # But can't install on truffleruby
-  # spec.add_development_dependency("json", "~> 2.6")                                 # ruby >= 2.3,
-
   # Dev, Test, & Release Tasks
-  spec.add_development_dependency("kettle-dev", "~> 2.0")                           # ruby >= 2.3.0
+  spec.add_development_dependency("kettle-dev", "~> 2.0")                  # ruby >= 2.3.0
 
   # Security
-  spec.add_development_dependency("bundler-audit", "~> 0.9.2")                      # ruby >= 2.0.0
+  spec.add_development_dependency("bundler-audit", "~> 0.9.3")                      # ruby >= 2.0.0
 
   # Tasks
   spec.add_development_dependency("rake", "~> 13.0")                                # ruby >= 2.2.0
@@ -124,8 +132,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency("require_bench", "~> 1.0", ">= 1.0.4")            # ruby >= 2.2.0
 
   # Testing
-  spec.add_development_dependency("appraisal2", "~> 3.0", "~> 3.0.6")               # ruby >= 1.8.7, for testing against multiple versions of dependencies
-  spec.add_development_dependency("kettle-test", "~> 1.0", ">= 1.0.10")             # ruby >= 2.3
+  spec.add_development_dependency("appraisal2", "~> 3.0", ">= 3.0.6")               # ruby >= 1.8.7, for testing against multiple versions of dependencies
+  spec.add_development_dependency("kettle-test", "~> 1.0", ">= 1.0.10")              # ruby >= 2.3
 
   # Releasing
   spec.add_development_dependency("ruby-progressbar", "~> 1.13")                    # ruby >= 0

@@ -1,4 +1,3 @@
----
 # Lock/Unlock Deps Pattern
 #
 # Two often conflicting goals resolved!
@@ -65,7 +64,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install tree-sitter and jsonc grammar
+      - name: Install tree-sitter library
         uses: kettle-rb/ts-grammar-action@main
         with:
           grammar-jsonc: true
@@ -77,6 +76,17 @@ jobs:
           rubygems: ${{ matrix.rubygems }}
           bundler: ${{ matrix.bundler }}
           bundler-cache: true
+      - name: "[Attempt 1] Appraisal for ${{ matrix.ruby }}@${{ matrix.appraisal }}"
+        id: bundleAppraisalAttempt1
+        run: bundle exec appraisal ${{ matrix.appraisal }} install
+        # Continue to the next step on failure
+        continue-on-error: true
+      # Effectively an automatic retry of the previous step.
+      - name: "[Attempt 2] Appraisal for ${{ matrix.ruby }}@${{ matrix.appraisal }}"
+        id: bundleAppraisalAttempt2
+        # If bundleAppraisalAttempt1 failed, try again here; Otherwise skip.
+        if: ${{ steps.bundleAppraisalAttempt1.outcome == 'failure' }}
+        run: bundle exec appraisal ${{ matrix.appraisal }} install
 
       # Raw `bundle` will use the BUNDLE_GEMFILE set to matrix.gemfile (i.e. Appraisal.root)
       # We need to do this first to get appraisal installed.

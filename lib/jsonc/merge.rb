@@ -4,6 +4,8 @@
 # Keep the legacy namespace and require paths available for callers that
 # still depend on jsonc-merge while all merge behavior lives in json-merge.
 require "version_gem"
+require_relative "merge/version"
+
 require "ast/merge"
 
 module Jsonc

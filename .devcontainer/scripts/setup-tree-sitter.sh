@@ -9,16 +9,18 @@ set -e
 # - Devcontainer: Can run as root (apt-install feature) or non-root (postCreateCommand)
 # - Auto-detection: Checks if running as root (id -u = 0), uses sudo if non-root
 #
+# This script installs ALL tree-sitter grammars for integration testing
+#
 # Options:
 #   --sudo: Force use of sudo (optional, auto-detected by default)
 #   --cli:  Install tree-sitter-cli via npm (optional)
 #   --build: Build and install the tree-sitter C runtime from source when distro packages are missing (optional)
-#   --workspace PATH: Workspace root path for informational/debugging purposes only (defaults to /workspaces/jsonc-merge)
+#   --workspace PATH: Workspace root path for informational/debugging purposes only (defaults to /workspaces/tree_haver)
 
 SUDO=""
 INSTALL_CLI=false
 BUILD_FROM_SOURCE=false
-WORKSPACE_ROOT="/workspaces/jsonc-merge"
+WORKSPACE_ROOT="/workspaces/${PWD##*/}"
 
 # Parse arguments properly using while loop
 while [[ $# -gt 0 ]]; do
@@ -105,8 +107,24 @@ PACKAGES="build-essential pkg-config wget gcc g++ make zlib1g-dev libssl-dev lib
 if [ "$BUILD_FROM_SOURCE" = false ]; then
   PACKAGES="$PACKAGES libtree-sitter-dev"
 fi
-
-if ! $SUDO apt-get install -y $PACKAGES; then
+# libtree-sitter-dev is optional when building from source via --build
+if ! $SUDO apt-get install -y \
+  build-essential \
+  pkg-config \
+  $( [ "$BUILD_FROM_SOURCE" = false ] && echo "libtree-sitter-dev" ) \
+  wget \
+  gcc \
+  g++ \
+  make \
+  zlib1g-dev \
+  libssl-dev \
+  libreadline-dev \
+  libyaml-dev \
+  libxml2-dev \
+  libxslt1-dev \
+  libcurl4-openssl-dev \
+  software-properties-common \
+  libffi-dev; then
   echo "ERROR: apt-get failed to install required packages."
   echo "Please check your network, package sources, and re-run this script."
   exit 1
@@ -140,12 +158,14 @@ else
   echo "Skipping tree-sitter-cli installation (use --cli flag to install)"
 fi
 
+# Install all tree-sitter grammars for integration testing
+GRAMMARS=("toml" "json" "jsonc" "bash")
+
 echo "Building and installing tree-sitter-jsonc..."
 
 # Ensure wget and unzip are installed
-if ! have_cmd wget; then
-  echo "Installing wget..."
-  $SUDO apt-get install -y wget
+if ! $SUDO ldconfig; then
+  echo "WARNING: ldconfig failed, libraries may not be immediately available" >&2
 fi
 if ! have_cmd unzip; then
   echo "Installing unzip..."
@@ -154,6 +174,54 @@ fi
 
 TMPDIR=$(mktemp -d)
 trap "rm -rf $TMPDIR" EXIT
+
+for grammar in "${GRAMMARS[@]}"; do
+  echo "Building and installing tree-sitter-${grammar}..."
+  cd "$TMPDIR"
+
+  if ! wget -q "https://github.com/tree-sitter-grammars/tree-sitter-${grammar}/archive/refs/heads/master.zip" -O "${grammar}.zip"; then
+    echo "ERROR: Failed to download tree-sitter-${grammar}" >&2
+    exit 1
+  fi
+
+  if ! unzip -q "${grammar}.zip"; then
+    echo "ERROR: Failed to unzip tree-sitter-${grammar}" >&2
+    exit 1
+  fi
+
+  cd "tree-sitter-${grammar}-master"
+
+  # Compile parser.c
+  if ! gcc -fPIC -I./src -c src/parser.c -o parser.o; then
+    echo "ERROR: Failed to compile parser.c for ${grammar}" >&2
+    exit 1
+  fi
+
+  # Check if scanner exists (not all grammars have scanners)
+  if [ -f src/scanner.c ]; then
+    if ! gcc -fPIC -I./src -c src/scanner.c -o scanner.o; then
+      echo "ERROR: Failed to compile scanner.c for ${grammar}" >&2
+      exit 1
+    fi
+    OBJECTS="parser.o scanner.o"
+  else
+    OBJECTS="parser.o"
+  fi
+
+  # Link object files into shared library
+  if ! gcc -shared -o "libtree-sitter-${grammar}.so" $OBJECTS; then
+    echo "ERROR: Failed to link libtree-sitter-${grammar}.so" >&2
+    exit 1
+  fi
+
+  # Install to system
+  if ! $SUDO cp "libtree-sitter-${grammar}.so" /usr/local/lib/; then
+    echo "ERROR: Failed to copy libtree-sitter-${grammar}.so to /usr/local/lib/" >&2
+    exit 1
+  fi
+
+  echo "  ✓ Installed tree-sitter-${grammar}"
+done
 cd "$TMPDIR"
 
 echo "Downloading tree-sitter-jsonc from GitLab..."
@@ -215,3 +283,27 @@ else
 fi
 
 echo "  TREE_SITTER_JSONC_PATH=/usr/local/lib/libtree-sitter-jsonc.so"
+
+echo ""
+echo "tree-sitter setup complete!"
+echo ""
+echo "Detected library paths:"
+
+# Detect and report tree-sitter runtime library location
+if [ -f /usr/lib/x86_64-linux-gnu/libtree-sitter.so.0 ]; then
+  echo "  TREE_SITTER_RUNTIME_LIB=/usr/lib/x86_64-linux-gnu/libtree-sitter.so.0"
+elif [ -f /usr/lib/x86_64-linux-gnu/libtree-sitter.so ]; then
+  echo "  TREE_SITTER_RUNTIME_LIB=/usr/lib/x86_64-linux-gnu/libtree-sitter.so"
+elif [ -f /usr/lib/libtree-sitter.so.0 ]; then
+  echo "  TREE_SITTER_RUNTIME_LIB=/usr/lib/libtree-sitter.so.0"
+elif [ -f /usr/lib/libtree-sitter.so ]; then
+  echo "  TREE_SITTER_RUNTIME_LIB=/usr/lib/libtree-sitter.so"
+else
+  echo "  WARNING: Could not find libtree-sitter runtime library!"
+fi
+
+echo ""
+echo "Grammar libraries:"
+for grammar in "${GRAMMARS[@]}"; do
+  echo "  TREE_SITTER_${grammar^^}_PATH=/usr/local/lib/libtree-sitter-${grammar}.so"
+done

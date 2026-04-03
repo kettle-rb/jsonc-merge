@@ -31,7 +31,7 @@ jobs:
     name: Specs ${{ matrix.ruby }}@${{ matrix.appraisal }}${{ matrix.name_extra || '' }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental || endsWith(matrix.ruby, 'head') }}
-    env:
+    env: # $BUNDLE_GEMFILE must be set at job level, so it is set for all steps
       # $BUNDLE_GEMFILE must be set at job level, so it is set for all steps
       BUNDLE_GEMFILE: ${{ github.workspace }}/${{ matrix.gemfile }}.gemfile
       # Note: LD_LIBRARY_PATH and TREE_SITTER_JSONC_PATH are set by ts-grammar-action
@@ -43,7 +43,7 @@ jobs:
           # ruby-head
           - ruby: "ruby-head"
             appraisal: "head"
-            exec_cmd: "rake magic"
+            exec_cmd: "rake test"
             gemfile: "Appraisal.root"
             rubygems: default
             bundler: default
@@ -51,7 +51,7 @@ jobs:
           # truffleruby-head
           - ruby: "truffleruby-head"
             appraisal: "head"
-            exec_cmd: "rake magic"
+            exec_cmd: "rake test"
             gemfile: "Appraisal.root"
             rubygems: default
             bundler: default
@@ -59,7 +59,7 @@ jobs:
           # jruby-head
           - ruby: "jruby-head"
             appraisal: "head"
-            exec_cmd: "rake magic"
+            exec_cmd: "rake test"
             gemfile: "Appraisal.root"
             rubygems: default
             bundler: default
