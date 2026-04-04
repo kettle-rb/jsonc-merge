@@ -2,25 +2,12 @@
 
 ## 🎯 Project Overview
 
-### Running Commands
-
-Always make commands self-contained. Use `mise exec -C /home/pboling/src/kettle-rb/prism-merge -- ...` so the command gets the project environment in the same invocation.
-If the command is complicated write a script in local tmp/ and then run the script.
-
 This project is a **RubyGem** managed with the [kettle-rb](https://github.com/kettle-rb) toolchain.
 
 **Minimum Supported Ruby**: See the gemspec `required_ruby_version` constraint.
 **Local Development Ruby**: See `.tool-versions` for the version used in local development (typically the latest stable Ruby).
 
 ## ⚠️ AI Agent Terminal Limitations
-
-### Terminal Output Is Available, but Each Command Is Isolated
-
-```bash
-mise exec -C /path/to/project -- bundle exec rspec
-```
-
-✅ **CORRECT** — If you need shell syntax first, load the environment in the same command:
 
 ### Use `mise` for Project Environment
 
@@ -31,42 +18,19 @@ mise exec -C /path/to/project -- bundle exec rspec
 **Recovery rule**: If a `mise exec` command goes silent or appears hung, assume `mise trust` is the first thing to check. Recover by running:
 
 ```bash
-mise trust -C /home/pboling/src/kettle-rb/jsonc-merge
-mise exec -C /home/pboling/src/kettle-rb/jsonc-merge -- bundle exec rspec
-```
-
-```bash
 mise trust -C /path/to/project
 mise exec -C /path/to/project -- bundle exec rspec
 ```
 
 Do this before spending time on unrelated debugging; in this workspace pattern, silent `mise` commands are usually a trust problem first.
 
-```bash
-mise trust -C /home/pboling/src/kettle-rb/jsonc-merge
-```
-
 ✅ **CORRECT** — Run self-contained commands with `mise exec`:
 
 ```bash
-mise exec -C /home/pboling/src/kettle-rb/jsonc-merge -- bundle exec rspec
+mise exec -C /path/to/project -- bundle exec rspec
 ```
 
-✅ **CORRECT**:
-```bash
-eval "$(mise env -C /home/pboling/src/kettle-rb/jsonc-merge -s bash)" && bundle exec rspec
-```
-
-❌ **WRONG**:
-```bash
-cd /home/pboling/src/kettle-rb/jsonc-merge
-bundle exec rspec
-```
-
-❌ **WRONG**:
-```bash
-cd /home/pboling/src/kettle-rb/jsonc-merge && bundle exec rspec
-```
+✅ **CORRECT** — If you need shell syntax first, load the environment in the same command:
 
 ```bash
 eval "$(mise env -C /path/to/project -s bash)" && bundle exec rspec
@@ -87,63 +51,32 @@ cd /path/to/project && bundle exec rspec
 
 ### Prefer Internal Tools Over Terminal
 
-### Environment Variable Helpers
+✅ **PREFERRED** — Use internal tools:
 
-```ruby
-before do
-  stub_env("MY_ENV_VAR" => "value")
-end
+- `grep_search` instead of `grep` command
+- `file_search` instead of `find` command
+- `read_file` instead of `cat` command
+- `list_dir` instead of `ls` command
+- `replace_string_in_file` or `create_file` instead of `sed` / manual editing
 
-before do
-  hide_env("HOME", "USER")
-end
-```
+❌ **AVOID** when possible:
 
-### Dependency Tags
+- `run_in_terminal` for information gathering
 
-Use dependency tags to conditionally skip tests when optional dependencies are not available:
+Only use terminal for:
 
-### Workspace layout
+- Running tests (`bundle exec rspec`)
+- Installing dependencies (`bundle install`)
+- Simple commands that do not require much shell escaping
+- Running scripts (prefer writing a script over a complicated command with shell escaping)
+
+When you do run tests, keep the full output visible so you can inspect failures completely.
 
 ## 🏗️ Architecture
 
 ### Toolchain Dependencies
 
 This gem is part of the **kettle-rb** ecosystem. Key development tools:
-
-### NEVER Pipe Test Commands Through head/tail
-
-When you do run tests, keep the full output visible so you can inspect failures completely.
-
-## 🏗️ Architecture: Format-Specific Implementation
-
-### What jsonc-merge Provides
-
-- **`Jsonc::Merge::SmartMerger`** – JSONC-specific SmartMerger implementation
-- **`Jsonc::Merge::FileAnalysis`** – JSONC file analysis with object/array extraction
-- **`Jsonc::Merge::NodeWrapper`** – Wrapper for JSONC AST nodes
-- **`Jsonc::Merge::MergeResult`** – JSONC-specific merge result
-- **`Jsonc::Merge::ConflictResolver`** – JSONC conflict resolution
-- **`Jsonc::Merge::FreezeNode`** – JSONC freeze block support
-- **`Jsonc::Merge::DebugLogger`** – JSONC-specific debug logging
-
-### Key Dependencies
-
-| Gem | Role |
-|-----|------|
-| `ast-merge` (~> 4.0) | Base classes and shared infrastructure |
-| `tree_haver` (~> 5.0) | Unified parser adapter (tree-sitter) |
-| `version_gem` (~> 1.1) | Version management |
-
-### Parser Backend Support
-
-jsonc-merge works with tree-sitter JSONC parser via TreeHaver:
-
-| Backend | Parser | Platform | Notes |
-|---------|--------|----------|-------|
-| `:mri` | tree-sitter-jsonc | MRI only | Best performance, requires native library |
-| `:rust` | tree-sitter-jsonc | MRI only | Rust implementation via tree_stump |
-| `:ffi` | tree-sitter-jsonc | All platforms | FFI binding, works on JRuby/TruffleRuby |
 
 | Tool | Purpose |
 |------|---------|
@@ -163,24 +96,6 @@ jsonc-merge works with tree-sitter JSONC parser via TreeHaver:
 | `kettle-check-eof` | EOF newline validation |
 
 ## 📁 Project Structure
-
-```
-lib/jsonc/merge/
-├── smart_merger.rb          # Main SmartMerger implementation
-├── file_analysis.rb         # JSONC file analysis
-├── node_wrapper.rb          # AST node wrapper
-├── merge_result.rb          # Merge result object
-├── conflict_resolver.rb     # Conflict resolution
-├── freeze_node.rb           # Freeze block support
-├── debug_logger.rb          # Debug logging
-└── version.rb
-
-spec/jsonc/merge/
-├── smart_merger_spec.rb
-├── file_analysis_spec.rb
-├── node_wrapper_spec.rb
-└── integration/
-```
 
 ```
 lib/
@@ -212,20 +127,12 @@ gemfiles/
 
 ## 🔧 Development Workflows
 
+### Running Commands
+
+Always make commands self-contained. Use `mise exec -C /home/pboling/src/kettle-rb/prism-merge -- ...` so the command gets the project environment in the same invocation.
+If the command is complicated write a script in local tmp/ and then run the script.
+
 ### Running Tests
-
-```bash
-# Full suite
-mise exec -C /home/pboling/src/kettle-rb/jsonc-merge -- bundle exec rspec
-
-# Single file (disable coverage threshold check)
-mise exec -C /home/pboling/src/kettle-rb/jsonc-merge -- env K_SOUP_COV_MIN_HARD=false bundle exec rspec spec/jsonc/merge/smart_merger_spec.rb
-
-# Specific backend tests
-mise exec -C /home/pboling/src/kettle-rb/jsonc-merge -- bundle exec rspec --tag mri_backend
-mise exec -C /home/pboling/src/kettle-rb/jsonc-merge -- bundle exec rspec --tag rust_backend
-mise exec -C /home/pboling/src/kettle-rb/jsonc-merge -- bundle exec rspec --tag ffi_backend
-```
 
 Full suite spec runs:
 
@@ -243,21 +150,15 @@ mise exec -C /path/to/project -- env K_SOUP_COV_MIN_HARD=false bundle exec rspec
 ### Coverage Reports
 
 ```bash
-mise exec -C /home/pboling/src/kettle-rb/jsonc-merge -- bin/rake coverage
-mise exec -C /home/pboling/src/kettle-rb/jsonc-merge -- bin/kettle-soup-cover -d
-```
-
-```bash
 mise exec -C /path/to/project -- bin/rake coverage
 mise exec -C /path/to/project -- bin/kettle-soup-cover -d
 ```
 
 **Key ENV variables** (set in `mise.toml`, with local overrides in `.env.local`):
-
-- Running tests (`bundle exec rspec`)
-- Installing dependencies (`bundle install`)
-- Simple commands that do not require much shell escaping
-- Running scripts (prefer writing a script over a complicated command with shell escaping)
+- `K_SOUP_COV_DO=true` – Enable coverage
+- `K_SOUP_COV_MIN_LINE` – Line coverage threshold
+- `K_SOUP_COV_MIN_BRANCH` – Branch coverage threshold
+- `K_SOUP_COV_MIN_HARD=true` – Fail if thresholds not met
 
 ### Code Quality
 
@@ -275,42 +176,9 @@ bin/kettle-release        # Full release workflow
 
 ## 📝 Project Conventions
 
-### API Conventions
-
-#### SmartMerger API
-
-### Test Infrastructure
-
-- Uses `kettle-test` for RSpec helpers (stubbed_env, block_is_expected, silent_stream, timecop)
-- Uses `Dir.mktmpdir` for isolated filesystem tests
-- Spec helper is loaded by `.rspec` — never add `require "spec_helper"` to spec files
-
-#### JSONC-Specific Features
-
-**Comment Support**:
-```jsonc
-{
-  // Line comment
-  "key": "value",
-  /* Block comment */
-  "another": "value"
-}
-```
-
 ### Freeze Block Preservation
 
 Template updates preserve custom code wrapped in freeze blocks:
-
-```jsonc
-{
-  "config": {
-    // jsonc-merge:freeze
-    "customValue": "don't override",
-    "preserveThis": 42
-    // jsonc-merge:unfreeze
-  }
-}
-```
 
 ```ruby
 # kettle-jem:freeze
@@ -328,37 +196,27 @@ Gemfiles are split into modular components under `gemfiles/modular/`. Each compo
 
 ## 🧪 Testing Patterns
 
-### TreeHaver Dependency Tags
+### Test Infrastructure
 
-✅ **PREFERRED** — Use internal tools:
+- Uses `kettle-test` for RSpec helpers (stubbed_env, block_is_expected, silent_stream, timecop)
+- Uses `Dir.mktmpdir` for isolated filesystem tests
+- Spec helper is loaded by `.rspec` — never add `require "spec_helper"` to spec files
 
-- `grep_search` instead of `grep` command
-- `file_search` instead of `find` command
-- `read_file` instead of `cat` command
-- `list_dir` instead of `ls` command
-- `replace_string_in_file` or `create_file` instead of `sed` / manual editing
+### Environment Variable Helpers
 
-✅ **CORRECT**:
-```ruby
-RSpec.describe Jsonc::Merge::SmartMerger, :jsonc_grammar do
-  # Skipped if no JSONC parser available
-end
-```
-
-❌ **WRONG**:
 ```ruby
 before do
-  skip "Requires tree-sitter" unless tree_sitter_available?  # DO NOT DO THIS
+  stub_env("MY_ENV_VAR" => "value")
+end
+
+before do
+  hide_env("HOME", "USER")
 end
 ```
 
-## 💡 Key Insights
+### Dependency Tags
 
-1. **JSONC = JSON + Comments**: Full comment support unlike plain JSON
-2. **Comment preservation**: Comments are associated with nodes and preserved during merge
-3. **Freeze blocks use `// jsonc-merge:freeze`**: Standard comment syntax
-4. **Multi-backend support**: Works with MRI, Rust, and FFI backends
-5. **Backend isolation is critical**: Always use `TreeHaver.with_backend`
+Use dependency tags to conditionally skip tests when optional dependencies are not available:
 
 ```ruby
 RSpec.describe SomeClass, :prism_merge do
@@ -367,38 +225,5 @@ end
 ```
 
 ## 🚫 Common Pitfalls
-
-1. **NEVER mix FFI and MRI backends** – Use `TreeHaver.with_backend` for isolation
-2. **NEVER use manual skip checks** – Use dependency tags (`:jsonc_grammar`, `:mri_backend`)
-3. **Do NOT load vendor gems** – They are not part of this project; they do not exist in CI
-4. **Use `tmp/` for temporary files** – Never use `/tmp` or other system directories
-5. **Do NOT expect `cd` to persist** – Every terminal command is isolated; use a self-contained `mise exec -C ... -- ...` invocation.
-6. **Do NOT rely on prior shell state** – Previous `cd`, `export`, aliases, and functions are not available to the next command.
-
-## 🔧 JSONC-Specific Notes
-
-### Comment Types
-
-```jsonc
-// Single-line comment
-/* Multi-line
-   comment */
-{
-  "key": "value" // Trailing comment
-}
-```
-
-### Merge Behavior
-
-❌ **AVOID** when possible:
-
-- `run_in_terminal` for information gathering
-
-Only use terminal for:
-
-- `K_SOUP_COV_DO=true` – Enable coverage
-- `K_SOUP_COV_MIN_LINE` – Line coverage threshold
-- `K_SOUP_COV_MIN_BRANCH` – Branch coverage threshold
-- `K_SOUP_COV_MIN_HARD=true` – Fail if thresholds not met
 
 1. **NEVER pipe test output through `head`/`tail`** — Run tests without truncation so you can inspect the full output.
