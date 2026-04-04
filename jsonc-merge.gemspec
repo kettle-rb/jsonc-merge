@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
   spec.summary = "🍲 Compatibility shim for JSONC merging via json-merge"
   spec.description = "🍲 Jsonc::Merge is now a compatibility shim. JSONC support lives in json-merge, which now preserves JSONC comments through the tree-sitter JSON parser path. Keep depending on jsonc-merge temporarily if you need the legacy gem name, but prefer json-merge for new setups."
   spec.homepage = "https://github.com/kettle-rb/jsonc-merge"
-  spec.licenses = ["AGPL-3.0-only", "PolyForm-Small-Business-1.0.0", "LicenseRef-Big-Time-Public-License"]
+  spec.licenses = ["AGPL-3.0-only"]
   spec.required_ruby_version = ">= 3.2.0"
 
   # Linux distros often package gems and securely certify them independent
