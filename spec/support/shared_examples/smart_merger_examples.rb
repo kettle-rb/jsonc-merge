@@ -570,6 +570,33 @@ RSpec.shared_examples "nested object comments" do
   end
 end
 
+RSpec.shared_examples "multi-byte character (emoji) handling" do
+  it "does not duplicate keys when destination contains emoji values" do
+    template = '{"name": "default"}'
+    destination = '{"emoji": "🪙", "name": "custom"}'
+    merger = described_class.new(template, destination, preference: :destination, add_template_only_nodes: true)
+    result = merger.merge_result
+    output = result.to_json
+    expect(output.scan('"name"').size).to eq(1)
+  end
+
+  it "preserves emoji values" do
+    template = '{"key": "template"}'
+    destination = '{"key": "🍲 special"}'
+    merger = described_class.new(template, destination, preference: :destination)
+    result = merger.merge_result
+    expect(result.to_json).to include("🍲")
+  end
+
+  it "handles CJK without duplication" do
+    template = '{"lang": "en"}'
+    destination = '{"greeting": "こんにちは", "lang": "ja"}'
+    merger = described_class.new(template, destination, preference: :destination, add_template_only_nodes: true)
+    result = merger.merge_result
+    expect(result.to_json.scan('"lang"').size).to eq(1)
+  end
+end
+
 RSpec.shared_examples "mixed object and array comments" do
   describe "mixed object/array comment preservation" do
     it "recursively merges keyed arrays of objects without duplicating the array key" do
