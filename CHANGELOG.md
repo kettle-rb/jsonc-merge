@@ -34,6 +34,7 @@ Please file a bug if you notice a violation of semantic versioning.
 ### Fixed
 
 - Existing `require "jsonc/merge"` callers now resolve through the unified `json-merge` JSONC-aware code path instead of loading a divergent implementation
+- Fixed multi-byte character (emoji) handling — upstream `ast-merge` `byteslice` → `slice` fix prevents corruption when merging content with multi-byte characters
 
 ### Security
 
