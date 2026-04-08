@@ -527,8 +527,9 @@ RSpec.shared_examples "shared comment capability" do
       owner = analysis.statements.first
       attachment = augmenter.attachment_for(owner)
 
-      expect(attachment.leading_region).to be_a(Ast::Merge::Comment::Region)
-      expect(attachment.leading_region.normalized_content).to eq("Header docs")
+      expect(attachment.leading_region).to be_nil
+      expect(augmenter.preamble_region).to be_a(Ast::Merge::Comment::Region)
+      expect(augmenter.preamble_region.normalized_content).to eq("Header docs")
       expect(augmenter.postlude_region).to be_a(Ast::Merge::Comment::Region)
       expect(augmenter.postlude_region.normalized_content).to eq("Footer docs")
     end
