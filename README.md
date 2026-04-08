@@ -7,7 +7,7 @@
 [🖼️kettle-rb-i]: https://logos.galtzo.com/assets/images/kettle-rb/avatar-192px.svg
 [🖼️kettle-rb]: https://github.com/kettle-rb
 
-# 🍲 Jsonc::Merge
+# ☯️ Jsonc::Merge
 
 [![Version][👽versioni]][👽version] [![GitHub tag (latest SemVer)][⛳️tag-img]][⛳️tag] [![License: MIT][📄license-img]][📄license-ref] [![Downloads Rank][👽dl-ranki]][👽dl-rank] [![Open Source Helpers][👽oss-helpi]][👽oss-help] [![CodeCov Test Coverage][🏀codecovi]][🏀codecov] [![Coveralls Test Coverage][🏀coveralls-img]][🏀coveralls] [![QLTY Test Coverage][🏀qlty-covi]][🏀qlty-cov] [![QLTY Maintainability][🏀qlty-mnti]][🏀qlty-mnt] [![CI Heads][🚎3-hd-wfi]][🚎3-hd-wf] [![CI Runtime Dependencies @ HEAD][🚎12-crh-wfi]][🚎12-crh-wf] [![CI Current][🚎11-c-wfi]][🚎11-c-wf] [![CI Truffle Ruby][🚎9-t-wfi]][🚎9-t-wf] [![CI JRuby][🚎10-j-wfi]][🚎10-j-wf] [![Deps Locked][🚎13-🔒️-wfi]][🚎13-🔒️-wf] [![Deps Unlocked][🚎14-🔓️-wfi]][🚎14-🔓️-wf] [![CI Test Coverage][🚎2-cov-wfi]][🚎2-cov-wf] [![CI Style][🚎5-st-wfi]][🚎5-st-wf] [![CodeQL][🖐codeQL-img]][🖐codeQL] [![Apache SkyWalking Eyes License Compatibility Check][🚎15-🪪-wfi]][🚎15-🪪-wf]
 
@@ -27,7 +27,6 @@ I've summarized my thoughts in [this blog post](https://dev.to/galtzo/hostile-ta
 </details>
 
 ## 🌻 Synopsis
-
 
 Jsonc::Merge is now a compatibility shim for [json-merge][json-merge]. The underlying tree-sitter JSON parser used by `json-merge` can now parse JSONC in this workspace, so JSONC-aware merging and comment preservation live in `json-merge` directly.
 
@@ -340,7 +339,6 @@ NOTE: Be prepared to track down certs for signed gems and add them the same way 
 
 ## ⚙️ Configuration
 
-
 ```ruby
 merger = Jsonc::Merge::SmartMerger.new(
   template_content,
@@ -367,7 +365,6 @@ merger = Jsonc::Merge::SmartMerger.new(
 ```
 
 ## 🔧 Basic Usage
-
 
 ### Simple Merge
 
