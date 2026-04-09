@@ -6,8 +6,8 @@ RSpec.describe Jsonc::Merge::DebugLogger do
   # Use the shared examples to validate base DebugLogger integration
   it_behaves_like "Ast::Merge::DebugLogger" do
     let(:described_logger) { described_class }
-    let(:env_var_name) { "JSONC_MERGE_DEBUG" }
-    let(:log_prefix) { "[Jsonc::Merge]" }
+    let(:env_var_name) { "JSON_MERGE_DEBUG" }
+    let(:log_prefix) { "[Json::Merge]" }
   end
 
   describe "JSON-specific functionality" do
@@ -19,7 +19,7 @@ RSpec.describe Jsonc::Merge::DebugLogger do
 
       context "when enabled" do
         it "outputs timing information" do
-          stub_env("JSONC_MERGE_DEBUG" => "1")
+          stub_env("JSON_MERGE_DEBUG" => "1")
           expect { described_class.time("test operation") { sleep(0.001) } }.to output(/Completed: test operation.*real_ms/).to_stderr
         end
       end
@@ -28,7 +28,7 @@ RSpec.describe Jsonc::Merge::DebugLogger do
     describe ".log_node" do
       context "when enabled" do
         it "logs FreezeNode info" do
-          stub_env("JSONC_MERGE_DEBUG" => "1")
+          stub_env("JSON_MERGE_DEBUG" => "1")
           lines = [
             "// json-merge:freeze",
             '"secret": "value"',
@@ -48,7 +48,7 @@ RSpec.describe Jsonc::Merge::DebugLogger do
         end
 
         it "logs NodeWrapper info" do
-          stub_env("JSONC_MERGE_DEBUG" => "1")
+          stub_env("JSON_MERGE_DEBUG" => "1")
           json = '{"key": "value"}'
           analysis = Jsonc::Merge::FileAnalysis.new(json)
           node = analysis.nodes.first
@@ -61,7 +61,7 @@ RSpec.describe Jsonc::Merge::DebugLogger do
         end
 
         it "logs unknown node type info using extract_node_info" do
-          stub_env("JSONC_MERGE_DEBUG" => "1")
+          stub_env("JSON_MERGE_DEBUG" => "1")
           unknown_node = Object.new
 
           expect {
