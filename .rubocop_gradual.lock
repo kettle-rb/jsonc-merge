@@ -1,8 +1,0 @@
-{
-  "spec/integration/removal_mode_compliance_spec.rb:951602126": [
-    [6, 1, 56, "RSpec/SpecFilePathFormat: Spec path should end with `jsonc/merge/smart_merger*_spec.rb`.", 1472018996]
-  ],
-  "spec/jsonc/merge/conflict_resolver_spec.rb:79968711": [
-    [7, 3, 299, "RSpec/LeakyConstantDeclaration: Stub constant instead of declaring explicitly.", 50493823]
-  ]
-}

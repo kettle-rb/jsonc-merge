@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable RSpec/SpecFilePathFormat
+
 require "spec_helper"
 require "ast/merge/rspec/shared_examples"
 
@@ -100,3 +102,5 @@ RSpec.describe Jsonc::Merge::SmartMerger, :jsonc_grammar do
     end
   end
 end
+
+# rubocop:enable RSpec/SpecFilePathFormat
