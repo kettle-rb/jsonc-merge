@@ -6,7 +6,7 @@
 <title>
   Module: Jsonc::Merge
   
-    &mdash; Documentation by YARD 0.9.38
+    &mdash; Documentation by YARD 0.9.39
   
 </title>
 
@@ -79,7 +79,7 @@
   <dl>
     <dt>Defined in:</dt>
     <dd>lib/jsonc/merge.rb<span class="defines">,<br />
-  lib/jsonc/merge/emitter.rb,<br /> lib/jsonc/merge/version.rb,<br /> lib/jsonc/merge/freeze_node.rb,<br /> lib/jsonc/merge/debug_logger.rb,<br /> lib/jsonc/merge/merge_result.rb,<br /> lib/jsonc/merge/node_wrapper.rb,<br /> lib/jsonc/merge/smart_merger.rb,<br /> lib/jsonc/merge/file_analysis.rb,<br /> lib/jsonc/merge/comment_tracker.rb,<br /> lib/jsonc/merge/conflict_resolver.rb</span>
+  lib/jsonc/merge/version.rb</span>
 </dd>
   </dl>
   
@@ -87,9 +87,7 @@
 
 <h2>Overview</h2><div class="docstring">
   <div class="discussion">
-    <p>Smart merge system for JSONC files using tree-sitter AST analysis.<br />
-Provides intelligent merging by understanding JSON structure<br />
-rather than treating files as plain text.</p>
+    <p>Legacy namespace kept for compatibility.</p>
 
 
   </div>
@@ -97,26 +95,13 @@ rather than treating files as plain text.</p>
 <div class="tags">
   
 
-  <p class="tag_title">See Also:</p>
-  <ul class="see">
-    
-      <li><span class='object_link'><a href="Merge/SmartMerger.html" title="Jsonc::Merge::SmartMerger (class)">Main entry point for merge operations</a></span></li>
-    
-      <li><span class='object_link'><a href="Merge/FileAnalysis.html" title="Jsonc::Merge::FileAnalysis (class)">Analyzes JSON structure</a></span></li>
-    
-      <li><span class='object_link'><a href="Merge/ConflictResolver.html" title="Jsonc::Merge::ConflictResolver (class)">Resolves content conflicts</a></span></li>
-    
-  </ul>
-
 </div><h2>Defined Under Namespace</h2>
 <p class="children">
   
     
-      <strong class="modules">Modules:</strong> <span class='object_link'><a href="Merge/DebugLogger.html" title="Jsonc::Merge::DebugLogger (module)">DebugLogger</a></span>, <span class='object_link'><a href="Merge/Version.html" title="Jsonc::Merge::Version (module)">Version</a></span>
+      <strong class="modules">Modules:</strong> <span class='object_link'><a href="Merge/Version.html" title="Jsonc::Merge::Version (module)">Version</a></span>
     
   
-    
-      <strong class="classes">Classes:</strong> <span class='object_link'><a href="Merge/CommentTracker.html" title="Jsonc::Merge::CommentTracker (class)">CommentTracker</a></span>, <span class='object_link'><a href="Merge/ConflictResolver.html" title="Jsonc::Merge::ConflictResolver (class)">ConflictResolver</a></span>, <span class='object_link'><a href="Merge/DestinationParseError.html" title="Jsonc::Merge::DestinationParseError (class)">DestinationParseError</a></span>, <span class='object_link'><a href="Merge/Emitter.html" title="Jsonc::Merge::Emitter (class)">Emitter</a></span>, <span class='object_link'><a href="Merge/Error.html" title="Jsonc::Merge::Error (class)">Error</a></span>, <span class='object_link'><a href="Merge/FileAnalysis.html" title="Jsonc::Merge::FileAnalysis (class)">FileAnalysis</a></span>, <span class='object_link'><a href="Merge/FreezeNode.html" title="Jsonc::Merge::FreezeNode (class)">FreezeNode</a></span>, <span class='object_link'><a href="Merge/MergeResult.html" title="Jsonc::Merge::MergeResult (class)">MergeResult</a></span>, <span class='object_link'><a href="Merge/NodeWrapper.html" title="Jsonc::Merge::NodeWrapper (class)">NodeWrapper</a></span>, <span class='object_link'><a href="Merge/ParseError.html" title="Jsonc::Merge::ParseError (class)">ParseError</a></span>, <span class='object_link'><a href="Merge/SmartMerger.html" title="Jsonc::Merge::SmartMerger (class)">SmartMerger</a></span>, <span class='object_link'><a href="Merge/TemplateParseError.html" title="Jsonc::Merge::TemplateParseError (class)">TemplateParseError</a></span>
     
   
 </p>
@@ -129,10 +114,75 @@ rather than treating files as plain text.</p>
 
     <dl class="constants">
       
+        <dt id="Error-constant" class="">Error =
+          
+        </dt>
+        <dd><pre class="code"><span class='const'>Json</span><span class='op'>::</span><span class='const'>Merge</span><span class='op'>::</span><span class='const'>Error</span></pre></dd>
+      
+        <dt id="ParseError-constant" class="">ParseError =
+          
+        </dt>
+        <dd><pre class="code"><span class='const'>Json</span><span class='op'>::</span><span class='const'>Merge</span><span class='op'>::</span><span class='const'>ParseError</span></pre></dd>
+      
+        <dt id="TemplateParseError-constant" class="">TemplateParseError =
+          
+        </dt>
+        <dd><pre class="code"><span class='const'>Json</span><span class='op'>::</span><span class='const'>Merge</span><span class='op'>::</span><span class='const'>TemplateParseError</span></pre></dd>
+      
+        <dt id="DestinationParseError-constant" class="">DestinationParseError =
+          
+        </dt>
+        <dd><pre class="code"><span class='const'>Json</span><span class='op'>::</span><span class='const'>Merge</span><span class='op'>::</span><span class='const'>DestinationParseError</span></pre></dd>
+      
+        <dt id="CommentTracker-constant" class="">CommentTracker =
+          
+        </dt>
+        <dd><pre class="code"><span class='const'>Json</span><span class='op'>::</span><span class='const'>Merge</span><span class='op'>::</span><span class='const'>CommentTracker</span></pre></dd>
+      
+        <dt id="DebugLogger-constant" class="">DebugLogger =
+          
+        </dt>
+        <dd><pre class="code"><span class='const'>Json</span><span class='op'>::</span><span class='const'>Merge</span><span class='op'>::</span><span class='const'>DebugLogger</span></pre></dd>
+      
+        <dt id="Emitter-constant" class="">Emitter =
+          
+        </dt>
+        <dd><pre class="code"><span class='const'>Json</span><span class='op'>::</span><span class='const'>Merge</span><span class='op'>::</span><span class='const'>Emitter</span></pre></dd>
+      
+        <dt id="FreezeNode-constant" class="">FreezeNode =
+          
+        </dt>
+        <dd><pre class="code"><span class='const'>Json</span><span class='op'>::</span><span class='const'>Merge</span><span class='op'>::</span><span class='const'>FreezeNode</span></pre></dd>
+      
+        <dt id="FileAnalysis-constant" class="">FileAnalysis =
+          
+        </dt>
+        <dd><pre class="code"><span class='const'>Json</span><span class='op'>::</span><span class='const'>Merge</span><span class='op'>::</span><span class='const'>FileAnalysis</span></pre></dd>
+      
+        <dt id="MergeResult-constant" class="">MergeResult =
+          
+        </dt>
+        <dd><pre class="code"><span class='const'>Json</span><span class='op'>::</span><span class='const'>Merge</span><span class='op'>::</span><span class='const'>MergeResult</span></pre></dd>
+      
+        <dt id="NodeWrapper-constant" class="">NodeWrapper =
+          
+        </dt>
+        <dd><pre class="code"><span class='const'>Json</span><span class='op'>::</span><span class='const'>Merge</span><span class='op'>::</span><span class='const'>NodeWrapper</span></pre></dd>
+      
+        <dt id="ConflictResolver-constant" class="">ConflictResolver =
+          
+        </dt>
+        <dd><pre class="code"><span class='const'>Json</span><span class='op'>::</span><span class='const'>Merge</span><span class='op'>::</span><span class='const'>ConflictResolver</span></pre></dd>
+      
+        <dt id="SmartMerger-constant" class="">SmartMerger =
+          
+        </dt>
+        <dd><pre class="code"><span class='const'>Json</span><span class='op'>::</span><span class='const'>Merge</span><span class='op'>::</span><span class='const'>SmartMerger</span></pre></dd>
+      
         <dt id="VERSION-constant" class="">VERSION =
           <div class="docstring">
   <div class="discussion">
-    <p>traditional location</p>
+    <p>Traditional Constant Location</p>
 
 
   </div>
@@ -158,9 +208,9 @@ rather than treating files as plain text.</p>
 </div>
 
       <div id="footer">
-  Generated on Thu Feb 19 09:34:51 2026 by
+  Generated on Sun Apr 12 11:49:46 2026 by
   <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
-  0.9.38 (ruby-4.0.1).
+  0.9.39 (ruby-4.0.2).
 </div>
 
     </div>
