@@ -33,6 +33,7 @@ env:
   K_SOUP_COV_MULTI_FORMATTERS: true
   K_SOUP_COV_COMMAND_NAME: "Test Coverage"
   # Point to the installed jsonc grammar (setup script installs to /usr/local/lib)
+  # Point to the installed jsonc grammar (setup script installs to /usr/local/lib)
   TREE_SITTER_JSONC_PATH: /usr/local/lib/libtree-sitter-jsonc.so
 
 on:
@@ -45,6 +46,7 @@ on:
   pull_request:
     branches:
       - '*'
+  # Allow manually triggering the workflow.
   # Allow manually triggering the workflow.
   workflow_dispatch:
 
@@ -92,10 +94,13 @@ jobs:
         if: ${{ !env.ACT }}
         run: bundle exec appraisal ${{ matrix.appraisal }} install
         # Continue to the next step on failure
+        # Continue to the next step on failure
         continue-on-error: true
+      # Effectively an automatic retry of the previous step.
       # Effectively an automatic retry of the previous step.
       - name: "[Attempt 2] Appraisal for ${{ matrix.ruby }}@${{ matrix.appraisal }}"
         id: bundleAppraisalAttempt2
+        # If bundleAppraisalAttempt1 failed, try again here; Otherwise skip.
         # If bundleAppraisalAttempt1 failed, try again here; Otherwise skip.
         if: ${{ steps.bundleAppraisalAttempt1.outcome == 'failure' && !env.ACT }}
         run: bundle exec appraisal ${{ matrix.appraisal }} install
