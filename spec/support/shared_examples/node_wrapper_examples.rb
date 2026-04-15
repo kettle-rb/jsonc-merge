@@ -83,7 +83,7 @@ RSpec.shared_examples "pair node handling" do
   end
 end
 
-RSpec.shared_examples "signature generation" do
+RSpec.shared_examples "node wrapper signature generation" do
   describe "#signature" do
     it "generates signature for pair nodes" do
       json = '{"key": "value"}'
@@ -650,7 +650,7 @@ RSpec.shared_examples "nested structures" do
   end
 end
 
-RSpec.shared_examples "edge cases" do
+RSpec.shared_examples "node wrapper edge cases" do
   describe "edge cases" do
     it "handles empty object" do
       json = "{}"

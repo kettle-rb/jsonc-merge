@@ -18,7 +18,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     it_behaves_like "type predicates"
     it_behaves_like "complete type predicates"
     it_behaves_like "pair node handling"
-    it_behaves_like "signature generation"
+    it_behaves_like "node wrapper signature generation"
     it_behaves_like "comprehensive signature generation"
     it_behaves_like "node properties and methods"
     it_behaves_like "line and bracket methods"
@@ -28,7 +28,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     it_behaves_like "additional pair and element tests"
     it_behaves_like "mergeable children"
     it_behaves_like "nested structures"
-    it_behaves_like "edge cases"
+    it_behaves_like "node wrapper edge cases"
     it_behaves_like "private methods"
   end
 
@@ -47,7 +47,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     it_behaves_like "type predicates"
     it_behaves_like "complete type predicates"
     it_behaves_like "pair node handling"
-    it_behaves_like "signature generation"
+    it_behaves_like "node wrapper signature generation"
     it_behaves_like "comprehensive signature generation"
     it_behaves_like "node properties and methods"
     it_behaves_like "line and bracket methods"
@@ -57,7 +57,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     it_behaves_like "additional pair and element tests"
     it_behaves_like "mergeable children"
     it_behaves_like "nested structures"
-    it_behaves_like "edge cases"
+    it_behaves_like "node wrapper edge cases"
     it_behaves_like "private methods"
   end
 
@@ -76,7 +76,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     it_behaves_like "type predicates"
     it_behaves_like "complete type predicates"
     it_behaves_like "pair node handling"
-    it_behaves_like "signature generation"
+    it_behaves_like "node wrapper signature generation"
     it_behaves_like "comprehensive signature generation"
     it_behaves_like "node properties and methods"
     it_behaves_like "line and bracket methods"
@@ -86,7 +86,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     it_behaves_like "additional pair and element tests"
     it_behaves_like "mergeable children"
     it_behaves_like "nested structures"
-    it_behaves_like "edge cases"
+    it_behaves_like "node wrapper edge cases"
     it_behaves_like "private methods"
   end
 
@@ -105,7 +105,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     it_behaves_like "type predicates"
     it_behaves_like "complete type predicates"
     it_behaves_like "pair node handling"
-    it_behaves_like "signature generation"
+    it_behaves_like "node wrapper signature generation"
     it_behaves_like "comprehensive signature generation"
     it_behaves_like "node properties and methods"
     it_behaves_like "line and bracket methods"
@@ -115,7 +115,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     it_behaves_like "additional pair and element tests"
     it_behaves_like "mergeable children"
     it_behaves_like "nested structures"
-    it_behaves_like "edge cases"
+    it_behaves_like "node wrapper edge cases"
     it_behaves_like "private methods"
   end
 
@@ -134,7 +134,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     it_behaves_like "type predicates"
     it_behaves_like "complete type predicates"
     it_behaves_like "pair node handling"
-    it_behaves_like "signature generation"
+    it_behaves_like "node wrapper signature generation"
     it_behaves_like "comprehensive signature generation"
     it_behaves_like "node properties and methods"
     it_behaves_like "line and bracket methods"
@@ -144,7 +144,7 @@ RSpec.describe Jsonc::Merge::NodeWrapper do
     it_behaves_like "additional pair and element tests"
     it_behaves_like "mergeable children"
     it_behaves_like "nested structures"
-    it_behaves_like "edge cases"
+    it_behaves_like "node wrapper edge cases"
     it_behaves_like "private methods"
   end
 end
