@@ -40,7 +40,6 @@ RSpec.shared_examples "type predicates" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.object?).to be true
     end
 
@@ -48,7 +47,6 @@ RSpec.shared_examples "type predicates" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.array?).to be false
     end
   end
@@ -61,9 +59,7 @@ RSpec.shared_examples "pair node handling" do
     it "returns key name for pair nodes" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
 
       # Note: Some backends may not support key_name extraction
       # This is a known limitation of certain tree-sitter bindings
@@ -78,9 +74,7 @@ RSpec.shared_examples "pair node handling" do
     it "returns value wrapper for pair nodes" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
 
       value = pair.value_node
       if value
@@ -98,9 +92,7 @@ RSpec.shared_examples "signature generation" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
 
       sig = pair.signature
       expect(sig).to be_an(Array)
@@ -119,7 +111,6 @@ RSpec.shared_examples "signature generation" do
       json = '{"b": 1, "a": 2}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
 
       sig = root.signature
       expect(sig).to be_an(Array)
@@ -136,7 +127,6 @@ RSpec.shared_examples "container detection" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.container?).to be true
       expect(root.leaf?).to be false
     end
@@ -149,7 +139,6 @@ RSpec.shared_examples "pairs and elements" do
       json = '{"a": 1, "b": 2}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
 
       pairs = root.pairs
       expect(pairs.size).to eq(2)
@@ -160,7 +149,6 @@ RSpec.shared_examples "pairs and elements" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.elements).to eq([])
     end
   end
@@ -172,9 +160,7 @@ RSpec.shared_examples "complete type predicates" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.string?).to be true
@@ -187,9 +173,7 @@ RSpec.shared_examples "complete type predicates" do
       json = '{"count": 42}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.number?).to be true
@@ -202,9 +186,7 @@ RSpec.shared_examples "complete type predicates" do
       json = '{"enabled": true}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.boolean?).to be true
@@ -217,9 +199,7 @@ RSpec.shared_examples "complete type predicates" do
       json = '{"enabled": false}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.boolean?).to be true
@@ -232,9 +212,7 @@ RSpec.shared_examples "complete type predicates" do
       json = '{"value": null}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.null?).to be true
@@ -247,9 +225,7 @@ RSpec.shared_examples "complete type predicates" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       expect(pair.pair?).to be true
     end
   end
@@ -261,7 +237,6 @@ RSpec.shared_examples "comprehensive signature generation" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
-      skip "No root node" unless root
       sig = root.signature
       expect(sig).to be_an(Array)
       expect(sig.first).to eq(:document)
@@ -271,7 +246,6 @@ RSpec.shared_examples "comprehensive signature generation" do
       json = '["a", "b", "c"]'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
-      skip "No root node" unless root
       array_node = root.children.find(&:array?)
       if array_node
         sig = array_node.signature
@@ -287,9 +261,7 @@ RSpec.shared_examples "comprehensive signature generation" do
       json = '{"key": "hello"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         sig = value.signature
@@ -305,9 +277,7 @@ RSpec.shared_examples "comprehensive signature generation" do
       json = '{"count": 42}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         sig = value.signature
@@ -323,9 +293,7 @@ RSpec.shared_examples "comprehensive signature generation" do
       json = '{"value": -123}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.number?).to be true
@@ -338,9 +306,7 @@ RSpec.shared_examples "comprehensive signature generation" do
       json = '{"value": 3.14}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.number?).to be true
@@ -353,9 +319,7 @@ RSpec.shared_examples "comprehensive signature generation" do
       json = '{"flag": true}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         sig = value.signature
@@ -371,9 +335,7 @@ RSpec.shared_examples "comprehensive signature generation" do
       json = '{"flag": false}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         sig = value.signature
@@ -389,9 +351,7 @@ RSpec.shared_examples "comprehensive signature generation" do
       json = '{"nothing": null}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         sig = value.signature
@@ -406,9 +366,7 @@ RSpec.shared_examples "comprehensive signature generation" do
       json = '{"myKey": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       sig = pair.signature
       expect(sig).to be_an(Array)
       expect(sig.first).to eq(:pair)
@@ -427,7 +385,6 @@ RSpec.shared_examples "node properties and methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.freeze_node?).to be false
     end
 
@@ -435,7 +392,6 @@ RSpec.shared_examples "node properties and methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.type?(:object)).to be true
       expect(root.type?("object")).to be true
     end
@@ -444,7 +400,6 @@ RSpec.shared_examples "node properties and methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.type?(:array)).to be false
     end
 
@@ -452,7 +407,6 @@ RSpec.shared_examples "node properties and methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.comment?).to be false
     end
 
@@ -460,7 +414,6 @@ RSpec.shared_examples "node properties and methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.content).to be_a(String)
       expect(root.content).not_to be_empty
     end
@@ -469,7 +422,6 @@ RSpec.shared_examples "node properties and methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.text).to be_a(String)
     end
 
@@ -477,7 +429,6 @@ RSpec.shared_examples "node properties and methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.inspect).to be_a(String)
       expect(root.inspect).to include("NodeWrapper")
     end
@@ -486,7 +437,6 @@ RSpec.shared_examples "node properties and methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.children).to be_an(Array)
     end
 
@@ -494,7 +444,6 @@ RSpec.shared_examples "node properties and methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.frozen?).to be false
     end
   end
@@ -506,7 +455,6 @@ RSpec.shared_examples "line and bracket methods" do
       json = "{\n  \"key\": \"value\"\n}"
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.opening_line).to eq("{")
     end
 
@@ -514,7 +462,6 @@ RSpec.shared_examples "line and bracket methods" do
       json = "[\n  \"item\"\n]"
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
-      skip "No root node" unless root
       array_node = root.children.find(&:array?)
       skip "No array" unless array_node
       expect(array_node.opening_line).to eq("[")
@@ -524,9 +471,7 @@ RSpec.shared_examples "line and bracket methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.opening_line).to be_nil
@@ -539,7 +484,6 @@ RSpec.shared_examples "line and bracket methods" do
       json = "{\n  \"key\": \"value\"\n}"
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.closing_line).to eq("}")
     end
 
@@ -547,7 +491,6 @@ RSpec.shared_examples "line and bracket methods" do
       json = "[\n  \"item\"\n]"
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
-      skip "No root node" unless root
       array_node = root.children.find(&:array?)
       skip "No array" unless array_node
       expect(array_node.closing_line).to eq("]")
@@ -557,9 +500,7 @@ RSpec.shared_examples "line and bracket methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.closing_line).to be_nil
@@ -574,7 +515,6 @@ RSpec.shared_examples "line and bracket methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.opening_bracket).to eq("{")
     end
 
@@ -582,7 +522,6 @@ RSpec.shared_examples "line and bracket methods" do
       json = '["item"]'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
-      skip "No root node" unless root
       array_node = root.children.find(&:array?)
       skip "No array" unless array_node
       expect(array_node.opening_bracket).to eq("[")
@@ -592,9 +531,7 @@ RSpec.shared_examples "line and bracket methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.opening_bracket).to be_nil
@@ -607,7 +544,6 @@ RSpec.shared_examples "line and bracket methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.closing_bracket).to eq("}")
     end
 
@@ -615,7 +551,6 @@ RSpec.shared_examples "line and bracket methods" do
       json = '["item"]'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
-      skip "No root node" unless root
       array_node = root.children.find(&:array?)
       skip "No array" unless array_node
       expect(array_node.closing_bracket).to eq("]")
@@ -625,9 +560,7 @@ RSpec.shared_examples "line and bracket methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.closing_bracket).to be_nil
@@ -644,7 +577,6 @@ RSpec.shared_examples "mergeable children" do
       json = '{"a": 1, "b": 2}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       children = root.mergeable_children
       expect(children.size).to eq(root.pairs.size)
       expect(children.all?(&:pair?)).to be true
@@ -654,7 +586,6 @@ RSpec.shared_examples "mergeable children" do
       json = '["a", "b"]'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
-      skip "No root node" unless root
       array_node = root.children.find(&:array?)
       skip "No array" unless array_node
       children = array_node.mergeable_children
@@ -666,9 +597,7 @@ RSpec.shared_examples "mergeable children" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.mergeable_children).to eq([])
@@ -681,9 +610,7 @@ RSpec.shared_examples "mergeable children" do
       json = '{"key": 42}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.mergeable_children).to eq([])
@@ -700,9 +627,7 @@ RSpec.shared_examples "nested structures" do
       json = '{"outer": {"inner": "value"}}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.object?).to be true
@@ -716,9 +641,7 @@ RSpec.shared_examples "nested structures" do
       json = '{"items": [1, 2, [3, 4]]}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.array?).to be true
@@ -731,7 +654,6 @@ RSpec.shared_examples "nested structures" do
       json = '[{"a": 1}, {"b": 2}]'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
-      skip "No root node" unless root
       array_node = root.children.find(&:array?)
       skip "No array" unless array_node
       elements = array_node.elements
@@ -747,7 +669,6 @@ RSpec.shared_examples "edge cases" do
       json = "{}"
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.pairs).to eq([])
     end
 
@@ -755,7 +676,6 @@ RSpec.shared_examples "edge cases" do
       json = "[]"
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
-      skip "No root node" unless root
       array_node = root.children.find(&:array?)
       skip "No array" unless array_node
       expect(array_node.elements).to eq([])
@@ -765,9 +685,7 @@ RSpec.shared_examples "edge cases" do
       json = '{"key": ""}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.string?).to be true
@@ -780,9 +698,7 @@ RSpec.shared_examples "edge cases" do
       json = '{"emoji": "🎉"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       key_name = pair.key_name
       if key_name
         expect(key_name).to eq("emoji")
@@ -795,9 +711,7 @@ RSpec.shared_examples "edge cases" do
       json = '{"path": "C:\\\\Users\\\\test"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       key_name = pair.key_name
       if key_name
         expect(key_name).to eq("path")
@@ -810,7 +724,6 @@ RSpec.shared_examples "edge cases" do
       json = '["a", "b"]'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
-      skip "No root node" unless root
       array_node = root.children.find(&:array?)
       skip "No array" unless array_node
       elements = array_node.elements
@@ -822,7 +735,6 @@ RSpec.shared_examples "edge cases" do
       json = '[1, "two", true, null]'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
-      skip "No root node" unless root
       array_node = root.children.find(&:array?)
       skip "No array" unless array_node
       elements = array_node.elements
@@ -833,7 +745,6 @@ RSpec.shared_examples "edge cases" do
       json = '{"a": 1, "b": 2}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pairs = root.pairs
       expect(pairs.all?(&:pair?)).to be true
     end
@@ -846,7 +757,6 @@ RSpec.shared_examples "complete container detection" do
       json = '["item"]'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
-      skip "No root node" unless root
       array_node = root.children.find(&:array?)
       skip "No array" unless array_node
       expect(array_node.container?).to be true
@@ -856,9 +766,7 @@ RSpec.shared_examples "complete container detection" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.container?).to be false
@@ -871,7 +779,6 @@ RSpec.shared_examples "complete container detection" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.leaf?).to be false
     end
 
@@ -879,9 +786,7 @@ RSpec.shared_examples "complete container detection" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.pairs.first
-      skip "No pair" unless pair
       value = pair.value_node
       if value
         expect(value.leaf?).to be true
@@ -898,7 +803,6 @@ RSpec.shared_examples "private methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       pair = root.send(:find_child_by_type, "pair")
       expect(pair).not_to be_nil if root.pairs.any?
     end
@@ -907,7 +811,6 @@ RSpec.shared_examples "private methods" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       result = root.send(:find_child_by_type, "nonexistent_type")
       expect(result).to be_nil
     end
@@ -920,7 +823,6 @@ RSpec.shared_examples "additional pair and element tests" do
       json = '["a", "b", "c"]'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
-      skip "No root node" unless root
       array_node = root.children.find(&:array?)
       skip "No array" unless array_node
       elements = array_node.elements
@@ -931,7 +833,6 @@ RSpec.shared_examples "additional pair and element tests" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.elements).to eq([])
     end
 
@@ -939,7 +840,6 @@ RSpec.shared_examples "additional pair and element tests" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.key_name).to be_nil
     end
 
@@ -947,7 +847,6 @@ RSpec.shared_examples "additional pair and element tests" do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_object
-      skip "No root object" unless root
       expect(root.value_node).to be_nil
     end
   end

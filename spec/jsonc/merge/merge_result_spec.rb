@@ -211,7 +211,6 @@ RSpec.describe Jsonc::Merge::MergeResult do
       json = '{"key": "value"}'
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       node = analysis.root_object
-      skip "No root object" unless node
 
       # Node should have valid lines, so this should work
       initial_count = result.lines.size

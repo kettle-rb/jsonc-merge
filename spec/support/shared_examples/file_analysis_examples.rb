@@ -454,7 +454,6 @@ RSpec.shared_examples "fallthrough_node? behavior" do
     it "returns true for NodeWrapper instances" do
       analysis = described_class.new(simple_json)
       node = analysis.root_object
-      skip "No root object" unless node
       expect(analysis.fallthrough_node?(node)).to be true
     end
 
