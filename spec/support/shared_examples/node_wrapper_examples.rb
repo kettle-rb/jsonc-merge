@@ -17,18 +17,15 @@ RSpec.shared_examples "basic node properties" do
   end
 
   it "returns the node type" do
-    skip "No wrapper node available" unless @wrapper
     expect(@wrapper.type).to be_a(Symbol)
   end
 
   it "returns the starting line number" do
-    skip "No wrapper node available" unless @wrapper
     expect(@wrapper.start_line).to be_a(Integer)
     expect(@wrapper.start_line).to be >= 1
   end
 
   it "returns the ending line number" do
-    skip "No wrapper node available" unless @wrapper
     expect(@wrapper.end_line).to be_a(Integer)
     expect(@wrapper.end_line).to be >= @wrapper.start_line
   end
@@ -247,14 +244,10 @@ RSpec.shared_examples "comprehensive signature generation" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
       array_node = root.children.find(&:array?)
-      if array_node
-        sig = array_node.signature
-        expect(sig).to be_an(Array)
-        # Root-level arrays use :root_array signature so they always match during merging
-        expect(sig.first).to eq(:root_array)
-      else
-        skip "No array node found"
-      end
+      sig = array_node.signature
+      expect(sig).to be_an(Array)
+      # Root-level arrays use :root_array signature so they always match during merging
+      expect(sig.first).to eq(:root_array)
     end
 
     it "generates signature for string with content" do
@@ -463,7 +456,6 @@ RSpec.shared_examples "line and bracket methods" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
       array_node = root.children.find(&:array?)
-      skip "No array" unless array_node
       expect(array_node.opening_line).to eq("[")
     end
 
@@ -492,7 +484,6 @@ RSpec.shared_examples "line and bracket methods" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
       array_node = root.children.find(&:array?)
-      skip "No array" unless array_node
       expect(array_node.closing_line).to eq("]")
     end
 
@@ -523,7 +514,6 @@ RSpec.shared_examples "line and bracket methods" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
       array_node = root.children.find(&:array?)
-      skip "No array" unless array_node
       expect(array_node.opening_bracket).to eq("[")
     end
 
@@ -552,7 +542,6 @@ RSpec.shared_examples "line and bracket methods" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
       array_node = root.children.find(&:array?)
-      skip "No array" unless array_node
       expect(array_node.closing_bracket).to eq("]")
     end
 
@@ -587,7 +576,6 @@ RSpec.shared_examples "mergeable children" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
       array_node = root.children.find(&:array?)
-      skip "No array" unless array_node
       children = array_node.mergeable_children
       expect(children.size).to eq(array_node.elements.size)
       expect(children.all?(&:string?)).to be true
@@ -655,7 +643,6 @@ RSpec.shared_examples "nested structures" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
       array_node = root.children.find(&:array?)
-      skip "No array" unless array_node
       elements = array_node.elements
       expect(elements.size).to eq(2)
       elements.each { |e| expect(e.object?).to be true }
@@ -677,7 +664,6 @@ RSpec.shared_examples "edge cases" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
       array_node = root.children.find(&:array?)
-      skip "No array" unless array_node
       expect(array_node.elements).to eq([])
     end
 
@@ -725,7 +711,6 @@ RSpec.shared_examples "edge cases" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
       array_node = root.children.find(&:array?)
-      skip "No array" unless array_node
       elements = array_node.elements
       expect(elements.size).to eq(2)
       expect(elements.all?(&:string?)).to be true
@@ -736,7 +721,6 @@ RSpec.shared_examples "edge cases" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
       array_node = root.children.find(&:array?)
-      skip "No array" unless array_node
       elements = array_node.elements
       expect(elements.size).to eq(4)
     end
@@ -758,7 +742,6 @@ RSpec.shared_examples "complete container detection" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
       array_node = root.children.find(&:array?)
-      skip "No array" unless array_node
       expect(array_node.container?).to be true
     end
 
@@ -824,7 +807,6 @@ RSpec.shared_examples "additional pair and element tests" do
       analysis = Jsonc::Merge::FileAnalysis.new(json)
       root = analysis.root_node
       array_node = root.children.find(&:array?)
-      skip "No array" unless array_node
       elements = array_node.elements
       expect(elements.size).to eq(3)
     end
