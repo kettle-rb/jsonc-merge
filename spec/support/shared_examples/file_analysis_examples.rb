@@ -377,7 +377,6 @@ RSpec.shared_examples "signature generation" do
       json = '{"key": "value"}'
       analysis = described_class.new(json)
       node = analysis.nodes.find { |n| n.is_a?(Jsonc::Merge::NodeWrapper) }
-      skip "No NodeWrapper found" unless node
       sig = analysis.send(:compute_node_signature, node)
       expect(sig).to be_an(Array).or be_nil
     end
